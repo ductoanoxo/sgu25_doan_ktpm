@@ -1,5 +1,5 @@
 const Users = require('../../Models/user')
-
+const bcrypt = require('bcryptjs');
 
 module.exports.index = async(req, res) => {
 
@@ -68,3 +68,29 @@ module.exports.update_user = async(req, res) => {
     res.json("Thanh Cong")
 
 }
+module.exports.changePassword = async(req, res) => {
+    const { _id, old_password, new_password } = req.body;
+
+    try {
+        const user = await Users.findById(_id);
+        if (!user)
+            return res.json({ success: false, message: 'User not found' });
+
+        // 🔐 Nếu mật khẩu trong DB là bcrypt hash
+        const isMatch = await bcrypt.compare(old_password, user.password);
+        if (!isMatch)
+            return res.json({ success: false, message: 'Mật khẩu cũ không đúng!' });
+
+        // 🔐 Hash mật khẩu mới trước khi lưu
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(new_password, salt);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.json({ success: true, message: 'Đổi mật khẩu thành công!' });
+    } catch (err) {
+        console.error('Error in changePassword:', err);
+        return res.json({ success: false, message: 'Lỗi server!' });
+    }
+};

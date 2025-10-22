@@ -14,4 +14,7 @@ router.get('/detail/login', Users.detail)
 
 router.post('/', Users.post_user)
 
+router.put('/change-password', Users.changePassword);
+
+
 module.exports = router

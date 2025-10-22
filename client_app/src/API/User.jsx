@@ -25,8 +25,11 @@ const User = {
     Post_User: (data) => {
         const url = '/api/User'
         return axiosClient.post(url, data)
-    }
-
+    },
+    ChangePassword: (data) => {
+    const url = '/user/change-password'
+    return axiosClient.put(url, data)
+}
 }
 
 export default User
