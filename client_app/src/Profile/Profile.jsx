@@ -39,9 +39,10 @@ function Profile(props) {
 
             set_email(response.email)
 
-            set_password(response.password)
-            set_new_password(response.password)
-            set_compare_password(response.password)
+            // Không set password cũ vào form để user phải nhập lại
+            // set_password(response.password)
+            // set_new_password(response.password)
+            // set_compare_password(response.password)
 
         }
 
@@ -55,19 +56,88 @@ function Profile(props) {
     const [password, set_password] = useState('')
     const [new_password, set_new_password] = useState('')
     const [compare_password, set_compare_password] = useState('')
+    
+    // State để hiển thị thông báo
+    const [message, set_message] = useState('')
+    const [error, set_error] = useState('')
 
     const handler_update = async () => {
         
-        const data = {
-            _id: sessionStorage.getItem('id_user'),
-            fullname: name,
-            username: username,
-            password: compare_password
+        if (edit_status === 'edit_profile') {
+            // Cập nhật profile (không thay đổi username)
+            const data = {
+                _id: sessionStorage.getItem('id_user'),
+                fullname: name,
+                username: user.username,  // Giữ nguyên username ban đầu
+                password: user.password  // Giữ nguyên password cũ
+            }
+
+            try {
+                await User.Put_User(data)
+                set_message('Cập nhật thông tin thành công!')
+                set_error('')
+                
+                setTimeout(() => {
+                    window.location.reload()
+                }, 1500)
+            } catch (err) {
+                set_error('Có lỗi xảy ra khi cập nhật thông tin')
+                set_message('')
+            }
+            
+        } else {
+            // Đổi mật khẩu
+            await handler_change_password()
+        }
+    }
+
+    const handler_change_password = async () => {
+        // Reset messages
+        set_message('')
+        set_error('')
+        
+        // Validation
+        if (!password || !new_password || !compare_password) {
+            set_error('Vui lòng điền đầy đủ thông tin')
+            return
+        }
+if (new_password !== compare_password) {
+            set_error('Mật khẩu mới và xác nhận mật khẩu không khớp')
+            return
+        }
+        
+        if (new_password.length < 6) {
+            set_error('Mật khẩu mới phải có ít nhất 6 ký tự')
+            return
         }
 
-        await User.Put_User(data)
+        try {
+            // Gọi API đổi mật khẩu
+            const response = await User.Change_Password({
+                userId: sessionStorage.getItem('id_user'),
+                oldPassword: password,
+                newPassword: new_password
+            })
 
-        window.location.reload()
+            if (response.success) {
+                set_message('Đổi mật khẩu thành công!')
+                set_error('')
+                
+                // Reset form
+                set_password('')
+                set_new_password('')
+                set_compare_password('')
+                
+                setTimeout(() => {
+                    // Redirect về trang home
+                    window.location.href = '/'
+                }, 2000)
+            } else {
+                set_error(response.message || 'Có lỗi xảy ra khi đổi mật khẩu')
+            }
+        } catch (err) {
+            set_error('Mật khẩu cũ không đúng hoặc có lỗi xảy ra')
+        }
 
     }
 
@@ -93,8 +163,20 @@ function Profile(props) {
                         </div>
                     </div>
                     <div className="setting_right">
+                        {/* Hiển thị thông báo */}
+                        {message && (
+                            <div className="alert alert-success" role="alert">
+                                {message}
+                            </div>
+                        )}
+                        {error && (
+                            <div className="alert alert-danger" role="alert">
+                                {error}
+                            </div>
+                        )}
+                        
                         {
-                            edit_status === 'edit_profile' ? (
+edit_status === 'edit_profile' ? (
                                 <div className="setting_edit_profile">
                                     {/* <div className="header_setting_edit d-flex justify-content-center pt-4 pb-4">
                                         <div className="d-flex">
@@ -129,7 +211,7 @@ function Profile(props) {
                                         </div>
                                         <div>
                                             <input className="txt_input_edit" type="text" value={name}
-                                                onChange={(e) => set_name(e.target.value)} />
+onChange={(e) => set_name(e.target.value)} />
                                         </div>
                                     </div>
                                     <div className="txt_setting_edit pt-3 pb-2">
@@ -137,7 +219,7 @@ function Profile(props) {
                                             <span style={{ fontWeight: '600' }}>Username</span>
                                         </div>
                                         <div>
-                                            <input className="txt_input_edit" type="text" value={username}
+                                            <input className="txt_input_edit" type="text" disabled={true} value={username}
                                                 onChange={(e) => set_username(e.target.value)} />
                                         </div>
                                     </div>
@@ -170,7 +252,7 @@ function Profile(props) {
                                             <span style={{ fontWeight: '600' }} >New Password</span>
                                         </div>
                                         <div>
-                                            <input className="txt_input_edit" type="password" value={new_password}
+<input className="txt_input_edit" type="password" value={new_password}
                                                 onChange={(e) => set_new_password(e.target.value)} />
                                         </div>
                                     </div>

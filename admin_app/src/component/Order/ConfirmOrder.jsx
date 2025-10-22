@@ -31,7 +31,15 @@ function ConfirmOrder(props) {
 
         const fetchAllData = async () => {
             const od = await orderAPI.getAPI(query)
-            console.log(od)
+            console.log('ConfirmOrder data:', od)
+            console.log('ConfirmOrder orders array:', od.orders)
+            if (od.orders) {
+                od.orders.forEach((order, index) => {
+                    console.log(`ConfirmOrder ${index}:`, order)
+                    console.log(`User data:`, order.id_user)
+                    console.log(`Note data:`, order.id_note)
+                })
+            }
             setTotalPage(od.totalPage)
             setOrder(od.orders)
 
@@ -129,9 +137,9 @@ function ConfirmOrder(props) {
                                                             </div>
                                                         </td>
                                                         <td className="name">{value._id}</td>
-                                                        <td className="name">{value.id_note.fullname}</td>
-                                                        <td className="name">{value.id_user.email}</td>
-                                                        <td className="name">{value.id_note.phone}</td>
+                                                        <td className="name">{value.id_note ? value.id_note.fullname : 'N/A'}</td>
+                                                        <td className="name">{value.id_user ? value.id_user.email : 'N/A'}</td>
+                                                        <td className="name">{value.id_note ? value.id_note.phone : 'N/A'}</td>
                                                         <td className="name">{value.address}</td>
                                                         <td>
                                                             {(() => {

@@ -5,6 +5,7 @@ const crypto = require('crypto')
 const Order = require('../../Models/order')
 const Detail_Order = require('../../Models/detail_order')
 const Note = require('../../Models/note')
+const Payment = require('../../Models/payment')
 
 // Đặt hàng
 module.exports.post_order = async (req, res) => {
@@ -193,3 +194,52 @@ module.exports.post_momo = async (req, res) => {
 //     res.send("Thanh Cong")
 
 // }
+
+// Get payment methods
+module.exports.get_payments = async (req, res) => {
+    try {
+        const payments = await Payment.find({});
+        res.json(payments);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// Clean invalid stripe orders
+module.exports.clean_invalid_orders = async (req, res) => {
+    try {
+        // Xóa các đơn hàng có id_payment không hợp lệ
+        const result = await Order.deleteMany({
+            $or: [
+                { id_payment: 'stripe_payment' },
+                { id_payment: { $type: 'string', $ne: null } }
+            ]
+        });
+        
+        res.json({ 
+            message: 'Đã xóa các đơn hàng có dữ liệu không hợp lệ', 
+            deletedCount: result.deletedCount 
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// Clear all test data - xóa tất cả lịch sử đơn hàng
+module.exports.clear_all_orders = async (req, res) => {
+    try {
+        // Xóa tất cả orders
+        const ordersResult = await Order.deleteMany({});
+        
+        // Xóa tất cả detail orders
+        const detailsResult = await Detail_Order.deleteMany({});
+        
+        res.json({ 
+            message: 'Đã xóa tất cả lịch sử đơn hàng', 
+            ordersDeleted: ordersResult.deletedCount,
+            detailsDeleted: detailsResult.deletedCount
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}

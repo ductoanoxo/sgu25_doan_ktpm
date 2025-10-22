@@ -17,4 +17,10 @@ router.post('/momo', Order.post_momo)
 
 router.post('/email', Order.send_mail)
 
+router.get('/payments', Order.get_payments)
+
+router.delete('/clean-invalid', Order.clean_invalid_orders)
+
+router.delete('/clear-all', Order.clear_all_orders)
+
 module.exports = router

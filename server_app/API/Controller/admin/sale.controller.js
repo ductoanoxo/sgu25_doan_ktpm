@@ -46,7 +46,25 @@ module.exports.create = async (req, res) => {
     if (flag){
         res.send("Sản phẩm này đã có khuyến mãi")
     }else{
-        await Sale.create(req.body)
+        // Xử lý promotion: loại bỏ ký tự % và chuyển thành số
+        let promotionValue = req.body.promotion;
+        if (typeof promotionValue === 'string') {
+            promotionValue = promotionValue.replace('%', '');
+            promotionValue = parseFloat(promotionValue);
+        }
+
+        // Kiểm tra promotion value hợp lệ
+        if (isNaN(promotionValue) || promotionValue < 0 || promotionValue > 100) {
+            return res.send("Giá trị khuyến mãi không hợp lệ (0-100)")
+        }
+
+        // Tạo object data với promotion đã được xử lý
+        const saleData = {
+            ...req.body,
+            promotion: promotionValue
+        };
+
+        await Sale.create(saleData)
 
         res.send("Bạn đã thêm thành công")
     }
@@ -69,7 +87,19 @@ module.exports.update = async (req, res) => {
 
     const sale = await Sale.findOne({ _id: id })
 
-    sale.promotion = req.body.promotion
+    // Xử lý promotion: loại bỏ ký tự % và chuyển thành số
+    let promotionValue = req.body.promotion;
+    if (typeof promotionValue === 'string') {
+        promotionValue = promotionValue.replace('%', '');
+        promotionValue = parseFloat(promotionValue);
+    }
+
+    // Kiểm tra promotion value hợp lệ
+    if (isNaN(promotionValue) || promotionValue < 0 || promotionValue > 100) {
+        return res.json("Giá trị khuyến mãi không hợp lệ (0-100)")
+    }
+
+    sale.promotion = promotionValue
     sale.describe = req.body.describe
     sale.status = req.body.status
     sale.id_product = req.body.id_product

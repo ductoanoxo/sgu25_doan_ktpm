@@ -70,7 +70,7 @@ function Home(props) {
             id_cart: Math.random().toString(),
             id_product: id_modal,
             name_product: product_detail.name_product,
-            price_product: product_detail.price_product,
+            price_product: priceSale || product_detail.price_product, // Sử dụng giá sale nếu có
             count: 1,
             image: product_detail.image,
             size: 'S',

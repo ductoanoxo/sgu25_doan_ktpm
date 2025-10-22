@@ -22,7 +22,8 @@ function UpdateSale(props) {
         const body = {
             promotion: promotion,
             describe: describe,
-            status: status,
+            // ensure status is a boolean when sending to the server
+            status: status === null ? false : status,
             id_product: selectProduct
         }
 
@@ -34,7 +35,8 @@ function UpdateSale(props) {
 
     const [promotion, setPromotion] = useState('')
     const [describe, setDescribe] = useState('')
-    const [status, setStatus] = useState('')
+    // use null as initial so we can tell if value was populated from server
+    const [status, setStatus] = useState(null)
     const [selectProduct, setSelectProduct] = useState("60866d646da8e98ac1e39ba0")
 
     const [product, setProduct] = useState([])
@@ -52,6 +54,13 @@ function UpdateSale(props) {
 
             setPromotion(resDetail.promotion)
             setDescribe(resDetail.describe)
+            // ensure we initialize current status and selected product from detail
+            if (typeof resDetail.status !== 'undefined') {
+                setStatus(!!resDetail.status)
+            }
+            if (resDetail.id_product) {
+                setSelectProduct(resDetail.id_product)
+            }
 
         }
 
@@ -103,15 +112,19 @@ function UpdateSale(props) {
                                     </div>
                                     <div className="form-group w-50">
                                         <label htmlFor="description">Trạng Thái</label>
-                                        <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="true" onClick={(e) => setStatus(e.target.value)} />
-                                        <label class="form-check-label" for="gridRadios1">
+                                        <div className="form-check">
+                                        <input className="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="true"
+                                            checked={status === true}
+                                            onChange={() => setStatus(true)} />
+                                        <label className="form-check-label" htmlFor="gridRadios1">
                                             Hoạt Động
                                         </label>
                                         </div>
-                                        <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="false" onClick={(e) => setStatus(e.target.value)} />
-                                        <label class="form-check-label" for="gridRadios2">
+                                        <div className="form-check">
+                                        <input className="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="false"
+                                            checked={status === false}
+                                            onChange={() => setStatus(false)} />
+                                        <label className="form-check-label" htmlFor="gridRadios2">
                                             Ngưng Hoạt Động
                                         </label>
                                         </div>

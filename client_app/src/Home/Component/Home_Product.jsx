@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Product from '../../API/Product';
+import SaleAPI from '../../API/SaleAPI';
 import queryString from 'query-string'
 import { Link } from 'react-router-dom';
 import Slider from "react-slick";
@@ -60,6 +61,7 @@ function Home_Product(props) {
 
 
     const [products, set_products] = useState([])
+    const [salesData, setSalesData] = useState({})
 
     // Hàm này dùng gọi API trả lại dữ liệu product category
     useEffect(() => {
@@ -82,6 +84,28 @@ function Home_Product(props) {
 
     }, [])
 
+    // Lấy thông tin sale cho tất cả sản phẩm
+    useEffect(() => {
+        const fetchSales = async () => {
+            const salesMap = {}
+            for (const product of products) {
+                try {
+                    const response = await SaleAPI.checkSale(product._id)
+                    if (response.msg === "Thanh Cong" && response.sale) {
+                        salesMap[product._id] = response.sale
+                    }
+                } catch (error) {
+                    console.error(`Error checking sale for product ${product._id}:`, error)
+                }
+            }
+            setSalesData(salesMap)
+        }
+
+        if (products && products.length > 0) {
+            fetchSales()
+        }
+    }, [products])
+
 
     return (
         // col-lg-3 col-md-4 col-sm-6 mt-40 col_product
@@ -96,48 +120,75 @@ function Home_Product(props) {
                         </div>
                         <Slider {...settings}>
                             {
-                                products && products.map(value => (
-                                    <div className="col-lg-12 col_product" style={{ zIndex: '999', height: '30rem', position: 'relative' }} key={value._id}>
-                                        <div className="single-product-wrap">
-                                            <div className="product-image">
-                                                <Link to={`/detail/${value._id}`}>
-                                                    <img src={value.image} alt="Li's Product Image" />
-                                                </Link>
-                                                <span className="sticker">New</span>
-                                            </div>
-                                            <div className="product_desc">
-                                                <div className="product_desc_info">
-                                                    <div className="product-review">
-                                                        <h5 className="manufacturer">
-                                                            <a href="shop-left-sidebar.html">{value.name_product}</a>
-                                                        </h5>
-                                                        <div className="rating-box">
-                                                            <ul className="rating">
-                                                                <li><i className="fa fa-star-o"></i></li>
-                                                                <li><i className="fa fa-star-o"></i></li>
-                                                                <li><i className="fa fa-star-o"></i></li>
-                                                                <li className="no-star"><i className="fa fa-star-o"></i></li>
-                                                                <li className="no-star"><i className="fa fa-star-o"></i></li>
-                                                            </ul>
+                                products && products.map(value => {
+                                    const sale = salesData[value._id]
+                                    const basePrice = value.price_product
+                                    let salePrice = null
+                                    let discountPercent = 0
+
+                                    if (sale && sale.promotion) {
+                                        discountPercent = Number(sale.promotion) || 0
+                                        salePrice = Math.round(basePrice * (1 - discountPercent / 100))
+                                    }
+
+                                    return (
+                                        <div className="col-lg-12 col_product" style={{ zIndex: '999', height: '30rem', position: 'relative' }} key={value._id}>
+                                            <div className="single-product-wrap">
+                                                <div className="product-image">
+                                                    <Link to={`/detail/${value._id}`}>
+                                                        <img src={value.image} alt="Li's Product Image" />
+                                                    </Link>
+                                                    {sale ? (
+                                                        <span className="sticker">-{discountPercent}%</span>
+                                                    ) : (
+                                                        <span className="sticker">New</span>
+                                                    )}
+                                                </div>
+                                                <div className="product_desc">
+                                                    <div className="product_desc_info">
+                                                        <div className="product-review">
+                                                            <h5 className="manufacturer">
+                                                                <a href="shop-left-sidebar.html">{value.name_product}</a>
+                                                            </h5>
+                                                            <div className="rating-box">
+                                                                <ul className="rating">
+                                                                    <li><i className="fa fa-star-o"></i></li>
+                                                                    <li><i className="fa fa-star-o"></i></li>
+                                                                    <li><i className="fa fa-star-o"></i></li>
+                                                                    <li className="no-star"><i className="fa fa-star-o"></i></li>
+                                                                    <li className="no-star"><i className="fa fa-star-o"></i></li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div className="price-box">
+                                                            {sale ? (
+                                                                <div className="d-flex justify-content-between align-items-center">
+                                                                    <del className="new-price" style={{ color: '#999', fontSize: '14px' }}>
+                                                                        {new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(basePrice)+ ' VNĐ'}
+                                                                    </del>
+                                                                    <span className="new-price" style={{ color: 'red', fontWeight: 'bold' }}>
+                                                                        {new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(salePrice)+ ' VNĐ'}
+                                                                    </span>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="new-price">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(basePrice)+ ' VNĐ'}</span>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                    <div className="price-box">
-                                                        <span className="new-price">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.price_product)+ ' VNĐ'}</span>
-                                                    </div>
+                                                    {/* <div className="add_actions">
+                                                        <ul className="add-actions-link">                                                      
+                                                            <li><a href="#" title="quick view"
+                                                                className="links-details"
+                                                                data-toggle="modal"
+                                                                data-target={`#${value._id}`}
+                                                                onClick={() => GET_id_modal(`${value._id}`)}><i className="fa fa-eye"></i></a></li>
+                                                        </ul>
+                                                    </div> */}
                                                 </div>
-                                                {/* <div className="add_actions">
-                                                    <ul className="add-actions-link">                                                      
-                                                        <li><a href="#" title="quick view"
-                                                            className="links-details"
-                                                            data-toggle="modal"
-                                                            data-target={`#${value._id}`}
-                                                            onClick={() => GET_id_modal(`${value._id}`)}><i className="fa fa-eye"></i></a></li>
-                                                    </ul>
-                                                </div> */}
                                             </div>
                                         </div>
-                                    </div>
-                                ))
+                                    )
+                                })
                             }
                         </Slider>
                     </div>
