@@ -23,6 +23,15 @@ function CompletedOrder(props) {
 
         const fetchAllData = async () => {
             const od = await orderAPI.completeOrder(query)
+            console.log('Order data:', od)
+            console.log('Orders array:', od.orders)
+            if (od.orders) {
+                od.orders.forEach((order, index) => {
+                    console.log(`Order ${index}:`, order)
+                    console.log(`User data:`, order.id_user)
+                    console.log(`Note data:`, order.id_note)
+                })
+            }
             setTotalPage(od.totalPage)
             setOrder(od.orders)
             setTotalMoney(od.totalMoney)
@@ -211,9 +220,9 @@ function CompletedOrder(props) {
                                                 order && order.map((value, index) => (
                                                     <tr key={index}>
                                                         <td className="name">{value._id}</td>
-                                                        <td className="name">{value.id_note.fullname}</td>
-                                                        <td className="name">{value.id_user.email}</td>
-                                                        <td className="name">{value.id_note.phone}</td>
+                                                        <td className="name">{value.id_note ? value.id_note.fullname : 'N/A'}</td>
+                                                        <td className="name">{value.id_user ? value.id_user.email : 'N/A'}</td>
+                                                        <td className="name">{value.id_note ? value.id_note.phone : 'N/A'}</td>
                                                         <td className="name">{value.address}</td>
                                                         <td>
                                                             {(() => {

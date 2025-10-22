@@ -55,10 +55,14 @@ module.exports.create = async(req, res) => {
         newUser.fullname = req.query.name
         newUser.username = req.query.username
         newUser.password = req.query.password
-        if (req.query.permission) {
-            newUser.id_permission = "6087dcb5f269113b3460fce4"
-        } else newUser.id_permission = req.query.permission
         newUser.email = req.query.email
+        
+        // Fix logic permission
+        if (req.query.permission) {
+            newUser.id_permission = req.query.permission
+        } else {
+            newUser.id_permission = "6087dcb5f269113b3460fce4"  // Default customer permission
+        }
 
         newUser.save();
         res.json({ msg: "Bạn đã thêm thành công" })

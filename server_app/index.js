@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express')
 const app = express()
 const http = require('http').Server(app);
@@ -177,6 +178,14 @@ mongoose.connect(uri)
             console.log("🌱 Payment mẫu đã được tạo");
         }
 
+        // Create Stripe payment method
+        let stripePayment = await Payment.findOne({ pay_name: 'Stripe Payment' });
+        if (!stripePayment) {
+            stripePayment = new Payment({ pay_name: 'Stripe Payment' });
+            await stripePayment.save();
+            console.log("🌱 Stripe Payment method đã được tạo");
+        }
+
         // ===== Note =====
         const Note = require('./Models/note');
         let note = await Note.findOne({ fullname: 'Nguyễn Văn A' });
@@ -304,6 +313,10 @@ app.use('/api/admin/User', UserAdmin)
 app.use('/api/admin/Order', Order)
 app.use('/api/admin/Coupon', Coupon)
 app.use('/api/admin/Sale', Sale)
+
+// Stripe API routes
+const StripeAPI = require('./API/Router/stripe.router')
+app.use('/api/stripe', StripeAPI)
 
 
 io.on("connection", (socket) => {

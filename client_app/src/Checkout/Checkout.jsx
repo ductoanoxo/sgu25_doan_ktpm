@@ -13,6 +13,7 @@ import Detail_OrderAPI from '../API/Detail_OrderAPI';
 import CouponAPI from '../API/CouponAPI';
 import MoMo from './MoMo.jsx';
 import MapComponent from './MapComponent';
+import StripePayment from './StripePayment';
 
 const socket = io('http://localhost:8000', {
     transports: ['websocket'], jsonp: false
@@ -703,6 +704,33 @@ function Checkout(props) {
   </div>
 }
 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="card">
+                                                    <div className="card-header" id="#payment-4">
+                                                        <h5 className="panel-title">
+                                                            <a className="collapsed" data-toggle="collapse" data-target="#collapseStripe" aria-expanded="false" aria-controls="collapseStripe">
+                                                                Stripe (Credit/Debit Card)
+                                                        </a>
+                                                        </h5>
+                                                    </div>
+                                                    <div id="collapseStripe" className="collapse">
+                                                        <div className="card-body">
+                                                            {
+                                                                show_error ? 'Please Checking Information!' :
+                                                                <StripePayment
+                                                                    information={information}
+                                                                    total={total_price}
+                                                                    Change_Load_Order={Change_Load_Order}
+                                                                    from={from}
+                                                                    distance={distance}
+                                                                    duration={duration}
+                                                                    price={price}
+                                                                />
+                                                            }
                                                         </div>
                                                     </div>
                                                 </div>

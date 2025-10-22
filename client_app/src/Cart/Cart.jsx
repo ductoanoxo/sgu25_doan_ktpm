@@ -135,6 +135,7 @@ function Cart(props) {
     const [show_success, set_show_success] = useState(false)
 
     const [errorCode, setErrorCode] = useState(false)
+    const [alreadyUsed, setAlreadyUsed] = useState(false) // Thêm state cho đã sử dụng coupon
 
     const [notEligible, setNotEligible] = useState(false) // Thêm state cho không đủ điều kiện
 
@@ -144,6 +145,21 @@ function Cart(props) {
 
         e.preventDefault()
         
+        // If coupon input is empty -> remove applied coupon
+        if (!coupon || coupon.trim() === '') {
+            // remove coupon from localStorage and reset values
+            localStorage.removeItem('id_coupon')
+            localStorage.removeItem('coupon')
+            setDiscount(0)
+            set_new_price(total_price)
+            set_show_success(false)
+            setErrorCode(false)
+            setAlreadyUsed(false)
+            setNotEligible(false)
+            setCouponRequirement('')
+            return
+        }
+
         if (!sessionStorage.getItem('id_user')){
             set_show_error(true)
         }else{
@@ -171,11 +187,17 @@ function Cart(props) {
 
             if (response.msg === 'Không tìm thấy'){
                 setErrorCode(true)
+                setAlreadyUsed(false)
+                setNotEligible(false)
             }else if (response.msg === 'Bạn đã sử dụng mã này rồi'){
-                setErrorCode(true)
+                setAlreadyUsed(true)
+                setErrorCode(false)
+                setNotEligible(false)
             }else if (response.msg === 'Không đủ điều kiện'){
                 // Xử lý trường hợp không đủ điều kiện
                 setNotEligible(true)
+                setErrorCode(false)
+                setAlreadyUsed(false)
                 setCouponRequirement(response.errorMessage || response.describe || 'Không đủ điều kiện áp dụng coupon này')
             }else{
                 localStorage.setItem('id_coupon', response.coupon._id)
@@ -215,9 +237,41 @@ function Cart(props) {
             set_show_null_cart(false)
             set_show_success(false)
             setErrorCode(false)
+            setAlreadyUsed(false)
             setNotEligible(false) // Reset state không đủ điều kiện
         }, 1500)
     }
+
+    // Nếu giỏ hàng thay đổi (ví dụ xóa sản phẩm) và đã có coupon trong localStorage,
+    // cần tái tính lại discount/new_price theo total mới. Lắng nghe total_price thay đổi.
+    useEffect(() => {
+        const storedCoupon = localStorage.getItem('coupon')
+        if (storedCoupon) {
+            try {
+                const couponObj = JSON.parse(storedCoupon)
+                let promotionPercent = 0
+                const promotionStr = couponObj.promotion.toString()
+                const numberMatch = promotionStr.match(/\d+(\.\d+)?/)
+                if (numberMatch) {
+                    promotionPercent = parseFloat(numberMatch[0])
+                }
+
+                const discountAmount = (total_price * promotionPercent) / 100
+                setDiscount(discountAmount)
+                set_new_price(total_price - discountAmount)
+            } catch (err) {
+                // nếu parse lỗi thì clear coupon
+                localStorage.removeItem('coupon')
+                localStorage.removeItem('id_coupon')
+                setDiscount(0)
+                set_new_price(total_price)
+            }
+        } else {
+            // không có coupon lưu, đảm bảo giá hiển thị đúng
+            setDiscount(0)
+            set_new_price(total_price)
+        }
+    }, [total_price])
 
     return (
         <div>
@@ -241,6 +295,18 @@ function Cart(props) {
                             <i className="fa fa-bell fix_icon_bell" style={{ fontSize: '40px', color: '#fff', backgroundColor: '#f84545' }}></i>
                         </div>
                         <h4 className="text-center p-3" style={{ color: '#fff' }}>Vui Lòng Kiểm Tra Lại Mã Code!</h4>
+                    </div>
+                </div>
+            }
+            {
+                alreadyUsed &&
+                <div className="modal_success">
+                    <div className="group_model_success pt-3">
+                        <div className="text-center p-2">
+                            <i className="fa fa-exclamation-triangle fix_icon_bell" style={{ fontSize: '40px', color: '#fff', backgroundColor: '#ff9800' }}></i>
+                        </div>
+                        <h4 className="text-center p-3" style={{ color: '#fff' }}>Bạn Đã Sử Dụng Mã Code Này Rồi!</h4>
+                        <p className="text-center" style={{ color: '#fff', fontSize: '14px' }}>Mỗi mã giảm giá chỉ có thể sử dụng một lần.</p>
                     </div>
                 </div>
             }

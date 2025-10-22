@@ -82,9 +82,9 @@ function CancelOrder(props) {
                                                 order && order.map((value, index) => (
                                                     <tr key={index}>
                                                         <td className="name">{value._id}</td>
-                                                        <td className="name">{value.id_note.fullname}</td>
-                                                        <td className="name">{value.id_user.email}</td>
-                                                        <td className="name">{value.id_note.phone}</td>
+                                                        <td className="name">{value.id_note ? value.id_note.fullname : 'N/A'}</td>
+                                                        <td className="name">{value.id_user ? value.id_user.email : 'N/A'}</td>
+                                                        <td className="name">{value.id_note ? value.id_note.phone : 'N/A'}</td>
                                                         <td className="name">{value.address}</td>
                                                         <td>
                                                             {(() => {

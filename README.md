@@ -34,6 +34,33 @@ project/
 ## Hướng dẫn chạy test
 [Thêm hướng dẫn để chạy các test case]
 
+## 4.2 Tools
+
+Các tool được tích hợp trong dự án (phiên bản lấy từ `package.json`, `Dockerfile` và `docker-compose.yml`):
+
+|               |  Tool     | Version (source) |
+|----------------------|----------------------|------------------|
+| Bug Tracking         | GitHub Issues        | (repository)     |
+| Project Management   | GitHub               | (repository)     |
+| Version control      | Git                  | (managed by repo)|
+| Runtime (server)     | Node.js              | 18 (from `server_app/Dockerfile`)
+| Runtime (client/admin)| Node.js             | 16 (from `client_app` & `admin_app` Dockerfile)
+| Package manager      | npm                  | (from Node image)
+| Database             | MongoDB              | 5 (from `docker-compose.yml` -> image: mongo:5)
+| Web framework        | Express              | ^4.17.1 (from `server_app/package.json`)
+| Database ODM/Driver  | Mongoose (MongoDB)   | ^5.12.2 (from `server_app/package.json`)
+| Auth / Hashing       | bcryptjs             | ^2.4.3 (from `server_app/package.json`)
+| Real-time / Socket   | socket.io / client   | ^3.1.0 (server & client)
+| Dev tool (server)    | nodemon (dev)        | ^2.0.7 (from `server_app/package.json`)
+| Frontend framework   | React (client)       | ^17.0.1 (from `client_app/package.json`)
+| Frontend framework   | React (admin)        | ^17.0.2 (from `admin_app/package.json`)
+| React scripts        | react-scripts        | 4.0.3 (from `client_app` & `admin_app`)
+
+Notes:
+- Versions above were collected from the project's `package.json` files and Docker configuration. They reflect what the project containers use, not necessarily your host machine.
+- To update any package versions, edit the corresponding `package.json` and rebuild the Docker images with `docker compose build`.
+
+
 <h2>Xây dựng Website bán quần áo sử dụng công nghệ ReactJS & NodeJS ( API,Socket )</h2>
 <h3>Mô tả chung , giới thiệu đề tài </h3>
 <b>Ngày nay , công nghệ thông tin đã có những bước phát triển mạnh mẽ trong mọi phương diện nói chung ví dụ như : đời sống , công việc , giải trí , truyền thông , ... Và riêng với bán hàng , so với cách bán truyền thống thì nay doanh nghiệp , cửa hàng nhỏ lẻ nào cũng có một website để quáng bá , bán hàng trực tuyến sản phẩm và tương tác với người dùng . Nắm bắt được nhu cầu đó , nhóm em quyết định thực hiện đề tài : Xây dựng Website bán quần áo sử dụng công nghệ ReactJS & NodeJS ( API,Socket ) . Khi sử dụng trang web khách hàng sẽ cảm nhận được sự mới mẻ và thuận tiện của Website mang lại . Và website cũng dễ dàng cung cấp thông tin chi tiết sản phẩm giúp khách hàng có thể thanh toán trực tiếp qua paypal hoặc ship cod .</b>
