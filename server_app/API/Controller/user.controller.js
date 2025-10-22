@@ -1,7 +1,6 @@
 const Users = require('../../Models/user')
-const bcrypt = require('bcryptjs');
-const bcrypt = require('bcryptjs'); // Thêm bcrypt
-origin / kiet
+const bcrypt = require('bcryptjs');  // Thêm bcrypt
+
 
 module.exports.index = async(req, res) => {
 
@@ -47,9 +46,9 @@ module.exports.detail = async(req, res) => {
     } else {
         // Kiểm tra xem password có được mã hóa bcrypt không
         const isPasswordHashed = user.password.startsWith('$2a$') || user.password.startsWith('$2b$');
-
+        
         let isPasswordCorrect = false;
-
+        
         if (isPasswordHashed) {
             // Nếu password đã được mã hóa, dùng bcrypt.compare
             console.log('Sử dụng bcrypt.compare')
@@ -59,9 +58,9 @@ module.exports.detail = async(req, res) => {
             console.log('Sử dụng so sánh trực tiếp')
             isPasswordCorrect = (user.password === password);
         }
-
+        
         console.log('Kết quả kiểm tra password:', isPasswordCorrect)
-
+        
         if (isPasswordCorrect) {
             console.log('Đăng nhập thành công')
             res.json(user)
@@ -83,13 +82,13 @@ module.exports.post_user = async(req, res) => {
         // Hash mật khẩu trước khi lưu
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
+        
         // Tạo object user mới với mật khẩu đã được hash
         const newUserData = {
             ...req.body,
             password: hashedPassword
         };
-
+        
         await Users.create(newUserData)
         return res.send("Thanh Cong")
     }
@@ -102,7 +101,7 @@ module.exports.update_user = async(req, res) => {
 
     user.fullname = req.body.fullname
     user.username = req.body.username
-
+    
     // Hash mật khẩu mới nếu có thay đổi
     if (req.body.password) {
         const salt = await bcrypt.genSalt();
@@ -116,7 +115,7 @@ module.exports.update_user = async(req, res) => {
 }
 
 module.exports.change_password = async(req, res) => {
-
+    
     const { userId, oldPassword, newPassword } = req.body
 
     console.log('=== CHANGE PASSWORD DEBUG ===')
@@ -127,7 +126,7 @@ module.exports.change_password = async(req, res) => {
     try {
         // Tìm user
         const user = await Users.findOne({ _id: userId })
-
+        
         if (!user) {
             return res.json({ success: false, message: "Không tìm thấy người dùng" })
         }
@@ -138,7 +137,7 @@ module.exports.change_password = async(req, res) => {
         // Kiểm tra mật khẩu cũ
         const isPasswordHashed = user.password.startsWith('$2a$') || user.password.startsWith('$2b$');
         let isOldPasswordCorrect = false;
-
+        
         if (isPasswordHashed) {
             // Nếu password đã được mã hóa, dùng bcrypt.compare
             console.log('Checking with bcrypt.compare')
@@ -162,7 +161,10 @@ module.exports.change_password = async(req, res) => {
         console.log('New hashed password:', hashedNewPassword)
 
         // Cập nhật mật khẩu mới
-        await Users.updateOne({ _id: userId }, { password: hashedNewPassword })
+        await Users.updateOne(
+            { _id: userId }, 
+            { password: hashedNewPassword }
+        )
 
         console.log('Password updated successfully')
 

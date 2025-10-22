@@ -101,7 +101,8 @@ function Profile(props) {
             set_error('Vui lòng điền đầy đủ thông tin')
             return
         }
-if (new_password !== compare_password) {
+        
+        if (new_password !== compare_password) {
             set_error('Mật khẩu mới và xác nhận mật khẩu không khớp')
             return
         }
@@ -176,7 +177,7 @@ if (new_password !== compare_password) {
                         )}
                         
                         {
-edit_status === 'edit_profile' ? (
+                            edit_status === 'edit_profile' ? (
                                 <div className="setting_edit_profile">
                                     {/* <div className="header_setting_edit d-flex justify-content-center pt-4 pb-4">
                                         <div className="d-flex">
@@ -211,7 +212,7 @@ edit_status === 'edit_profile' ? (
                                         </div>
                                         <div>
                                             <input className="txt_input_edit" type="text" value={name}
-onChange={(e) => set_name(e.target.value)} />
+                                                onChange={(e) => set_name(e.target.value)} />
                                         </div>
                                     </div>
                                     <div className="txt_setting_edit pt-3 pb-2">
@@ -252,7 +253,7 @@ onChange={(e) => set_name(e.target.value)} />
                                             <span style={{ fontWeight: '600' }} >New Password</span>
                                         </div>
                                         <div>
-<input className="txt_input_edit" type="password" value={new_password}
+                                            <input className="txt_input_edit" type="password" value={new_password}
                                                 onChange={(e) => set_new_password(e.target.value)} />
                                         </div>
                                     </div>

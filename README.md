@@ -2,7 +2,7 @@
 # Đồ án môn kiểm thử phần mềm
 
 ## Thông tin chung
-- **Tên đề tài:** Website bán quần áo 
+- **Tên đề tài:** [Tên đề tài cần được thêm vào]
 - **Môn học:** Kiểm thử phần mềm
 - **Lớp:** [DCT122C3]
 
@@ -13,7 +13,7 @@
 4. Trà Đức Toàn
 
 ## Mô tả dự án
-Website Fear Of God hỗ trợ các kịch bản kinh doanh chính bao gồm: Danh mục sản phẩm, Giỏ hàng, Quy trình đặt hàng, Thanh toán, Giao hàng, Trò chuyện trực tuyến, Xác nhận Email và Kiểm soát truy cập.
+[Thêm mô tả ngắn về dự án và mục tiêu]
 
 ## Công nghệ sử dụng
 - [Liệt kê các công nghệ/framework được sử dụng]

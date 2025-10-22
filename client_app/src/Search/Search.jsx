@@ -15,6 +15,7 @@ function Search(props) {
 
     const [products, set_products] = useState([])
     const [page, set_page] = useState(1)
+    const [sort, set_sort] = useState('')
 
     const [show_load, set_show_load] = useState(true)
     const [salesData, setSalesData] = useState({})
@@ -73,6 +74,50 @@ function Search(props) {
         }
     }, [products])
 
+    // Handler cho sort
+    const handlerChangeSort = (e) => {
+        set_sort(e.target.value)
+    }
+
+    // Hàm sort sản phẩm
+    const sortProducts = (productsList) => {
+        if (!productsList || productsList.length === 0) return []
+        
+        const sortedProducts = [...productsList]
+        
+        if (sort === 'DownToUp') {
+            sortedProducts.sort((a, b) => {
+                const priceA = getSalePrice(a)
+                const priceB = getSalePrice(b)
+                return priceA - priceB
+            })
+        } else if (sort === 'UpToDown') {
+            sortedProducts.sort((a, b) => {
+                const priceA = getSalePrice(a)
+                const priceB = getSalePrice(b)
+                return priceB - priceA
+            })
+        }
+        
+        return sortedProducts
+    }
+
+    // Hàm lấy giá sau khi sale
+    const getSalePrice = (product) => {
+        const sale = salesData[product._id]
+        const basePrice = product.price_product
+        
+        if (sale && sale.promotion) {
+            const discountPercent = Number(sale.promotion) || 0
+            return Math.round(basePrice * (1 - discountPercent / 100))
+        }
+        
+        return basePrice
+    }
+
+    // Sắp xếp sản phẩm khi sort thay đổi
+    const displayProducts = sortProducts(products)
+
 
     return (
 
@@ -84,10 +129,10 @@ function Search(props) {
                             <div className="product-select-box">
                                 <div className="product-short">
                                     <p>Sort By:</p>
-                                    <select className="nice-select">
-                                        <option value="trending">Relevance</option>
-                                        <option value="rating">Price (Low &gt; High)</option>
-                                        <option value="rating">Price (High &gt; Low)</option>
+                                    <select className="nice-select" value={sort} onChange={handlerChangeSort}>
+                                        <option value="">Relevance</option>
+                                        <option value="DownToUp">Price (Low &gt; High)</option>
+                                        <option value="UpToDown">Price (High &gt; Low)</option>
                                     </select>
                                 </div>
                             </div>
@@ -104,7 +149,7 @@ function Search(props) {
                                             : <h4 className="text-center" style={{ paddingTop: '3rem', color: '#FED700' }}>Yay! You have seen it all</h4>}
                                     >
                                         {
-                                            products && products.map(value => {
+                                            displayProducts && displayProducts.map(value => {
                                                 const sale = salesData[value._id]
                                                 const basePrice = value.price_product
                                                 let salePrice = null
