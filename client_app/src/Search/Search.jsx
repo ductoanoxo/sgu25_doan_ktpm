@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import queryString from 'query-string'
 import Product from '../API/Product';
+import SaleAPI from '../API/SaleAPI';
 import './Search.css'
 import { Link } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ function Search(props) {
     const [page, set_page] = useState(1)
 
     const [show_load, set_show_load] = useState(true)
+    const [salesData, setSalesData] = useState({})
 
     useEffect(() => {
 
@@ -46,6 +48,30 @@ function Search(props) {
         }, 2500)
 
     }, [page])
+
+    // Lấy thông tin sale cho tất cả sản phẩm
+    useEffect(() => {
+        const fetchSales = async () => {
+            const salesMap = {...salesData}
+            for (const product of products) {
+                if (!salesMap[product._id]) {
+                    try {
+                        const response = await SaleAPI.checkSale(product._id)
+                        if (response.msg === "Thanh Cong" && response.sale) {
+                            salesMap[product._id] = response.sale
+                        }
+                    } catch (error) {
+                        console.error(`Error checking sale for product ${product._id}:`, error)
+                    }
+                }
+            }
+            setSalesData(salesMap)
+        }
+
+        if (products && products.length > 0) {
+            fetchSales()
+        }
+    }, [products])
 
 
     return (
@@ -78,52 +104,79 @@ function Search(props) {
                                             : <h4 className="text-center" style={{ paddingTop: '3rem', color: '#FED700' }}>Yay! You have seen it all</h4>}
                                     >
                                         {
-                                            products && products.map(value => (
-                                                <div className="row product-layout-list" key={value._id}>
-                                                    <div className="col-lg-3 col-md-5 ">
-                                                        <div className="product-image">
-                                                            <Link to={`/detail/${value._id}`}>
-                                                                <img src={value.image} alt="Li's Product Image" />
-                                                            </Link>
-                                                            <span className="sticker">New</span>
+                                            products && products.map(value => {
+                                                const sale = salesData[value._id]
+                                                const basePrice = value.price_product
+                                                let salePrice = null
+                                                let discountPercent = 0
+
+                                                if (sale && sale.promotion) {
+                                                    discountPercent = Number(sale.promotion) || 0
+                                                    salePrice = Math.round(basePrice * (1 - discountPercent / 100))
+                                                }
+
+                                                return (
+                                                    <div className="row product-layout-list" key={value._id}>
+                                                        <div className="col-lg-3 col-md-5 ">
+                                                            <div className="product-image">
+                                                                <Link to={`/detail/${value._id}`}>
+                                                                    <img src={value.image} alt="Li's Product Image" />
+                                                                </Link>
+                                                                {sale ? (
+                                                                    <span className="sticker">-{discountPercent}%</span>
+                                                                ) : (
+                                                                    <span className="sticker">New</span>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="col-lg-5 col-md-7">
-                                                        <div className="product_desc">
-                                                            <div className="product_desc_info">
-                                                                <div className="product-review">
-                                                                    <h5 className="manufacturer">
-                                                                        <a href="product-details.html">{value.name_product}</a>
-                                                                    </h5>
-                                                                    <div className="rating-box">
-                                                                        <ul className="rating">
-                                                                            <li><i className="fa fa-star" /></li>
-                                                                            <li><i className="fa fa-star" /></li>
-                                                                            <li><i className="fa fa-star" /></li>
-                                                                            <li><i className="fa fa-star" /></li>
-                                                                            <li><i className="fa fa-star" /></li>
-                                                                        </ul>
+                                                        <div className="col-lg-5 col-md-7">
+                                                            <div className="product_desc">
+                                                                <div className="product_desc_info">
+                                                                    <div className="product-review">
+                                                                        <h5 className="manufacturer">
+                                                                            <a href="product-details.html">{value.name_product}</a>
+                                                                        </h5>
+                                                                        <div className="rating-box">
+                                                                            <ul className="rating">
+                                                                                <li><i className="fa fa-star" /></li>
+                                                                                <li><i className="fa fa-star" /></li>
+                                                                                <li><i className="fa fa-star" /></li>
+                                                                                <li><i className="fa fa-star" /></li>
+                                                                                <li><i className="fa fa-star" /></li>
+                                                                            </ul>
+                                                                        </div>
                                                                     </div>
+                                                                    <h4><a className="product_name" href="product-details.html">{value.name_product}</a></h4>
+                                                                    <div className="price-box">
+                                                                        {sale ? (
+                                                                            <div>
+                                                                                <del style={{ color: '#999', marginRight: '10px' }}>
+                                                                                    {new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(basePrice)+ ' VNĐ'}
+                                                                                </del>
+                                                                                <span className="new-price" style={{ color: 'red' }}>
+                                                                                    {new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(salePrice)+ ' VNĐ'}
+                                                                                </span>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="new-price">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(basePrice)+ ' VNĐ'}</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere assumenda ea quia magnam, aspernatur earum quidem eum et illum dolorem commodi sunt delectus totam blanditiis doloremque at voluptates nisi iusto!</p>
                                                                 </div>
-                                                                <h4><a className="product_name" href="product-details.html">{value.name_product}</a></h4>
-                                                                <div className="price-box">
-                                                                    <span className="new-price">${value.price_product}</span>
-                                                                </div>
-                                                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere assumenda ea quia magnam, aspernatur earum quidem eum et illum dolorem commodi sunt delectus totam blanditiis doloremque at voluptates nisi iusto!</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-lg-4">
+                                                            <div className="shop-add-action mb-xs-30">
+                                                                <ul className="add-actions-link">
+                                                                    <li className="add-cart"><a href="#">Add to cart</a></li>
+                                                                    <li className="wishlist"><a href="wishlist.html"><i className="fa fa-heart-o" />Add to wishlist</a></li>
+                                                                    <li><a className="quick-view" data-toggle="modal" data-target={`#${value._id}`} href="#"><i className="fa fa-eye" />Quick view</a></li>
+                                                                </ul>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-4">
-                                                        <div className="shop-add-action mb-xs-30">
-                                                            <ul className="add-actions-link">
-                                                                <li className="add-cart"><a href="#">Add to cart</a></li>
-                                                                <li className="wishlist"><a href="wishlist.html"><i className="fa fa-heart-o" />Add to wishlist</a></li>
-                                                                <li><a className="quick-view" data-toggle="modal" data-target={`#${value._id}`} href="#"><i className="fa fa-eye" />Quick view</a></li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
+                                                )
+                                            })
                                         }
                                     </InfiniteScroll>
                                 </div>

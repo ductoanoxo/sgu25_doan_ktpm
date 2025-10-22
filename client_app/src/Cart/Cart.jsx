@@ -145,6 +145,21 @@ function Cart(props) {
 
         e.preventDefault()
         
+        // If coupon input is empty -> remove applied coupon
+        if (!coupon || coupon.trim() === '') {
+            // remove coupon from localStorage and reset values
+            localStorage.removeItem('id_coupon')
+            localStorage.removeItem('coupon')
+            setDiscount(0)
+            set_new_price(total_price)
+            set_show_success(false)
+            setErrorCode(false)
+            setAlreadyUsed(false)
+            setNotEligible(false)
+            setCouponRequirement('')
+            return
+        }
+
         if (!sessionStorage.getItem('id_user')){
             set_show_error(true)
         }else{
@@ -226,6 +241,37 @@ function Cart(props) {
             setNotEligible(false) // Reset state không đủ điều kiện
         }, 1500)
     }
+
+    // Nếu giỏ hàng thay đổi (ví dụ xóa sản phẩm) và đã có coupon trong localStorage,
+    // cần tái tính lại discount/new_price theo total mới. Lắng nghe total_price thay đổi.
+    useEffect(() => {
+        const storedCoupon = localStorage.getItem('coupon')
+        if (storedCoupon) {
+            try {
+                const couponObj = JSON.parse(storedCoupon)
+                let promotionPercent = 0
+                const promotionStr = couponObj.promotion.toString()
+                const numberMatch = promotionStr.match(/\d+(\.\d+)?/)
+                if (numberMatch) {
+                    promotionPercent = parseFloat(numberMatch[0])
+                }
+
+                const discountAmount = (total_price * promotionPercent) / 100
+                setDiscount(discountAmount)
+                set_new_price(total_price - discountAmount)
+            } catch (err) {
+                // nếu parse lỗi thì clear coupon
+                localStorage.removeItem('coupon')
+                localStorage.removeItem('id_coupon')
+                setDiscount(0)
+                set_new_price(total_price)
+            }
+        } else {
+            // không có coupon lưu, đảm bảo giá hiển thị đúng
+            setDiscount(0)
+            set_new_price(total_price)
+        }
+    }, [total_price])
 
     return (
         <div>
