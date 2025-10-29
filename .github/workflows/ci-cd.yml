@@ -3,12 +3,22 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop, kiet ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
   pull_request:
     branches: [ main, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
 
 env:
   NODE_VERSION: '16.x'
   MONGO_URL: mongodb://localhost:27017/Clothes_Test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # ============= SERVER TESTS =============
@@ -215,14 +225,34 @@ jobs:
 
       - name: Start services
         run: |
+          # Start server in background and wait until it responds on port 8000
           cd server_app
           npm start &
           SERVER_PID=$!
-          sleep 10
+
+          echo "Waiting for server to be ready on http://localhost:8000 ..."
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8000/ >/dev/null 2>&1; then
+              echo "Server is up"
+              break
+            fi
+            sleep 2
+          done
+
+          # Start client in background and wait until it responds on port 3000
           cd ../client_app
           npm start &
           CLIENT_PID=$!
-          sleep 15
+
+          echo "Waiting for client to be ready on http://localhost:3000 ..."
+          for i in {1..30}; do
+            if curl -sSf http://localhost:3000/ >/dev/null 2>&1; then
+              echo "Client is up"
+              break
+            fi
+            sleep 2
+          done
+
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
           echo "CLIENT_PID=$CLIENT_PID" >> $GITHUB_ENV
         env:
