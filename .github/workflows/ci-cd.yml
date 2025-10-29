@@ -11,11 +11,12 @@ env:
   MONGO_URL: mongodb://localhost:27017/Clothes_Test
 
 jobs:
-  # ============= SERVER TESTS (TỐI ƯU) =============
+  # ============= SERVER TESTS =============
   server-tests:
-    name: Server Tests
+    name: Server Unit & Integration Tests
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 20
+
     services:
       mongodb:
         image: mongo:5
@@ -29,42 +30,44 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js (cache npm)
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: server_app/package-lock.json
 
-      - name: Install server dependencies
+      - name: Install server dependencies (faster)
         working-directory: ./server_app
-        run: npm ci --prefer-offline --no-audit
+        run: |
+          npm ci --no-audit --no-fund --prefer-offline
 
-      # CHẠY TẤT CẢ TESTS MỘT LẦN với coverage (nhanh hơn 3x)
-      - name: Run all server tests with coverage
+      # Gộp unit + integration + coverage trong 1 lần chạy Jest
+      # Nếu bạn đang dùng jest projects: `--selectProjects unit,integration`
+      # Nếu không, chỉ cần testMatch đã phân loại là đủ – Jest sẽ chạy hết.
+      - name: Run server tests (unit + integration) with coverage
         working-directory: ./server_app
-        continue-on-error: true
-        run: npm run test:coverage
+        run: |
+          npm run test -- --ci --coverage --maxWorkers=100% --passWithNoTests
         env:
           MONGO_URL: ${{ env.MONGO_URL }}
           JWT_SECRET: test_secret_key_for_ci
           NODE_ENV: test
 
       - name: Upload server coverage
-        if: github.ref == 'refs/heads/main'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./server_app/coverage/lcov.info
           flags: server
           name: server-coverage
           fail_ci_if_error: false
+          verbose: false
 
-  # ============= CLIENT TESTS (TỐI ƯU) =============
+  # ============= CLIENT TESTS =============
   client-tests:
-    name: Client Tests
+    name: Client Unit & Integration Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -80,26 +83,25 @@ jobs:
 
       - name: Install client dependencies
         working-directory: ./client_app
-        run: npm ci --prefer-offline --no-audit
+        run: npm ci
 
       - name: Run client tests
         working-directory: ./client_app
         continue-on-error: true
-        run: npm test -- --coverage --watchAll=false --maxWorkers=2
+        run: npm test -- --coverage --watchAll=false
         env:
           CI: true
           REACT_APP_API_URL: http://localhost:8000/
 
       - name: Upload client coverage
-        if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v3
         with:
           flags: client
           directory: ./client_app/coverage
 
-  # ============= ADMIN TESTS (TỐI ƯU) =============
+  # ============= ADMIN TESTS =============
   admin-tests:
-    name: Admin Tests
+    name: Admin Unit & Integration Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -115,31 +117,29 @@ jobs:
         working-directory: ./admin_app
         run: |
           if [ -f package-lock.json ]; then
-            npm ci --prefer-offline --no-audit
+            npm ci
           else
-            npm install --prefer-offline --no-audit
+            npm install
           fi
 
       - name: Run admin tests
         working-directory: ./admin_app
         continue-on-error: true
-        run: npm test -- --coverage --watchAll=false --maxWorkers=2
+        run: npm test -- --coverage --watchAll=false
         env:
           CI: true
           REACT_APP_API_URL: http://localhost:8000/
 
       - name: Upload admin coverage
-        if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v3
         with:
           flags: admin
           directory: ./admin_app/coverage
 
-  # ============= LINTING (TỐI ƯU - CHỈ CHẠY KHI CẦN) =============
+  # ============= LINTING & CODE QUALITY =============
   lint:
-    name: Code Quality
+    name: Code Quality & Linting
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
@@ -153,31 +153,30 @@ jobs:
       - name: Lint server code
         working-directory: ./server_app
         run: |
-          npm ci --prefer-offline --no-audit
+          npm ci
           npm run lint || true
 
       - name: Lint client code
         working-directory: ./client_app
         run: |
-          npm ci --prefer-offline --no-audit
+          npm ci
           npm run lint || true
 
       - name: Lint admin code
         working-directory: ./admin_app
         run: |
           if [ -f package-lock.json ]; then
-            npm ci --prefer-offline --no-audit
+            npm ci
           else
-            npm install --prefer-offline --no-audit
+            npm install
           fi
           npm run lint || true
 
-  # ============= E2E TESTS (TỐI ƯU - CHỈ CHẠY TRÊN MAIN) =============
+  # ============= E2E TESTS =============
   e2e-tests:
     name: End-to-End Tests
     runs-on: ubuntu-latest
-    needs: [server-tests, client-tests]
-    if: github.ref == 'refs/heads/main'
+    needs: [server-tests, client-tests, admin-tests]
 
     services:
       mongodb:
@@ -194,11 +193,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies (parallel)
+      - name: Install all dependencies
         run: |
-          npm ci --prefix server_app --prefer-offline --no-audit &
-          npm ci --prefix client_app --prefer-offline --no-audit &
-          wait
+          cd server_app && npm ci && cd ..
+          cd client_app && npm ci && cd ..
+          cd admin_app && npm ci && cd ..
 
       - name: Start services
         run: |
@@ -225,7 +224,6 @@ jobs:
         run: |
           kill ${{ env.SERVER_PID }} || true
           kill ${{ env.CLIENT_PID }} || true
-
   # ============= BUILD & DOCKER (TỐI ƯU SONG SONG) =============
   build:
     name: Build Docker Images
@@ -263,7 +261,6 @@ jobs:
             type=sha,prefix={{branch}}-
             type=ref,event=branch
             type=raw,value=latest,enable={{is_default_branch}}
-
       - name: Build and push image
         uses: docker/build-push-action@v4
         with:
@@ -274,11 +271,11 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
-  # ============= DEPLOY (TỐI ƯU) =============
+  # ============= DEPLOY =============
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build, e2e-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
