@@ -50,7 +50,7 @@ jobs:
       - name: Run server tests (unit + integration) with coverage
         working-directory: ./server_app
         run: |
-          npm run test -- --ci --coverage --maxWorkers=100% --passWithNoTests
+          npx jest --ci --coverage --maxWorkers=100% --passWithNoTests
         env:
           MONGO_URL: ${{ env.MONGO_URL }}
           JWT_SECRET: test_secret_key_for_ci
