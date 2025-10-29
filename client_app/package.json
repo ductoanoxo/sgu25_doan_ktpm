@@ -30,9 +30,16 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts --max_old_space_size=4096 build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
+  "resolutions": {
+    "postcss": "^8.4.31"
   },
   "eslintConfig": {
     "extends": [
