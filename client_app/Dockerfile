@@ -1,14 +1,20 @@
-FROM node:16
+# Use Node 14 as base image
+FROM node:14
 
+# Set working directory
 WORKDIR /usr/src/app
 
+# Copy package files
 COPY package*.json ./
 
-RUN npm install --legacy-peer-deps \
-    && npm install ajv@6 ajv-keywords@3 --save-exact
+# Install dependencies
+RUN npm install
 
+# Copy app source
 COPY . .
 
+# Expose port
 EXPOSE 3000
 
+# Start the app
 CMD ["npm", "start"]
