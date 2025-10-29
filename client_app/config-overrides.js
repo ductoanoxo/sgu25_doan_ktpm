@@ -1,6 +1,18 @@
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = function override(config) {
+    // Allow imports from outside src/
+    config.resolve.modules = [
+        ...config.resolve.modules,
+        path.resolve(__dirname, 'node_modules')
+    ];
+
+    // Disable ModuleScopePlugin to allow imports from node_modules
+    config.resolve.plugins = config.resolve.plugins.filter(
+        plugin => plugin.constructor.name !== 'ModuleScopePlugin'
+    );
+
     config.resolve.fallback = {
         ...config.resolve.fallback,
         crypto: require.resolve('crypto-browserify'),
