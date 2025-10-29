@@ -3,46 +3,80 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop, kiet ]
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
   pull_request:
     branches: [ main, develop ]
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
 
-env:
-  NODE_VERSION: '16.x'
-  MONGO_URL: mongodb://localhost:27017/Clothes_Test
-
+# Hủy workflow cũ khi có push mới cùng nhánh -> tiết kiệm thời gian/runner
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: '16.x' # Giữ nguyên version bạn đang dùng
+  MONGO_DB_NAME: Clothes_Test
+  # Truy cập service 'mongodb' trực tiếp (nhanh hơn so với NAT qua localhost)
+  MONGO_URL: mongodb://mongodb:27017/Clothes_Test
+
 jobs:
+  # ============= CHANGES FILTER =============
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+      client: ${{ steps.filter.outputs.client }}
+      admin:  ${{ steps.filter.outputs.admin }}
+      infra:  ${{ steps.filter.outputs.infra }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            server:
+              - 'server_app/**'
+            client:
+              - 'client_app/**'
+            admin:
+              - 'admin_app/**'
+            infra:
+              - '.github/workflows/**'
+              - 'Dockerfile*'
+              - '**/Dockerfile'
+              - 'compose*.yml'
+              - 'package.json'
+              - 'package-lock.json'
+
   # ============= SERVER TESTS =============
   server-tests:
     name: Server Unit & Integration Tests
     runs-on: ubuntu-latest
-    
+    needs: changes
+    if: needs.changes.outputs.server == 'true' || needs.changes.outputs.infra == 'true'
+    timeout-minutes: 20
+
     services:
       mongodb:
         image: mongo:5
-        ports:
-          - 27017:27017
+        # Không cần publish ports ra host, job có thể truy cập bằng hostname `mongodb`
+        # Điều này tránh overhead NAT -> nhanh, ổn định hơn
         options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="bash -lc 'echo \"db.runCommand({ ping: 1 })\" | mongosh --quiet --port 27017'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+          --wiredTigerCacheSizeGB 0.25
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -50,37 +84,40 @@ jobs:
 
       - name: Install server dependencies
         working-directory: ./server_app
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Run server unit tests
         working-directory: ./server_app
-        continue-on-error: true
-        run: npm run test:unit
         env:
-          MONGO_URL: ${{ env.MONGO_URL }}
-          JWT_SECRET: test_secret_key_for_ci
+          CI: true
           NODE_ENV: test
+          JWT_SECRET: test_secret_key_for_ci
+          MONGO_URL: ${{ env.MONGO_URL }}
+        run: |
+          npm run test:unit --silent || true
 
       - name: Run server integration tests
         working-directory: ./server_app
-        continue-on-error: true
-        run: npm run test:integration
         env:
-          MONGO_URL: ${{ env.MONGO_URL }}
-          JWT_SECRET: test_secret_key_for_ci
+          CI: true
           NODE_ENV: test
+          JWT_SECRET: test_secret_key_for_ci
+          MONGO_URL: ${{ env.MONGO_URL }}
+        run: |
+          npm run test:integration --silent || true
 
       - name: Generate server coverage report
         working-directory: ./server_app
-        continue-on-error: true
-        run: npm run test:coverage
         env:
-          MONGO_URL: ${{ env.MONGO_URL }}
-          JWT_SECRET: test_secret_key_for_ci
+          CI: true
           NODE_ENV: test
+          JWT_SECRET: test_secret_key_for_ci
+          MONGO_URL: ${{ env.MONGO_URL }}
+        run: |
+          npm run test:coverage --silent || true
 
       - name: Upload server coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./server_app/coverage/lcov.info
@@ -93,13 +130,16 @@ jobs:
   client-tests:
     name: Client Unit & Integration Tests
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.client == 'true' || needs.changes.outputs.infra == 'true'
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -107,92 +147,106 @@ jobs:
 
       - name: Install client dependencies
         working-directory: ./client_app
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Run client tests
         working-directory: ./client_app
-        continue-on-error: true
-        run: npm test -- --coverage --watchAll=false
         env:
           CI: true
           REACT_APP_API_URL: http://localhost:8000/
+        run: npm test -- --coverage --watchAll=false || true
 
       - name: Upload client coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           flags: client
           directory: ./client_app/coverage
+          fail_ci_if_error: false
+          verbose: true
 
   # ============= ADMIN TESTS =============
   admin-tests:
     name: Admin Unit & Integration Tests
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.admin == 'true' || needs.changes.outputs.infra == 'true'
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: admin_app/package-lock.json
 
       - name: Install admin dependencies
         working-directory: ./admin_app
         run: |
           if [ -f package-lock.json ]; then
-            npm ci
+            npm ci --no-audit --no-fund
           else
-            npm install
+            npm install --no-audit --no-fund
           fi
 
       - name: Run admin tests
         working-directory: ./admin_app
-        continue-on-error: true
-        run: npm test -- --coverage --watchAll=false
         env:
           CI: true
           REACT_APP_API_URL: http://localhost:8000/
+        run: npm test -- --coverage --watchAll=false || true
 
       - name: Upload admin coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           flags: admin
           directory: ./admin_app/coverage
+          fail_ci_if_error: false
+          verbose: true
 
   # ============= LINTING & CODE QUALITY =============
   lint:
     name: Code Quality & Linting
     runs-on: ubuntu-latest
+    needs: changes
+    if: |
+      needs.changes.outputs.server == 'true' ||
+      needs.changes.outputs.client == 'true' ||
+      needs.changes.outputs.admin  == 'true' ||
+      needs.changes.outputs.infra  == 'true'
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Lint server code
         working-directory: ./server_app
         run: |
-          npm ci
+          npm ci --no-audit --no-fund
           npm run lint || true
 
       - name: Lint client code
         working-directory: ./client_app
         run: |
-          npm ci
+          npm ci --no-audit --no-fund
           npm run lint || true
 
       - name: Lint admin code
         working-directory: ./admin_app
         run: |
           if [ -f package-lock.json ]; then
-            npm ci
+            npm ci --no-audit --no-fund
           else
-            npm install
+            npm install --no-audit --no-fund
           fi
           npm run lint || true
 
@@ -201,63 +255,50 @@ jobs:
     name: End-to-End Tests
     runs-on: ubuntu-latest
     needs: [server-tests, client-tests, admin-tests]
+    if: |
+      (needs.server-tests.result == 'success' || needs.server-tests.result == 'skipped') &&
+      (needs.client-tests.result == 'success' || needs.client-tests.result == 'skipped') &&
+      (needs.admin-tests.result  == 'success' || needs.admin-tests.result  == 'skipped')
+    timeout-minutes: 25
 
     services:
       mongodb:
         image: mongo:5
-        ports:
-          - 27017:27017
+        options: >-
+          --health-cmd="bash -lc 'echo \"db.runCommand({ ping: 1 })\" | mongosh --quiet --port 27017'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+          --wiredTigerCacheSizeGB 0.25
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install all dependencies
         run: |
-          cd server_app && npm ci && cd ..
-          cd client_app && npm ci && cd ..
-          cd admin_app && npm ci && cd ..
+          cd server_app && npm ci --no-audit --no-fund && cd ..
+          cd client_app && npm ci --no-audit --no-fund && cd ..
+          cd admin_app  && npm ci --no-audit --no-fund && cd ..
 
-      - name: Start services
+      - name: Start services (server + client)
         run: |
-          # Start server in background and wait until it responds on port 8000
+          set -e
           cd server_app
-          npm start &
+          MONGO_URL="${{ env.MONGO_URL }}" JWT_SECRET="test_secret_key_for_ci" npm start &
           SERVER_PID=$!
-
-          echo "Waiting for server to be ready on http://localhost:8000 ..."
-          for i in {1..30}; do
-            if curl -sSf http://localhost:8000/ >/dev/null 2>&1; then
-              echo "Server is up"
-              break
-            fi
-            sleep 2
-          done
-
-          # Start client in background and wait until it responds on port 3000
+          sleep 10
           cd ../client_app
           npm start &
           CLIENT_PID=$!
-
-          echo "Waiting for client to be ready on http://localhost:3000 ..."
-          for i in {1..30}; do
-            if curl -sSf http://localhost:3000/ >/dev/null 2>&1; then
-              echo "Client is up"
-              break
-            fi
-            sleep 2
-          done
-
+          sleep 15
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
           echo "CLIENT_PID=$CLIENT_PID" >> $GITHUB_ENV
-        env:
-          MONGO_URL: mongodb://localhost:27017/Clothes_Test
-          JWT_SECRET: test_secret_key_for_ci
 
       - name: Run E2E tests
         working-directory: ./client_app
@@ -274,20 +315,26 @@ jobs:
     name: Build & Docker Images
     runs-on: ubuntu-latest
     needs: [server-tests, client-tests, admin-tests, lint]
+    if: |
+      (needs.server-tests.result == 'success' || needs.server-tests.result == 'skipped') &&
+      (needs.client-tests.result == 'success' || needs.client-tests.result == 'skipped') &&
+      (needs.admin-tests.result  == 'success' || needs.admin-tests.result  == 'skipped') &&
+      (needs.lint.result         == 'success' || needs.lint.result         == 'skipped')
     permissions:
       contents: read
       packages: write
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -295,7 +342,7 @@ jobs:
 
       - name: Extract metadata for server
         id: meta-server
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/sgu-server
           tags: |
@@ -305,7 +352,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push server image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: ./server_app
           push: ${{ github.event_name != 'pull_request' }}
@@ -316,7 +363,7 @@ jobs:
 
       - name: Extract metadata for client
         id: meta-client
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/sgu-client
           tags: |
@@ -326,7 +373,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push client image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: ./client_app
           push: ${{ github.event_name != 'pull_request' }}
@@ -337,7 +384,7 @@ jobs:
 
       - name: Extract metadata for admin
         id: meta-admin
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/sgu-admin
           tags: |
@@ -347,7 +394,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push admin image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: ./admin_app
           push: ${{ github.event_name != 'pull_request' }}
@@ -362,10 +409,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, e2e-tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Deploy to server
         run: |
