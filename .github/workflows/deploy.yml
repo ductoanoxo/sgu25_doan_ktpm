@@ -1,0 +1,31 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["Build & Docker"]
+    types:
+      - completed
+    branches: [main]
+  workflow_dispatch:
+    branches: [main]
+
+env:
+  NODE_VERSION: '16.x'
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: |
+      github.ref == 'refs/heads/main' && 
+      (github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to server
+        run: |
+          echo "Deployment step - configure based on your hosting provider"
+          # Add your deployment commands here
+          # Example: SSH to server and pull latest images
