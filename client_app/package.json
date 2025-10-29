@@ -21,7 +21,7 @@
         "react-leaflet": "^3.2.5",
         "react-redux": "^7.2.3",
         "react-router-dom": "^5.2.0",
-        "react-scripts": "4.0.3",
+        "react-scripts": "5.0.1",
         "react-slick": "^0.28.1",
         "redux": "^4.0.5",
         "slick-carousel": "^1.8.1",
@@ -35,11 +35,7 @@
         "eject": "react-scripts eject"
     },
     "engines": {
-        "node": "18.x",
-        "npm": "9.x"
-    },
-    "resolutions": {
-        "postcss": "^8.4.31"
+        "node": "20.x"
     },
     "eslintConfig": {
         "extends": [
