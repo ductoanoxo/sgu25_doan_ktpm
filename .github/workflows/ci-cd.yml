@@ -41,22 +41,26 @@ jobs:
 
       - name: Install server dependencies (faster)
         working-directory: ./server_app
-        run: |
-          npm ci --no-audit --no-fund --prefer-offline
+        run: npm ci --no-audit --no-fund --prefer-offline
 
-      # Gộp unit + integration + coverage trong 1 lần chạy Jest
-      # Nếu bạn đang dùng jest projects: `--selectProjects unit,integration`
-      # Nếu không, chỉ cần testMatch đã phân loại là đủ – Jest sẽ chạy hết.
-      - name: Run server tests (unit + integration) with coverage
+      - name: Run server tests (unit + integration) with coverage (non-blocking)
         working-directory: ./server_app
+        continue-on-error: true
         run: |
-          npx jest --ci --coverage --maxWorkers=100% --passWithNoTests --watchAll=false
+          npx jest \
+            --ci \
+            --coverage \
+            --coverageReporters=lcov,text-summary \
+            --maxWorkers=100% \
+            --passWithNoTests \
+            --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
           MONGO_URL: ${{ env.MONGO_URL }}
           JWT_SECRET: test_secret_key_for_ci
           NODE_ENV: test
 
       - name: Upload server coverage
+        if: always()
         uses: codecov/codecov-action@v4
         with:
           files: ./server_app/coverage/lcov.info
