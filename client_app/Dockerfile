@@ -1,6 +1,18 @@
 # Build stage
 FROM node:18-alpine AS build
 
+# Build arguments - Railway will pass these from Environment Variables
+ARG REACT_APP_API_URL
+ARG REACT_APP_STRIPE_PUBLIC_KEY
+ARG REACT_APP_GOOGLE_MAPS_API_KEY
+ARG REACT_APP_PAYPAL_CLIENT_ID
+
+# Set as environment variables for build
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_STRIPE_PUBLIC_KEY=$REACT_APP_STRIPE_PUBLIC_KEY
+ENV REACT_APP_GOOGLE_MAPS_API_KEY=$REACT_APP_GOOGLE_MAPS_API_KEY
+ENV REACT_APP_PAYPAL_CLIENT_ID=$REACT_APP_PAYPAL_CLIENT_ID
+
 WORKDIR /app
 
 # Copy package files
@@ -14,7 +26,7 @@ RUN rm -f package-lock.json && \
 # Copy source code
 COPY . .
 
-# Build production
+# Build production with env vars
 RUN npm run build
 
 # Production stage

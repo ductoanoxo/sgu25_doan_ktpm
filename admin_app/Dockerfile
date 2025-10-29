@@ -1,6 +1,12 @@
 # Build stage
 FROM node:18-alpine AS build
 
+# Build arguments - Railway will pass these from Environment Variables
+ARG REACT_APP_API_URL
+
+# Set as environment variables for build
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 WORKDIR /app
 
 # Copy package files
@@ -14,7 +20,7 @@ RUN rm -f package-lock.json && \
 # Copy source code
 COPY . .
 
-# Build production
+# Build production with env vars
 RUN npm run build
 
 # Production stage
