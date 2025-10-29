@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]    # removed 22.x
+        node-version: [18.x, 20.x]
 
     steps:
       - name: Checkout repository
@@ -43,10 +43,14 @@ jobs:
 
       - name: Build client_app
         working-directory: ./client_app
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         run: npm run build --if-present
 
       - name: Run client_app tests
         working-directory: ./client_app
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         run: npm test --if-present
 
       - name: Install admin_app dependencies
@@ -55,8 +59,12 @@ jobs:
 
       - name: Build admin_app
         working-directory: ./admin_app
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         run: npm run build --if-present
 
       - name: Run admin_app tests
         working-directory: ./admin_app
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         run: npm test --if-present
