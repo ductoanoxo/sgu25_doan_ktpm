@@ -319,8 +319,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Category = <span class="cstat-no" title="statement not covered" >require('../../../Models/category');</span>
-const Product = <span class="cstat-no" title="statement not covered" >require('../../../Models/product');</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Category = <span class="cstat-no" title="statement not covered" >require('../../../Models/category')</span>
+const Product = <span class="cstat-no" title="statement not covered" >require('../../../Models/product')</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.index = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     let page = <span class="cstat-no" title="statement not covered" >parseInt(req.query.page) || 1;</span>
@@ -339,7 +339,7 @@ const Product = <span class="cstat-no" title="statement not covered" >require('.
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             categories: categories.slice(start, end),
             totalPage: totalPage
-        });
+        })
 &nbsp;
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >categories.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
@@ -350,7 +350,7 @@ const Product = <span class="cstat-no" title="statement not covered" >require('.
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             categories: newData.slice(start, end),
             totalPage: totalPage
-        });
+        })
     }
 }
 &nbsp;
@@ -362,27 +362,27 @@ const Product = <span class="cstat-no" title="statement not covered" >require('.
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (categoryFilter.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Loại đã tồn tại' });</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Loại đã tồn tại' })</span>
     } else {
-        var newcategory = <span class="cstat-no" title="statement not covered" >new Category();</span>
-<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
-<span class="cstat-no" title="statement not covered" >        newcategory.category = req.query.name;</span>
+        var newcategory = <span class="cstat-no" title="statement not covered" >new Category()</span>
+<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
+<span class="cstat-no" title="statement not covered" >        newcategory.category = req.query.name</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        newcategory.save();</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã thêm thành công" });</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã thêm thành công" })</span>
     }
 }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.delete = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    console.log(req.query);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(req.query)</span>
     const id = <span class="cstat-no" title="statement not covered" >req.query.id;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    await Category.deleteOne({ _id: id }, <span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) {</span>
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: err });</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: err })</span>
 <span class="cstat-no" title="statement not covered" >            return;</span>
         }
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Thanh Cong" });</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Thanh Cong" })</span>
     })
 &nbsp;
 }
@@ -408,7 +408,7 @@ const Product = <span class="cstat-no" title="statement not covered" >require('.
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             products: products.slice(start, end),
             totalPage: totalPage
-        });
+        })
 &nbsp;
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >products.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
@@ -421,7 +421,7 @@ const Product = <span class="cstat-no" title="statement not covered" >require('.
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             products: newData.slice(start, end),
             totalPage: totalPage
-        });
+        })
     }
 }
 &nbsp;
@@ -433,13 +433,13 @@ const Product = <span class="cstat-no" title="statement not covered" >require('.
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (categoryFilter.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Loại đã tồn tại' });</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Loại đã tồn tại' })</span>
     } else {
-<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
+<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
 <span class="cstat-no" title="statement not covered" >        await Category.updateOne({ _id: req.query.id }, { category: req.query.name }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
 <span class="cstat-no" title="statement not covered" >            if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
         });
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã update thành công" });</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã update thành công" })</span>
     }
 }
 &nbsp;
@@ -454,7 +454,7 @@ const Product = <span class="cstat-no" title="statement not covered" >require('.
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-29T14:46:00.289Z
+                at 2025-10-29T15:18:54.252Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

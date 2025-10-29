@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as ProductAPI from '../../../API/Product';
+import * as ProductAPI from '../../API/Product';
 
 jest.mock('axios');
 

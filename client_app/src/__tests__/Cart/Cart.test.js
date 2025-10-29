@@ -4,14 +4,14 @@ import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
-import Cart from '../../../Cart/Cart';
-import * as CartAPI from '../../../API/CartAPI';
+import Cart from '../../Cart/Cart';
+import * as CartAPI from '../../API/CartAPI';
 
-jest.mock('../../../API/CartAPI');
+jest.mock('../../API/CartAPI');
 
 const mockStore = configureStore([]);
 
-const renderWithProviders = (component, initialState = {}) => {
+const renderWithProviders = (component, initialState = { Count: { isLoad: false }, Cart: { cart: [] }, Session: {} }) => {
   const store = mockStore(initialState);
   return render(
     <Provider store={store}>
