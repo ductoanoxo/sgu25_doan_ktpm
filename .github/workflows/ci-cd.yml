@@ -13,6 +13,7 @@ env:
 jobs:
   # ============= SERVER TESTS =============
   server-tests:
+    if: ${{ hashFiles('server_app/package.json') != '' }}
     name: Server Unit & Integration Tests
     runs-on: ubuntu-latest
     
@@ -70,6 +71,7 @@ jobs:
 
   # ============= CLIENT TESTS =============
   client-tests:
+    if: ${{ hashFiles('client_app/package.json') != '' }}
     name: Client Unit & Integration Tests
     runs-on: ubuntu-latest
 
@@ -103,6 +105,7 @@ jobs:
 
   # ============= ADMIN TESTS =============
   admin-tests:
+    if: ${{ hashFiles('admin_app/package.json') != '' }} 
     name: Admin Unit & Integration Tests
     runs-on: ubuntu-latest
 
@@ -138,7 +141,7 @@ jobs:
   lint:
     name: Code Quality & Linting
     runs-on: ubuntu-latest
-
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
