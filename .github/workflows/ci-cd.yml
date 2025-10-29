@@ -122,12 +122,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: admin_app/package-lock.json
 
       - name: Install admin dependencies
         working-directory: ./admin_app
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Run admin tests
         working-directory: ./admin_app
@@ -171,7 +174,11 @@ jobs:
       - name: Lint admin code
         working-directory: ./admin_app
         run: |
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
           npm run lint || true
 
   # ============= E2E TESTS =============
