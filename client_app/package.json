@@ -41,6 +41,9 @@
     "devDependencies": {
         "react-app-rewired": "^2.2.1"
     },
+    "resolutions": {
+        "ajv": "^8.12.0"
+    },
     "engines": {
         "node": "20.x"
     },

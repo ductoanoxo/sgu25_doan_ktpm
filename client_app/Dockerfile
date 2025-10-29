@@ -6,8 +6,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
+# Clean install dependencies with resolutions
+RUN rm -f package-lock.json && \
+    npm install --legacy-peer-deps && \
+    npm install ajv@^8.12.0 --save-exact --legacy-peer-deps
 
 # Copy source code
 COPY . .
