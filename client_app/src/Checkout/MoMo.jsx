@@ -24,13 +24,16 @@ function MoMo(props) {
     console.log(orderID)
 
     useEffect(() => {
+        const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        const CLIENT_URL = window.location.origin;
+        
         const path = "https://test-payment.momo.vn/gw_payment/transactionProcessor"
         const partnerCode = "MOMO"
         const accessKey = "F8BBA842ECF85"
         const serectkey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
         const orderInfo = "Thanh toán MoMo"
-        const notifyurl = "http://localhost:8000/api/Payment/momo"
-        const returnUrl = "http://localhost:3000/momo"
+        const notifyurl = `${API_URL}/api/Payment/momo`
+        const returnUrl = `${CLIENT_URL}/momo`
         const amount = total.toString()
         const orderId = orderID
         const requestType = "captureMoMoWallet"
