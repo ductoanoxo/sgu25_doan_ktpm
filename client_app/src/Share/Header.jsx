@@ -163,7 +163,7 @@ function Header(props) {
 
             const response_male = await Product.Get_Category_Gender(query_male)
 
-            set_male(response_male)
+            set_male(Array.isArray(response_male) ? response_male : [])
 
             // gender = female
             const params_female = {
@@ -174,7 +174,7 @@ function Header(props) {
 
             const response_female = await Product.Get_Category_Gender(query_female)
 
-            set_female(response_female)
+            set_female(Array.isArray(response_female) ? response_female : [])
 
         }
 
