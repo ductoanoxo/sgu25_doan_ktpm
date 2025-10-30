@@ -34,6 +34,23 @@ project/
 ## Hướng dẫn chạy test
 [Thêm hướng dẫn để chạy các test case]
 
+## 🚀 CI/CD Pipeline
+
+Dự án này đã được tích hợp GitHub Actions để tự động hóa quy trình CI/CD.
+
+### Status Badges
+
+![CI/CD Pipeline](https://github.com/Babyfat012/sgu25_doan_ktpm/workflows/CI%2FCD%20Pipeline/badge.svg)
+![Development CI](https://github.com/Babyfat012/sgu25_doan_ktpm/workflows/Development%20Branch%20CI/badge.svg)
+
+### Workflows
+
+- **CI/CD Pipeline**: Chạy tests và build Docker images khi push code
+- **Development CI**: Quick validation cho development branches
+- **Deploy**: Tự động deploy lên production khi merge vào `main`
+
+📖 **Chi tiết**: Xem [CI/CD Guide](./docs/CI_CD_GUIDE.md) và [Workflows Documentation](./.github/WORKFLOWS.md)
+
 ## 4.2 Tools
 
 Các tool được tích hợp trong dự án (phiên bản lấy từ `package.json`, `Dockerfile` và `docker-compose.yml`):
@@ -364,4 +381,4 @@ docker compose up --watch
 - Nodemailer. 
 > ⚠️ **Lưu ý:**  
 > Do chưa cập nhật **sinh trắc học** vào **môi trường giả lập của MoMo**, nên hiện tại **không thể thực hiện chuyển khoản giả lập qua MoMo Developer**.  
-> Hệ thống giả lập vẫn chưa được cập nhật nên **chưa thể tiến hành test** được.
+> Hệ thống giả lập vẫn chưa được cập nhật nên **chưa thể tiến hành test** được. .....
