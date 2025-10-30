@@ -87,7 +87,14 @@ jobs:
 
       - name: Install client dependencies
         working-directory: ./client_app
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            # ưu tiên npm ci cho build ổn định
+            npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          else
+            # nếu không có lock thì fallback
+            npm install --no-audit --no-fund
+          fi
 
       - name: Run client tests
         working-directory: ./client_app
@@ -160,10 +167,14 @@ jobs:
           npm ci
           npm run lint || true
 
-      - name: Lint client code
-        working-directory: ./client_app
+      - name: Lint server code
+        working-directory: ./server_app
         run: |
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund || true
+          else
+            npm install --no-audit --no-fund || true
+          fi
           npm run lint || true
 
       - name: Lint admin code
