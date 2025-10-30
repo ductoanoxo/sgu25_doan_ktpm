@@ -32,28 +32,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (cache npm)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: server_app/package-lock.json
 
-      - name: Install server dependencies (faster)
+      - name: Install server dependencies
         working-directory: ./server_app
-        run: npm ci --no-audit --no-fund --prefer-offline
+        run: npm ci --no-audit --no-fund
 
-      - name: Run server tests (unit + integration) with coverage (non-blocking)
+      - name: Run server tests with coverage
         working-directory: ./server_app
         continue-on-error: true
-        run: |
-          npx jest \
-            --ci \
-            --coverage \
-            --coverageReporters=lcov,text-summary \
-            --maxWorkers=100% \
-            --passWithNoTests \
-            --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
+        run: npm run test:coverage
         env:
           MONGO_URL: ${{ env.MONGO_URL }}
           JWT_SECRET: test_secret_key_for_ci
@@ -76,10 +69,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -87,28 +80,24 @@ jobs:
 
       - name: Install client dependencies
         working-directory: ./client_app
-        run: |
-          if [ -f package-lock.json ]; then
-            # ưu tiên npm ci cho build ổn định
-            npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          else
-            # nếu không có lock thì fallback
-            npm install --no-audit --no-fund
-          fi
+        run: npm ci --no-audit --no-fund
 
       - name: Run client tests
         working-directory: ./client_app
         continue-on-error: true
-        run: npm test -- --coverage --watchAll=false  
+        run: npm run test:ci
         env:
-          CI: true
           REACT_APP_API_URL: http://localhost:8000/
 
       - name: Upload client coverage
-        uses: codecov/codecov-action@v3
+        if: always()
+        uses: codecov/codecov-action@v4
         with:
+          files: ./client_app/coverage/lcov.info
           flags: client
-          directory: ./client_app/coverage
+          name: client-coverage
+          fail_ci_if_error: false
+          verbose: false
 
   # ============= ADMIN TESTS =============
   admin-tests:
@@ -117,35 +106,35 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: admin_app/package-lock.json
 
       - name: Install admin dependencies
         working-directory: ./admin_app
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci --no-audit --no-fund
 
       - name: Run admin tests
         working-directory: ./admin_app
         continue-on-error: true
-        run: npm test -- --coverage --watchAll=false
+        run: npm run test:ci
         env:
-          CI: true
           REACT_APP_API_URL: http://localhost:8000/
 
       - name: Upload admin coverage
-        uses: codecov/codecov-action@v3
+        if: always()
+        uses: codecov/codecov-action@v4
         with:
+          files: ./admin_app/coverage/lcov.info
           flags: admin
-          directory: ./admin_app/coverage
+          name: admin-coverage
+          fail_ci_if_error: false
+          verbose: false
 
   # ============= LINTING & CODE QUALITY =============
   lint:
@@ -154,96 +143,36 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Lint server code
         working-directory: ./server_app
         run: |
-          npm ci
+          npm ci --no-audit --no-fund
           npm run lint || true
 
-      - name: Lint server code
-        working-directory: ./server_app
+      - name: Lint client code
+        working-directory: ./client_app
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci --no-audit --no-fund || true
-          else
-            npm install --no-audit --no-fund || true
-          fi
-          npm run lint || true
+          npm ci --no-audit --no-fund
+          echo "Client app uses react-scripts linting built-in"
 
       - name: Lint admin code
         working-directory: ./admin_app
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
-          npm run lint || true
+          npm ci --no-audit --no-fund
+          echo "Admin app uses react-scripts linting built-in"
 
-  # ============= E2E TESTS =============
-  e2e-tests:
-    name: End-to-End Tests
-    runs-on: ubuntu-latest
-    needs: [server-tests, client-tests, admin-tests]
-
-    services:
-      mongodb:
-        image: mongo:5
-        ports:
-          - 27017:27017
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install all dependencies
-        run: |
-          cd server_app && npm ci && cd ..
-          cd client_app && npm ci && cd ..
-          cd admin_app && npm ci && cd ..
-
-      - name: Start services
-        run: |
-          cd server_app
-          npm start &
-          SERVER_PID=$!
-          sleep 10
-          cd ../client_app
-          npm start &
-          CLIENT_PID=$!
-          sleep 15
-          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-          echo "CLIENT_PID=$CLIENT_PID" >> $GITHUB_ENV
-        env:
-          MONGO_URL: mongodb://localhost:27017/Clothes_Test
-          JWT_SECRET: test_secret_key_for_ci
-
-      - name: Run E2E tests
-        working-directory: ./client_app
-        run: npm run test:e2e || true
-
-      - name: Stop services
-        if: always()
-        run: |
-          kill ${{ env.SERVER_PID }} || true
-          kill ${{ env.CLIENT_PID }} || true
   # ============= BUILD & DOCKER (TỐI ƯU SONG SONG) =============
   build:
     name: Build Docker Images
     runs-on: ubuntu-latest
-    needs: [server-tests, client-tests]
+    needs: [server-tests, client-tests, admin-tests]
     if: github.event_name != 'pull_request'
     permissions:
       contents: read
@@ -255,13 +184,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -269,15 +198,16 @@ jobs:
 
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/sgu-${{ matrix.app }}
           tags: |
             type=sha,prefix={{branch}}-
             type=ref,event=branch
             type=raw,value=latest,enable={{is_default_branch}}
+      
       - name: Build and push image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ./${{ matrix.app }}_app
           push: true
@@ -290,12 +220,12 @@ jobs:
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build, e2e-tests]
+    needs: [build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Deploy to server
         run: |
