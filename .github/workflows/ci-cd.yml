@@ -2,9 +2,17 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop, kiet,DUCTOAN,babyfat,phat]
+    branches:
+      - main
+      - develop
+      - kiet
+      - DUCTOAN
+      - babyfat
+      - phat
   pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
+      - develop
 
 env:
   NODE_VERSION: '16.x'
