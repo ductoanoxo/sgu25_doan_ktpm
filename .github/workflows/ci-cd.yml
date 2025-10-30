@@ -99,7 +99,7 @@ jobs:
       - name: Run client tests
         working-directory: ./client_app
         continue-on-error: true
-        run: npm test -- --coverage --watchAll=false
+        run: npm test -- --coverage --watchAll=false  
         env:
           CI: true
           REACT_APP_API_URL: http://localhost:8000/
