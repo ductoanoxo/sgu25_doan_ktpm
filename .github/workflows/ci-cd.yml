@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop, kiet ]
+    branches: [ main, develop, kiet,DUCTOAN,babyfat,phat]
   pull_request:
     branches: [ main, develop ]
 
