@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/73</span>
+                <span class='fraction'>0/71</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/69</span>
+                <span class='fraction'>0/67</span>
             </div>
         
             
@@ -216,12 +216,8 @@
 <a name='L151'></a><a href='#L151'>151</a>
 <a name='L152'></a><a href='#L152'>152</a>
 <a name='L153'></a><a href='#L153'>153</a>
-<a name='L154'></a><a href='#L154'>154</a>
-<a name='L155'></a><a href='#L155'>155</a>
-<a name='L156'></a><a href='#L156'>156</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L154'></a><a href='#L154'>154</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -373,23 +369,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Order = <span class="cstat-no" title="statement not covered" >require('../../../Models/order')</span>
-const Detail_History = <span class="cstat-no" title="statement not covered" >require('../../../Models/detail_order')</span>
-const Payment = <span class="cstat-no" title="statement not covered" >require('../../../Models/payment')</span>
-const Delivery = <span class="cstat-no" title="statement not covered" >require('../../../Models/delivery')</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Order = <span class="cstat-no" title="statement not covered" >require('../../../Models/order');</span>
+const Detail_History = <span class="cstat-no" title="statement not covered" >require('../../../Models/detail_order');</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.index = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     let page = <span class="cstat-no" title="statement not covered" >parseInt(req.query.page) || 1;</span>
     let money = <span class="cstat-no" title="statement not covered" >0;</span>
 &nbsp;
-    const status = <span class="cstat-no" title="statement not covered" >req.query.status</span>
+    const status = <span class="cstat-no" title="statement not covered" >req.query.status;</span>
 &nbsp;
     const perPage = <span class="cstat-no" title="statement not covered" >parseInt(req.query.limit) || 8;</span>
 &nbsp;
     let start = <span class="cstat-no" title="statement not covered" >(page - 1) * perPage;</span>
     let end = <span class="cstat-no" title="statement not covered" >page * perPage;</span>
 &nbsp;
-    let orders
+    let orders;
 <span class="cstat-no" title="statement not covered" >    if (status) {</span>
 <span class="cstat-no" title="statement not covered" >        orders = await (await Order.find({ status: status }).populate('id_user').populate('id_payment').populate('id_note')).reverse();</span>
     } else {
@@ -400,16 +394,16 @@ const Delivery = <span class="cstat-no" title="statement not covered" >require('
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    orders.map(<span class="fstat-no" title="function not covered" >(v</span>alue) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        money += Number(value.total);</span>
-    })
+    });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json({</span>
         orders: orders.slice(start, end),
         totalPage: totalPage,
         totalMoney: money
-    })
+    });
 &nbsp;
    
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.detailOrder = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     let page = <span class="cstat-no" title="statement not covered" >parseInt(req.query.page) || 1;</span>
@@ -428,56 +422,56 @@ const Delivery = <span class="cstat-no" title="statement not covered" >require('
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             details: details.slice(start, end),
             totalPage: totalPage
-        })
+        });
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >details.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            return value.name_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||</span>
                 value.price_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
                 value.count.toString().toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
-                value.size.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
-        })
+                value.size.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
+        });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             details: newData.slice(start, end),
             totalPage: totalPage
-        })
+        });
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.details = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const order = <span class="cstat-no" title="statement not covered" >await Order.findOne({ _id: req.params.id }).populate('id_user').populate('id_payment').populate('id_note');</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(order)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(order);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.confirmOrder = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: "2" }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
+<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: '2' }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
     });
-<span class="cstat-no" title="statement not covered" >    res.json({ msg: "Thanh Cong" })</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Thanh Cong' });</span>
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.delivery = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: "3" }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
+<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: '3' }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
     });
-<span class="cstat-no" title="statement not covered" >    res.json({ msg: "Thanh Cong" })</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Thanh Cong' });</span>
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.confirmDelivery = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: "4", pay: true }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
+<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: '4', pay: true }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
     });
-<span class="cstat-no" title="statement not covered" >    res.json({ msg: "Thanh Cong" })</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Thanh Cong' });</span>
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.cancelOrder = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: "5" }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
+<span class="cstat-no" title="statement not covered" >    await Order.updateOne({ _id: req.query.id }, { status: '5' }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
     });
-<span class="cstat-no" title="statement not covered" >    res.json({ msg: "Thanh Cong" })</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Thanh Cong' });</span>
+};
 &nbsp;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.completeOrder = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
@@ -485,7 +479,7 @@ const Delivery = <span class="cstat-no" title="statement not covered" >require('
     let page = <span class="cstat-no" title="statement not covered" >parseInt(req.query.page) || 1;</span>
     let money = <span class="cstat-no" title="statement not covered" >0;</span>
 &nbsp;
-    const getDate = <span class="cstat-no" title="statement not covered" >req.query.getDate</span>
+    const getDate = <span class="cstat-no" title="statement not covered" >req.query.getDate;</span>
 &nbsp;
     const perPage = <span class="cstat-no" title="statement not covered" >parseInt(req.query.limit) || 8;</span>
 &nbsp;
@@ -500,42 +494,42 @@ const Delivery = <span class="cstat-no" title="statement not covered" >require('
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        orders.map(<span class="fstat-no" title="function not covered" >(v</span>alue) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            money += Number(value.total);</span>
-        })
+        });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             orders: orders.slice(start, end),
             totalPage: totalPage,
             totalMoney: money
-        })
+        });
 &nbsp;
     }else{
 &nbsp;
         const newOrder = <span class="cstat-no" title="statement not covered" >orders.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            return value.create_time.toString().indexOf(getDate.toString()) !== -1</span>
-        })
+<span class="cstat-no" title="statement not covered" >            return value.create_time.toString().indexOf(getDate.toString()) !== -1;</span>
+        });
 &nbsp;
         const totalPage = <span class="cstat-no" title="statement not covered" >Math.ceil(newOrder.length / perPage);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        newOrder.map(<span class="fstat-no" title="function not covered" >(v</span>alue) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            money += Number(value.total);</span>
-        })
+        });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             orders: newOrder.slice(start, end),
             totalPage: totalPage,
             totalMoney: money
-        })
+        });
 &nbsp;
     }
 &nbsp;
-}</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-30T08:18:08.211Z
+                at 2025-11-05T17:56:25.249Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

@@ -335,7 +335,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const User = <span class="cstat-no" title="statement not covered" >require('../../../Models/user')</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const User = <span class="cstat-no" title="statement not covered" >require('../../../Models/user');</span>
 const bcrypt = <span class="cstat-no" title="statement not covered" >require('bcryptjs');</span>
 const jwt = <span class="cstat-no" title="statement not covered" >require('jsonwebtoken');</span>
 &nbsp;
@@ -350,9 +350,9 @@ const jwt = <span class="cstat-no" title="statement not covered" >require('jsonw
     let end = <span class="cstat-no" title="statement not covered" >page * perPage;</span>
     let users;
 <span class="cstat-no" title="statement not covered" >    if (req.query.permission) {</span>
-<span class="cstat-no" title="statement not covered" >        users = await User.find({ id_permission: req.query.permission }).populate('id_permission')</span>
+<span class="cstat-no" title="statement not covered" >        users = await User.find({ id_permission: req.query.permission }).populate('id_permission');</span>
     } else {
-<span class="cstat-no" title="statement not covered" >        users = await User.find({}).populate('id_permission')</span>
+<span class="cstat-no" title="statement not covered" >        users = await User.find({}).populate('id_permission');</span>
     }
 &nbsp;
 &nbsp;
@@ -360,78 +360,78 @@ const jwt = <span class="cstat-no" title="statement not covered" >require('jsonw
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             users: users.slice(start, end),
             totalPage: totalPage
-        })
+        });
 &nbsp;
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >users.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            return value.fullname.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||</span>
-                value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
-        })
+                value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
+        });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             users: newData.slice(start, end),
             totalPage: totalPage
-        })
+        });
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.create = <span class="fstat-no" title="function not covered" >as</span>ync(req, res) =&gt; {</span>
     const user = <span class="cstat-no" title="statement not covered" >await User.find();</span>
 &nbsp;
     const userFilter = <span class="cstat-no" title="statement not covered" >user.filter(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        return c.email === req.query.email.trim() || c.username === req.query.username.trim()</span>
+<span class="cstat-no" title="statement not covered" >        return c.email === req.query.email.trim() || c.username === req.query.username.trim();</span>
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (userFilter.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Email hoặc username đã tồn tại' })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Email hoặc username đã tồn tại' });</span>
     } else {
-        var newUser = <span class="cstat-no" title="statement not covered" >new User()</span>
+        var newUser = <span class="cstat-no" title="statement not covered" >new User();</span>
         const salt = <span class="cstat-no" title="statement not covered" >await bcrypt.genSalt();</span>
 <span class="cstat-no" title="statement not covered" >        req.query.password = await bcrypt.hash(req.query.password, salt);</span>
-<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
-<span class="cstat-no" title="statement not covered" >        newUser.fullname = req.query.name</span>
-<span class="cstat-no" title="statement not covered" >        newUser.username = req.query.username</span>
-<span class="cstat-no" title="statement not covered" >        newUser.password = req.query.password</span>
-<span class="cstat-no" title="statement not covered" >        newUser.email = req.query.email</span>
+<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
+<span class="cstat-no" title="statement not covered" >        newUser.fullname = req.query.name;</span>
+<span class="cstat-no" title="statement not covered" >        newUser.username = req.query.username;</span>
+<span class="cstat-no" title="statement not covered" >        newUser.password = req.query.password;</span>
+<span class="cstat-no" title="statement not covered" >        newUser.email = req.query.email;</span>
         
         // Fix logic permission
 <span class="cstat-no" title="statement not covered" >        if (req.query.permission) {</span>
-<span class="cstat-no" title="statement not covered" >            newUser.id_permission = req.query.permission</span>
+<span class="cstat-no" title="statement not covered" >            newUser.id_permission = req.query.permission;</span>
         } else {
-<span class="cstat-no" title="statement not covered" >            newUser.id_permission = "6087dcb5f269113b3460fce4" </span> // Default customer permission
+<span class="cstat-no" title="statement not covered" >            newUser.id_permission = '6087dcb5f269113b3460fce4'; </span> // Default customer permission
         }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        newUser.save();</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã thêm thành công" })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Bạn đã thêm thành công' });</span>
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.delete = <span class="fstat-no" title="function not covered" >as</span>ync(req, res) =&gt; {</span>
     const id = <span class="cstat-no" title="statement not covered" >req.query.id;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    await User.deleteOne({ _id: id }, <span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) {</span>
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: err })</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: err });</span>
 <span class="cstat-no" title="statement not covered" >            return;</span>
         }
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Thanh Cong" })</span>
-    })
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Thanh Cong' });</span>
+    });
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.details = <span class="fstat-no" title="function not covered" >as</span>ync(req, res) =&gt; {</span>
     const user = <span class="cstat-no" title="statement not covered" >await User.findOne({ _id: req.params.id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(user)</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json(user);</span>
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.update = <span class="fstat-no" title="function not covered" >as</span>ync(req, res) =&gt; {</span>
     const user = <span class="cstat-no" title="statement not covered" >await User.findOne({ _id: req.query.id });</span>
 <span class="cstat-no" title="statement not covered" >    if (req.query.email &amp;&amp; req.query.email !== user.email) {</span>
-<span class="cstat-no" title="statement not covered" >        req.query.email = user.email</span>
+<span class="cstat-no" title="statement not covered" >        req.query.email = user.email;</span>
     }
 <span class="cstat-no" title="statement not covered" >    if (req.query.username &amp;&amp; req.query.username !== user.username) {</span>
-<span class="cstat-no" title="statement not covered" >        req.query.username = user.username</span>
+<span class="cstat-no" title="statement not covered" >        req.query.username = user.username;</span>
     }
 <span class="cstat-no" title="statement not covered" >    if (!req.query.password) {</span>
 <span class="cstat-no" title="statement not covered" >        req.query.password = user.password;</span>
@@ -440,7 +440,7 @@ const jwt = <span class="cstat-no" title="statement not covered" >require('jsonw
 <span class="cstat-no" title="statement not covered" >        req.query.password = await bcrypt.hash(req.query.password, salt);</span>
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
+<span class="cstat-no" title="statement not covered" >    req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
 <span class="cstat-no" title="statement not covered" >    await User.updateOne({ _id: req.query.id }, {</span>
         fullname: req.query.name,
         password: req.query.password,
@@ -448,37 +448,37 @@ const jwt = <span class="cstat-no" title="statement not covered" >require('jsonw
     }, <span class="fstat-no" title="function not covered" >fu</span>nction(err, res) {
 <span class="cstat-no" title="statement not covered" >        if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
     });
-<span class="cstat-no" title="statement not covered" >    res.json({ msg: "Bạn đã update thành công" })</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Bạn đã update thành công' });</span>
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.login = <span class="fstat-no" title="function not covered" >as</span>ync(req, res) =&gt; {</span>
 &nbsp;
-    const email = <span class="cstat-no" title="statement not covered" >req.body.email</span>
-    const password = <span class="cstat-no" title="statement not covered" >req.body.password</span>
+    const email = <span class="cstat-no" title="statement not covered" >req.body.email;</span>
+    const password = <span class="cstat-no" title="statement not covered" >req.body.password;</span>
 &nbsp;
-    const body = <span class="cstat-no" title="statement not covered" >[{ username: email }, { email: email }]</span>
+    const body = <span class="cstat-no" title="statement not covered" >[{ username: email }, { email: email }];</span>
 &nbsp;
-    const user = <span class="cstat-no" title="statement not covered" >await User.findOne({ $or: body }).populate('id_permission')</span>
+    const user = <span class="cstat-no" title="statement not covered" >await User.findOne({ $or: body }).populate('id_permission');</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (user === null) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Không Tìm Thấy User" })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Không Tìm Thấy User' });</span>
     } else {
-        const auth = <span class="cstat-no" title="statement not covered" >await bcrypt.compare(password, user.password)</span>
+        const auth = <span class="cstat-no" title="statement not covered" >await bcrypt.compare(password, user.password);</span>
 <span class="cstat-no" title="statement not covered" >        if (auth) {</span>
             var token = <span class="cstat-no" title="statement not covered" >jwt.sign(user._id.toJSON(), 'gfdgfd');</span>
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: "Đăng nhập thành công", user: user, jwt: token })</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: 'Đăng nhập thành công', user: user, jwt: token });</span>
         } else {
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: "Sai mật khẩu" })</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: 'Sai mật khẩu' });</span>
         }
     }
-}</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-30T08:18:08.211Z
+                at 2025-11-05T17:56:25.249Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

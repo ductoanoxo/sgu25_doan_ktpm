@@ -1,19 +1,19 @@
-var express = require('express')
+var express = require('express');
 
-var router = express.Router()
+var router = express.Router();
 
-const Sale = require('../../Controller/admin/sale.controller')
+const Sale = require('../../Controller/admin/sale.controller');
 
-router.get('/', Sale.index)
+router.get('/', Sale.index);
 
-router.post('/', Sale.create)
+router.post('/', Sale.create);
 
-router.get('/:id', Sale.detail)
+router.get('/:id', Sale.detail);
 
-router.patch('/:id', Sale.update)
+router.patch('/:id', Sale.update);
 
-router.get('/list/product', Sale.list)
+router.get('/list/product', Sale.list);
 
-router.get('/list/:id', Sale.detailList)
+router.get('/list/:id', Sale.detailList);
 
-module.exports = router
+module.exports = router;

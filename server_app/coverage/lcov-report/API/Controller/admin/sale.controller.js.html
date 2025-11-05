@@ -335,7 +335,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Sale = <span class="cstat-no" title="statement not covered" >require('../../../Models/sale')</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Sale = <span class="cstat-no" title="statement not covered" >require('../../../Models/sale');</span>
 &nbsp;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.index = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
@@ -354,34 +354,34 @@
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             sale: sale.slice(start, end),
             totalPage: totalPage
-        })
+        });
 &nbsp;
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >sale.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            return value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1</span>
-        })
+<span class="cstat-no" title="statement not covered" >            return value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;</span>
+        });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             sale: newData.slice(start, end),
             totalPage: totalPage
-        })
+        });
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.create = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const check = <span class="cstat-no" title="statement not covered" >await Sale.find({ id_product: req.body.id_product })</span>
+    const check = <span class="cstat-no" title="statement not covered" >await Sale.find({ id_product: req.body.id_product });</span>
 &nbsp;
-    let flag = <span class="cstat-no" title="statement not covered" >false</span>
+    let flag = <span class="cstat-no" title="statement not covered" >false;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    check.forEach(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (value.status === true){</span>
-<span class="cstat-no" title="statement not covered" >            flag = true</span>
+<span class="cstat-no" title="statement not covered" >            flag = true;</span>
         } 
-    })
+    });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (flag){</span>
-<span class="cstat-no" title="statement not covered" >        res.send("Sản phẩm này đã có khuyến mãi")</span>
+<span class="cstat-no" title="statement not covered" >        res.send('Sản phẩm này đã có khuyến mãi');</span>
     }else{
         // Xử lý promotion: loại bỏ ký tự % và chuyển thành số
         let promotionValue = <span class="cstat-no" title="statement not covered" >req.body.promotion;</span>
@@ -392,7 +392,7 @@
 &nbsp;
         // Kiểm tra promotion value hợp lệ
 <span class="cstat-no" title="statement not covered" >        if (isNaN(promotionValue) || promotionValue &lt; 0 || promotionValue &gt; 100) {</span>
-<span class="cstat-no" title="statement not covered" >            return res.send("Giá trị khuyến mãi không hợp lệ (0-100)")</span>
+<span class="cstat-no" title="statement not covered" >            return res.send('Giá trị khuyến mãi không hợp lệ (0-100)');</span>
         }
 &nbsp;
         // Tạo object data với promotion đã được xử lý
@@ -401,28 +401,28 @@
             promotion: promotionValue
         };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        await Sale.create(saleData)</span>
+<span class="cstat-no" title="statement not covered" >        await Sale.create(saleData);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        res.send("Bạn đã thêm thành công")</span>
+<span class="cstat-no" title="statement not covered" >        res.send('Bạn đã thêm thành công');</span>
     }
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.detail = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-    const sale = <span class="cstat-no" title="statement not covered" >await Sale.findOne({ _id: id })</span>
+    const sale = <span class="cstat-no" title="statement not covered" >await Sale.findOne({ _id: id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(sale)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(sale);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.update = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-    const sale = <span class="cstat-no" title="statement not covered" >await Sale.findOne({ _id: id })</span>
+    const sale = <span class="cstat-no" title="statement not covered" >await Sale.findOne({ _id: id });</span>
 &nbsp;
     // Xử lý promotion: loại bỏ ký tự % và chuyển thành số
     let promotionValue = <span class="cstat-no" title="statement not covered" >req.body.promotion;</span>
@@ -433,52 +433,52 @@
 &nbsp;
     // Kiểm tra promotion value hợp lệ
 <span class="cstat-no" title="statement not covered" >    if (isNaN(promotionValue) || promotionValue &lt; 0 || promotionValue &gt; 100) {</span>
-<span class="cstat-no" title="statement not covered" >        return res.json("Giá trị khuyến mãi không hợp lệ (0-100)")</span>
+<span class="cstat-no" title="statement not covered" >        return res.json('Giá trị khuyến mãi không hợp lệ (0-100)');</span>
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    sale.promotion = promotionValue</span>
-<span class="cstat-no" title="statement not covered" >    sale.describe = req.body.describe</span>
-<span class="cstat-no" title="statement not covered" >    sale.status = req.body.status</span>
-<span class="cstat-no" title="statement not covered" >    sale.id_product = req.body.id_product</span>
+<span class="cstat-no" title="statement not covered" >    sale.promotion = promotionValue;</span>
+<span class="cstat-no" title="statement not covered" >    sale.describe = req.body.describe;</span>
+<span class="cstat-no" title="statement not covered" >    sale.status = req.body.status;</span>
+<span class="cstat-no" title="statement not covered" >    sale.id_product = req.body.id_product;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    sale.save()</span>
+<span class="cstat-no" title="statement not covered" >    sale.save();</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json("Bạn đã cập nhật thành công")</span>
+<span class="cstat-no" title="statement not covered" >    res.json('Bạn đã cập nhật thành công');</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.list = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const sale = <span class="cstat-no" title="statement not covered" >await Sale.find({ status: true }).populate('id_product')</span>
+    const sale = <span class="cstat-no" title="statement not covered" >await Sale.find({ status: true }).populate('id_product');</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(sale)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(sale);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.detailList = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
     const sale = <span class="cstat-no" title="statement not covered" >await (await Sale.findOne({ id_product: id, status: true }).populate('id_product'));</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (sale){</span>
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
-            msg: "Thanh Cong",
+            msg: 'Thanh Cong',
             sale: sale
-        })
+        });
     }else{
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
-            msg: "That Bai"
-        })
+            msg: 'That Bai'
+        });
     }
-}</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-30T08:18:08.211Z
+                at 2025-11-05T17:56:25.249Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

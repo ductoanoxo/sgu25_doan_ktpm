@@ -5,7 +5,6 @@ const Products = require('../../../Models/product');
 const Order = require('../../../Models/order');
 const Users = require('../../../Models/user');
 const Categories = require('../../../Models/category');
-const Detail_Order = require('../../../Models/detail_order');
 
 // Thống kê tổng quan
 router.get('/statistics', async (req, res) => {

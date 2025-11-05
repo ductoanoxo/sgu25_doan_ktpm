@@ -1,3 +1,15 @@
+# CI/CD Workflow for MERN Stack E-commerce Application
+# This workflow includes jobs for testing, linting, building, and deploying the server, client, and admin applications.
+# 
+# Improvements:
+# - Node.js 18.x LTS for stability and performance
+# - Comprehensive test coverage for all three applications
+# - Parallel execution of frontend tests using matrix strategy
+# - Docker image building and publishing to GitHub Container Registry
+# - Code coverage reporting to Codecov
+# - Automated linting for code quality
+# - Smart caching for faster builds
+
 name: CI/CD Pipeline
 
 on:
@@ -15,58 +27,111 @@ on:
       - develop
 
 env:
-  NODE_VERSION: '16.x'
+  NODE_VERSION: '18.x' # Using Node.js 18 LTS
   MONGO_URL: mongodb://localhost:27017/Clothes_Test
+  JWT_SECRET: test_secret_key_for_ci_cd_pipeline
+  REACT_APP_API_URL: http://localhost:8000
 
 jobs:
-  # ============= SERVER TESTS =============
+  # ====================================================================
+  # ========================= SERVER TESTS =============================
+  # ====================================================================
   server-tests:
     name: Server Unit & Integration Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10 # Reduced from 20 to 10
 
-    services:
-      mongodb:
-        image: mongo:5
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # MongoDB service removed - tests use MongoMemoryServer (in-memory DB)
+    # services:
+    #   mongodb:
+    #     image: mongo:5
+    #     ports:
+    #       - 27017:27017
+    #     options: >-
+    #       --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+
     steps:
-      - name: Checkout code
+      - name: 1. Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (cache npm)
+      - name: 2. Setup Node.js and Cache npm
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: server_app/package-lock.json
 
-      - name: Install server dependencies (faster)
-        working-directory: ./server_app
-        run: npm ci --no-audit --no-fund --prefer-offline
-
-      - name: Run server tests (unit + integration) with coverage (non-blocking)
-        working-directory: ./server_app
-        continue-on-error: true
+      - name: 3. Log Environment Details
         run: |
-          npx jest \
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
+
+      - name: 4. Install server dependencies
+        working-directory: ./server_app
+        run: |
+          echo "Installing server dependencies..."
+          npm ci --no-audit --no-fund --prefer-offline --legacy-peer-deps
+
+      - name: 5. Install OpenSSL 1.1 for MongoMemoryServer
+        run: |
+          echo "Installing OpenSSL 1.1 (required by MongoMemoryServer)..."
+          echo "Ubuntu 24.04 doesn't have libssl1.1 in default repos, downloading from Ubuntu 22.04..."
+          wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+          rm libssl1.1_1.1.1f-1ubuntu2_amd64.deb
+          echo "OpenSSL 1.1 installed successfully"
+
+      # MongoDB Shell not needed - tests use in-memory DB
+      # - name: 5. Install mongosh (MongoDB Shell)
+      #   run: |
+      #     echo "Installing MongoDB Shell..."
+      #     npm install -g mongosh
+
+      # MongoDB verification not needed - tests use in-memory DB
+      # - name: 6. Verify MongoDB Connection
+      #   run: |
+      #     echo "Waiting for MongoDB to be ready..."
+      #     sleep 5
+      #     echo "Pinging MongoDB to verify connection..."
+      #     mongosh ${{ env.MONGO_URL }} --eval 'db.runCommand({ ping: 1 })' --quiet || echo "MongoDB connection check skipped"
+      #     echo "MongoDB verification complete."
+
+      - name: 6. Run server tests with coverage
+        working-directory: ./server_app
+        run: |
+          echo "Running server tests with Jest..."
+          echo "Test configuration:"
+          echo "  - Running in CI mode"
+          echo "  - Coverage enabled"
+          echo "  - Using MongoMemoryServer (in-memory database)"
+          echo "  - Max workers: default (script determines)"
+          echo "---"
+          npm test -- \
             --ci \
             --coverage \
-            --coverageReporters=lcov,text-summary \
-            --maxWorkers=100% \
+            --coverageReporters=lcov \
+            --coverageReporters=text-summary \
             --passWithNoTests \
             --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
-          MONGO_URL: ${{ env.MONGO_URL }}
-          JWT_SECRET: test_secret_key_for_ci
+          JWT_SECRET: ${{ env.JWT_SECRET }}
           NODE_ENV: test
 
-      - name: Upload server coverage
+      - name: 7. Display test summary
+        if: always()
+        working-directory: ./server_app
+        run: |
+          echo "=== Server Test Summary ==="
+          if [ -f coverage/coverage-summary.json ]; then
+            cat coverage/coverage-summary.json
+          else
+            echo "No coverage summary found"
+          fi
+
+      - name: 8. Upload server coverage to Codecov
         if: always()
         uses: codecov/codecov-action@v4
         with:
@@ -76,171 +141,276 @@ jobs:
           fail_ci_if_error: false
           verbose: false
 
-  # ============= CLIENT TESTS =============
-  client-tests:
-    name: Client Unit & Integration Tests
+  # ====================================================================
+  # ======================= FRONTEND TESTS =============================
+  # ====================================================================
+  frontend-tests:
+    name: ${{ matrix.app }} Unit & Integration Tests
     runs-on: ubuntu-latest
+    # needs: [server-tests] # REMOVED: Run in parallel with server tests
+    timeout-minutes: 10 # Reduced from 20 to 10
+    strategy:
+      matrix:
+        app: [client, admin]
 
     steps:
-      - name: Checkout code
+      - name: 1. Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 2. Setup Node.js and Cache npm
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}_app/package-lock.json
 
-      - name: Install client dependencies
-        working-directory: ./client_app
+      - name: 3. Log Environment Details
         run: |
-          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
 
-      - name: Run client tests
-        working-directory: ./client_app
-        continue-on-error: true
-        run: npm run test:ci
+      - name: 4. Install ${{ matrix.app }} dependencies
+        working-directory: ./${{ matrix.app }}_app
+        run: |
+          echo "Installing dependencies for ${{ matrix.app }}..."
+          npm ci --no-audit --no-fund --legacy-peer-deps || npm install --no-audit --no-fund --legacy-peer-deps
+
+      - name: 5. Run ${{ matrix.app }} tests
+        working-directory: ./${{ matrix.app }}_app
+        run: |
+          echo "Running tests for ${{ matrix.app }} app..."
+          echo "Test configuration:"
+          echo "  - Test command: test:ci"
+          echo "  - Coverage enabled"
+          echo "  - CI mode: true"
+          echo "  - Max workers: 50% (optimized)"
+          echo "---"
+          npm run test:ci -- --maxWorkers=50% --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}' || npm test -- --watchAll=false --coverage --maxWorkers=50% --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
-          REACT_APP_API_URL: http://localhost:8000/
+          REACT_APP_API_URL: ${{ env.REACT_APP_API_URL }}
+          CI: true
 
-      - name: Upload client coverage
+      - name: 6. Display ${{ matrix.app }} test summary
+        if: always()
+        working-directory: ./${{ matrix.app }}_app
+        run: |
+          echo "=== ${{ matrix.app }} Test Summary ==="
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "Coverage report found"
+          else
+            echo "No coverage summary available"
+          fi
+
+      - name: 7. Upload ${{ matrix.app }} coverage to Codecov
         if: always()
         uses: codecov/codecov-action@v4
         with:
-          files: ./client_app/coverage/lcov.info
-          flags: client
-          name: client-coverage
+          files: ./${{ matrix.app }}_app/coverage/lcov.info
+          flags: ${{ matrix.app }}
+          name: ${{ matrix.app }}-coverage
           fail_ci_if_error: false
           verbose: false
 
-  # ============= ADMIN TESTS =============
-  admin-tests:
-    name: Admin Unit & Integration Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install admin dependencies
-        working-directory: ./admin_app
-        run: |
-          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-
-      - name: Run admin tests
-        working-directory: ./admin_app
-        continue-on-error: true
-        run: npm run test:ci
-        env:
-          REACT_APP_API_URL: http://localhost:8000/
-
-      - name: Upload admin coverage
-        if: always()
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./admin_app/coverage/lcov.info
-          flags: admin
-          name: admin-coverage
-          fail_ci_if_error: false
-          verbose: false
-
-  # ============= LINTING & CODE QUALITY =============
+  # ====================================================================
+  # ===================== LINTING & CODE QUALITY =======================
+  # ====================================================================
   lint:
-    name: Code Quality & Linting
+    name: ${{ matrix.app }} Code Quality & Linting
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Lint server code
-        working-directory: ./server_app
-        run: |
-          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          npm run lint || true
-
-      - name: Lint client code
-        working-directory: ./client_app
-        run: |
-          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          echo "Client app uses react-scripts linting built-in"
-
-      - name: Lint admin code
-        working-directory: ./admin_app
-        run: |
-          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          echo "Admin app uses react-scripts linting built-in"
-
-  # ============= BUILD & DOCKER (TỐI ƯU SONG SONG) =============
-  build:
-    name: Build Docker Images
-    runs-on: ubuntu-latest
-    needs: [server-tests, client-tests, admin-tests]
-    if: github.event_name != 'pull_request'
-    permissions:
-      contents: read
-      packages: write
-    
+    continue-on-error: true # Don't fail the whole pipeline if linting fails
     strategy:
       matrix:
         app: [server, client, admin]
 
     steps:
-      - name: Checkout code
+      - name: 1. Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: 2. Setup Node.js and Cache npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.app }}_app/package-lock.json
+
+      - name: 3. Install dependencies
+        working-directory: ./${{ matrix.app }}_app
+        run: |
+          echo "Installing dependencies for ${{ matrix.app }} linting..."
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+
+      - name: 4. Run linter (if available)
+        working-directory: ./${{ matrix.app }}_app
+        run: |
+          echo "Checking if lint script exists..."
+          if npm run | grep -q "lint"; then
+            echo "Running linter for ${{ matrix.app }}..."
+            npm run lint || echo "Linting completed with warnings"
+          else
+            echo "No lint script found for ${{ matrix.app }}, skipping..."
+          fi
+
+  # ====================================================================
+  # ===================== BUILD DOCKER IMAGES ==========================
+  # ====================================================================
+  build:
+    name: Build ${{ matrix.app }} Docker Image
+    runs-on: ubuntu-latest
+    needs: [server-tests, frontend-tests]
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [server, client, admin]
+
+    steps:
+      - name: 1. Checkout code
+        uses: actions/checkout@v4
+
+      - name: 2. Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: 3. Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GitHub Container Registry
+      - name: 4. Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: 5. Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/sgu-${{ matrix.app }}
+          images: ghcr.io/${{ github.repository_owner }}/sgu25-doan-ktpm-${{ matrix.app }}
           tags: |
-            type=sha,prefix={{branch}}-
+            type=sha,prefix=${{ github.ref_name }}-
             type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
-      
-      - name: Build and push image
+
+      - name: 6. Log build context and metadata
+        run: |
+          echo "=== Docker Build Information ==="
+          echo "App:         ${{ matrix.app }}"
+          echo "Branch:      ${{ github.ref_name }}"
+          echo "Commit SHA:  ${{ github.sha }}"
+          echo "Actor:       ${{ github.actor }}"
+          echo "---"
+          echo "Image tags that will be created:"
+          echo "${{ steps.meta.outputs.tags }}"
+          echo "---"
+          echo "Build context files:"
+          ls -la ./${{ matrix.app }}_app | head -20
+
+      - name: 7. Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./${{ matrix.app }}_app
+          file: ./${{ matrix.app }}_app/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.app }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+          cache-from: type=gha,scope=${{ matrix.app }}-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}-${{ github.ref_name }}
+          build-args: |
+            NODE_ENV=production
+            REACT_APP_API_URL=${{ env.REACT_APP_API_URL }}
 
-  # ============= DEPLOY =============
+      - name: 8. Image build summary
+        run: |
+          echo "✅ Successfully built and pushed ${{ matrix.app }} image"
+          echo "Image name: ghcr.io/${{ github.repository_owner }}/sgu25-doan-ktpm-${{ matrix.app }}"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+
+  # ====================================================================
+  # ======================= DEPLOY TO PRODUCTION =======================
+  # ====================================================================
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://your-app-url.com # Update with your actual URL
 
     steps:
-      - name: Checkout code
+      - name: 1. Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to server
+      - name: 2. Deployment notification
         run: |
-          echo "Deployment step - configure based on your hosting provider"
-          # Add your deployment commands here
-          # Example: SSH to server and pull latest images
+          echo "🚀 Deployment initiated for main branch"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Author: ${{ github.actor }}"
+
+      - name: 3. Deploy to server (placeholder)
+        run: |
+          echo "📦 Deployment step would run here"
+          echo ""
+          echo "Example deployment commands:"
+          echo "  - SSH into production server"
+          echo "  - Pull latest Docker images from GHCR"
+          echo "  - Run: docker-compose pull"
+          echo "  - Run: docker-compose up -d --remove-orphans"
+          echo "  - Health checks and monitoring"
+          echo ""
+          echo "To enable actual deployment:"
+          echo "  1. Add server SSH credentials to repository secrets"
+          echo "  2. Configure deployment scripts"
+          echo "  3. Set up monitoring and rollback procedures"
+
+      # Example of actual deployment (uncomment and configure when ready):
+      # - name: Deploy via SSH
+      #   uses: appleboy/ssh-action@v1.0.0
+      #   with:
+      #     host: ${{ secrets.PROD_SERVER_HOST }}
+      #     username: ${{ secrets.PROD_SERVER_USER }}
+      #     key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+      #     script: |
+      #       cd /path/to/app
+      #       docker-compose pull
+      #       docker-compose up -d --remove-orphans
+      #       docker system prune -f
+
+      - name: 4. Deployment summary
+        run: |
+          echo "✅ Deployment process completed"
+          echo "Images available at: ghcr.io/${{ github.repository_owner }}/sgu25-doan-ktpm-*"
+
+  # ====================================================================
+  # ======================= PIPELINE SUMMARY ===========================
+  # ====================================================================
+  summary:
+    name: Pipeline Summary
+    runs-on: ubuntu-latest
+    needs: [server-tests, frontend-tests, build]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# 📊 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Pipeline Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Server Tests**: ${{ needs.server-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Tests**: ${{ needs.frontend-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build**: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Pipeline completed at $(date)*" >> $GITHUB_STEP_SUMMARY

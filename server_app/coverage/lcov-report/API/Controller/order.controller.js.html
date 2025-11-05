@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/67</span>
+                <span class='fraction'>0/66</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/66</span>
+                <span class='fraction'>0/65</span>
             </div>
         
             
@@ -305,13 +305,9 @@
 <a name='L240'></a><a href='#L240'>240</a>
 <a name='L241'></a><a href='#L241'>241</a>
 <a name='L242'></a><a href='#L242'>242</a>
-<a name='L243'></a><a href='#L243'>243</a>
-<a name='L244'></a><a href='#L244'>244</a>
-<a name='L245'></a><a href='#L245'>245</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L243'></a><a href='#L243'>243</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -551,33 +547,31 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
-const mailer = <span class="cstat-no" title="statement not covered" >require('../../mailer')</span>
-const crypto = <span class="cstat-no" title="statement not covered" >require('crypto')</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const mailer = <span class="cstat-no" title="statement not covered" >require('../../mailer');</span>
+const crypto = <span class="cstat-no" title="statement not covered" >require('crypto');</span>
 &nbsp;
-const Order = <span class="cstat-no" title="statement not covered" >require('../../Models/order')</span>
-const Detail_Order = <span class="cstat-no" title="statement not covered" >require('../../Models/detail_order')</span>
-const Note = <span class="cstat-no" title="statement not covered" >require('../../Models/note')</span>
-const Payment = <span class="cstat-no" title="statement not covered" >require('../../Models/payment')</span>
+const Order = <span class="cstat-no" title="statement not covered" >require('../../Models/order');</span>
+const Detail_Order = <span class="cstat-no" title="statement not covered" >require('../../Models/detail_order');</span>
+const Payment = <span class="cstat-no" title="statement not covered" >require('../../Models/payment');</span>
 &nbsp;
 // Đặt hàng
 <span class="cstat-no" title="statement not covered" >module.exports.post_order = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const order = <span class="cstat-no" title="statement not covered" >await Order.create(req.body)</span>
+    const order = <span class="cstat-no" title="statement not covered" >await Order.create(req.body);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(order)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(order);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.send_mail = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const carts = <span class="cstat-no" title="statement not covered" >await Detail_Order.find({ id_order: req.body.id_order }).populate('id_product')</span>
+    const carts = <span class="cstat-no" title="statement not covered" >await Detail_Order.find({ id_order: req.body.id_order }).populate('id_product');</span>
 &nbsp;
     //B3: Bắt đầu gửi Mail xác nhận đơn hàng
     const htmlHead = <span class="cstat-no" title="statement not covered" >'&lt;table style="width:50%"&gt;' +</span>
-        '&lt;tr style="border: 1px solid black;"&gt;&lt;th style="border: 1px solid black;"&gt;Tên Sản Phẩm&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Hình Ảnh&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Giá&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Số Lượng&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Size&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Thành Tiền&lt;/th&gt;'
+        '&lt;tr style="border: 1px solid black;"&gt;&lt;th style="border: 1px solid black;"&gt;Tên Sản Phẩm&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Hình Ảnh&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Giá&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Số Lượng&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Size&lt;/th&gt;&lt;th style="border: 1px solid black;"&gt;Thành Tiền&lt;/th&gt;';
 &nbsp;
-    let htmlContent = <span class="cstat-no" title="statement not covered" >""</span>
+    let htmlContent = <span class="cstat-no" title="statement not covered" >'';</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    for (let i = <span class="cstat-no" title="statement not covered" >0;</span> i &lt; carts.length; i++) {</span>
 <span class="cstat-no" title="statement not covered" >        htmlContent += '&lt;tr&gt;' +</span>
@@ -587,74 +581,74 @@ const Payment = <span class="cstat-no" title="statement not covered" >require('.
             '&lt;td style="border: 1px solid black; font-size: 1.2rem; text-align: center;"&gt;' + carts[i].count + '&lt;/td&gt;' +
             '&lt;td style="border: 1px solid black; font-size: 1.2rem; text-align: center;"&gt;' + carts[i].size + '&lt;/td&gt;' +
             '&lt;td style="border: 1px solid black; font-size: 1.2rem; text-align: center;"&gt;' + (parseInt(carts[i].id_product.price_product) * parseInt(carts[i].count)) + '$&lt;/td&gt;' +
-            '&lt;tr&gt;'
+            '&lt;/tr&gt;';
     }
 &nbsp;
     const htmlResult = <span class="cstat-no" title="statement not covered" >'&lt;h1&gt;Xin Chào ' + req.body.fullname + '&lt;/h1&gt;' + '&lt;h3&gt;Phone: ' + req.body.phone + '&lt;/h3&gt;' + '&lt;h3&gt;Address:' + req.body.address + '&lt;/h3&gt;' +</span>
-        htmlHead + htmlContent + '&lt;h1&gt;Phí Vận Chuyển: ' + req.body.price + '$&lt;/h1&gt;&lt;/br&gt;' + '&lt;h1&gt;Tổng Thanh Toán: ' + req.body.total + '$&lt;/h1&gt;&lt;/br&gt;' + '&lt;p&gt;Cảm ơn bạn!&lt;/p&gt;'
+        htmlHead + htmlContent + '&lt;/table&gt;&lt;h1&gt;Phí Vận Chuyển: ' + req.body.price + '$&lt;/h1&gt;&lt;/br&gt;' + '&lt;h1&gt;Tổng Thanh Toán: ' + req.body.total + '$&lt;/h1&gt;&lt;/br&gt;' + '&lt;p&gt;Cảm ơn bạn!&lt;/p&gt;';
 &nbsp;
     // Thực hiện gửi email (to, subject, htmlContent)
-<span class="cstat-no" title="statement not covered" >    await mailer.sendMail(req.body.email, 'Hóa Đơn Đặt Hàng', htmlResult)</span>
+<span class="cstat-no" title="statement not covered" >    await mailer.sendMail(req.body.email, 'Hóa Đơn Đặt Hàng', htmlResult);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.send("Gui Email Thanh Cong")</span>
+<span class="cstat-no" title="statement not covered" >    res.send('Gui Email Thanh Cong');</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.get_order = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id_user = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id_user = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-    const order = <span class="cstat-no" title="statement not covered" >await Order.find({ id_user }).populate(['id_user', 'id_note'])</span>
+    const order = <span class="cstat-no" title="statement not covered" >await Order.find({ id_user }).populate(['id_user', 'id_note']);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(order)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(order);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.get_detail = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id_order = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id_order = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-    const order = <span class="cstat-no" title="statement not covered" >await Order.findOne({ _id: id_order }).populate(['id_user', 'id_note', 'id_payment'])</span>
+    const order = <span class="cstat-no" title="statement not covered" >await Order.findOne({ _id: id_order }).populate(['id_user', 'id_note', 'id_payment']);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(order)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(order);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.post_momo = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const serectkey = <span class="cstat-no" title="statement not covered" >"uLb683H8g9dWuiyipZbLHgO6zjSDlVm5"</span>
-    const accessKey = <span class="cstat-no" title="statement not covered" >req.body.accessKey</span>
-    const amount = <span class="cstat-no" title="statement not covered" >req.body.amount</span>
-    const extraData = <span class="cstat-no" title="statement not covered" >req.body.extraData</span>
-    const errorCode = <span class="cstat-no" title="statement not covered" >req.body.errorCode</span>
-    const localMessage = <span class="cstat-no" title="statement not covered" >req.body.localMessage</span>
-    const message = <span class="cstat-no" title="statement not covered" >req.body.message</span>
-    const orderId = <span class="cstat-no" title="statement not covered" >req.body.orderId</span>
-    const orderInfo = <span class="cstat-no" title="statement not covered" >req.body.orderInfo</span>
-    const orderType = <span class="cstat-no" title="statement not covered" >req.body.orderType</span>
-    const partnerCode = <span class="cstat-no" title="statement not covered" >req.body.partnerCode</span>
-    const payType = <span class="cstat-no" title="statement not covered" >req.body.payType</span>
-    const requestId = <span class="cstat-no" title="statement not covered" >req.body.requestId</span>
-    const responseTime = <span class="cstat-no" title="statement not covered" >req.body.responseTime</span>
-    const transId = <span class="cstat-no" title="statement not covered" >req.body.transId</span>
+    const serectkey = <span class="cstat-no" title="statement not covered" >'uLb683H8g9dWuiyipZbLHgO6zjSDlVm5';</span>
+    const accessKey = <span class="cstat-no" title="statement not covered" >req.body.accessKey;</span>
+    const amount = <span class="cstat-no" title="statement not covered" >req.body.amount;</span>
+    const extraData = <span class="cstat-no" title="statement not covered" >req.body.extraData;</span>
+    const errorCode = <span class="cstat-no" title="statement not covered" >req.body.errorCode;</span>
+    const localMessage = <span class="cstat-no" title="statement not covered" >req.body.localMessage;</span>
+    const message = <span class="cstat-no" title="statement not covered" >req.body.message;</span>
+    const orderId = <span class="cstat-no" title="statement not covered" >req.body.orderId;</span>
+    const orderInfo = <span class="cstat-no" title="statement not covered" >req.body.orderInfo;</span>
+    const orderType = <span class="cstat-no" title="statement not covered" >req.body.orderType;</span>
+    const partnerCode = <span class="cstat-no" title="statement not covered" >req.body.partnerCode;</span>
+    const payType = <span class="cstat-no" title="statement not covered" >req.body.payType;</span>
+    const requestId = <span class="cstat-no" title="statement not covered" >req.body.requestId;</span>
+    const responseTime = <span class="cstat-no" title="statement not covered" >req.body.responseTime;</span>
+    const transId = <span class="cstat-no" title="statement not covered" >req.body.transId;</span>
 &nbsp;
-    let param = <span class="cstat-no" title="statement not covered" >`partnerCode=${partnerCode}&amp;accessKey=${accessKey}&amp;requestId=${requestId}&amp;amount=${amount}&amp;orderId=${orderId}&amp;orderInfo=${orderInfo}&amp;orderType=${orderType}&amp;transId=${transId}&amp;message=${message}&amp;localMessage=${localMessage}&amp;responseTime=${responseTime}&amp;errorCode=${errorCode}&amp;payType=${payType}&amp;extraData=${extraData}`</span>
+    let param = <span class="cstat-no" title="statement not covered" >`partnerCode=${partnerCode}&amp;accessKey=${accessKey}&amp;requestId=${requestId}&amp;amount=${amount}&amp;orderId=${orderId}&amp;orderInfo=${orderInfo}&amp;orderType=${orderType}&amp;transId=${transId}&amp;message=${message}&amp;localMessage=${localMessage}&amp;responseTime=${responseTime}&amp;errorCode=${errorCode}&amp;payType=${payType}&amp;extraData=${extraData}`;</span>
 &nbsp;
     var signature = <span class="cstat-no" title="statement not covered" >crypto.createHmac('sha256', serectkey)</span>
         .update(param)
         .digest('hex');
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (req.body.signature !== signature) {</span>
-<span class="cstat-no" title="statement not covered" >        res.send("Thông tin request không hợp lệ")</span>
+<span class="cstat-no" title="statement not covered" >        res.send('Thông tin request không hợp lệ');</span>
 <span class="cstat-no" title="statement not covered" >        return;</span>
     }
 <span class="cstat-no" title="statement not covered" >    if (errorCode == 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.send("Thanh Cong")</span>
+<span class="cstat-no" title="statement not covered" >        res.send('Thanh Cong');</span>
     } else {
-<span class="cstat-no" title="statement not covered" >        res.send("Thanh toán thất bại")</span>
+<span class="cstat-no" title="statement not covered" >        res.send('Thanh toán thất bại');</span>
     }
 &nbsp;
-}
+};
 &nbsp;
 &nbsp;
 &nbsp;
@@ -744,9 +738,9 @@ const Payment = <span class="cstat-no" title="statement not covered" >require('.
 //         }
 //     });
 &nbsp;
-//     res.send("Thanh Cong")
+//     res.send("Thanh Cong");
 &nbsp;
-// }
+// };
 &nbsp;
 // Get payment methods
 <span class="cstat-no" title="statement not covered" >module.exports.get_payments = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
@@ -756,7 +750,7 @@ const Payment = <span class="cstat-no" title="statement not covered" >require('.
     } catch (error) {
 <span class="cstat-no" title="statement not covered" >        res.status(500).json({ error: error.message });</span>
     }
-}
+};
 &nbsp;
 // Clean invalid stripe orders
 <span class="cstat-no" title="statement not covered" >module.exports.clean_invalid_orders = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
@@ -776,7 +770,7 @@ const Payment = <span class="cstat-no" title="statement not covered" >require('.
     } catch (error) {
 <span class="cstat-no" title="statement not covered" >        res.status(500).json({ error: error.message });</span>
     }
-}
+};
 &nbsp;
 // Clear all test data - xóa tất cả lịch sử đơn hàng
 <span class="cstat-no" title="statement not covered" >module.exports.clear_all_orders = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
@@ -795,14 +789,14 @@ const Payment = <span class="cstat-no" title="statement not covered" >require('.
     } catch (error) {
 <span class="cstat-no" title="statement not covered" >        res.status(500).json({ error: error.message });</span>
     }
-}</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-30T08:18:08.211Z
+                at 2025-11-05T17:56:25.249Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
