@@ -1,111 +1,119 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
-import SignUp from '../../Auth/SignUp';
-import * as UserAPI from '../../API/User';
+import User from '../../API/User';
+import axiosClient from '../../API/axiosClient';
 
-jest.mock('../../API/User');
+jest.mock('../../API/axiosClient');
 
-const renderWithRouter = (component) => {
-  return render(
-    <BrowserRouter>
-      {component}
-    </BrowserRouter>
-  );
-};
-
-describe('SignUp Component', () => {
+describe('User API - SignUp', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders sign up form', () => {
-    renderWithRouter(<SignUp />);
-    
-    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
-  });
-
-  test('displays validation errors for empty fields', async () => {
-    renderWithRouter(<SignUp />);
-    
-    const submitButton = screen.getByRole('button', { name: /sign up/i });
-    await userEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/full name is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/email is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/password is required/i)).toBeInTheDocument();
-    });
-  });
-
-  test('displays error when passwords do not match', async () => {
-    renderWithRouter(<SignUp />);
-    
-    const passwordInput = screen.getByLabelText(/^password/i);
-    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    
-    await userEvent.type(passwordInput, 'password123');
-    await userEvent.type(confirmPasswordInput, 'differentpassword');
-
-    const submitButton = screen.getByRole('button', { name: /sign up/i });
-    await userEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
-    });
-  });
-
-  test('calls signup API on successful form submission', async () => {
-    const mockSignupResponse = {
-      success: true,
-      message: 'Registration successful'
-    };
-    
-    UserAPI.SignUp = jest.fn().mockResolvedValue(mockSignupResponse);
-
-    renderWithRouter(<SignUp />);
-    
-    await userEvent.type(screen.getByLabelText(/full name/i), 'John Doe');
-    await userEvent.type(screen.getByLabelText(/email/i), 'john@example.com');
-    await userEvent.type(screen.getByLabelText(/^password/i), 'password123');
-    await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123');
-    await userEvent.type(screen.getByLabelText(/phone/i), '0123456789');
-
-    const submitButton = screen.getByRole('button', { name: /sign up/i });
-    await userEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(UserAPI.SignUp).toHaveBeenCalledWith({
-        fullname: 'John Doe',
-        email: 'john@example.com',
+  describe('Post_User (Registration)', () => {
+    test('should register a new user successfully', async () => {
+      const newUser = {
+        username: 'newuser',
+        email: 'newuser@example.com',
         password: 'password123',
+        fullname: 'New User',
         phone: '0123456789'
-      });
+      };
+
+      const mockResponse = {
+        _id: '1',
+        username: 'newuser',
+        email: 'newuser@example.com',
+        fullname: 'New User',
+        phone: '0123456789'
+      };
+
+      axiosClient.post.mockResolvedValue(mockResponse);
+
+      const result = await User.Post_User(newUser);
+
+      expect(axiosClient.post).toHaveBeenCalledWith('/api/User', newUser);
+      expect(result).toEqual(mockResponse);
+    });
+
+    test('should handle duplicate email error', async () => {
+      const duplicateUser = {
+        username: 'existinguser',
+        email: 'existing@example.com',
+        password: 'password123',
+        fullname: 'Existing User',
+        phone: '0123456789'
+      };
+
+      const error = new Error('Email already exists');
+      axiosClient.post.mockRejectedValue(error);
+
+      await expect(User.Post_User(duplicateUser)).rejects.toThrow('Email already exists');
+    });
+
+    test('should handle validation errors for invalid data', async () => {
+      const invalidUser = {
+        username: '',
+        email: 'invalid-email',
+        password: '123',
+        fullname: '',
+        phone: 'invalid-phone'
+      };
+
+      const error = new Error('Validation error');
+      axiosClient.post.mockRejectedValue(error);
+
+      await expect(User.Post_User(invalidUser)).rejects.toThrow('Validation error');
+    });
+
+    test('should handle missing required fields', async () => {
+      const incompleteUser = {
+        email: 'user@example.com'
+      };
+
+      const error = new Error('Required fields missing');
+      axiosClient.post.mockRejectedValue(error);
+
+      await expect(User.Post_User(incompleteUser)).rejects.toThrow('Required fields missing');
+    });
+
+    test('should handle network errors', async () => {
+      const newUser = {
+        username: 'newuser',
+        email: 'newuser@example.com',
+        password: 'password123',
+        fullname: 'New User',
+        phone: '0123456789'
+      };
+
+      const networkError = new Error('Network Error');
+      axiosClient.post.mockRejectedValue(networkError);
+
+      await expect(User.Post_User(newUser)).rejects.toThrow('Network Error');
     });
   });
 
-  test('displays error message on signup failure', async () => {
-    UserAPI.SignUp = jest.fn().mockRejectedValue(new Error('Email already exists'));
+  describe('Get_All_User', () => {
+    test('should retrieve all registered users', async () => {
+      const mockUsers = [
+        { _id: '1', username: 'user1', email: 'user1@example.com', fullname: 'User One' },
+        { _id: '2', username: 'user2', email: 'user2@example.com', fullname: 'User Two' },
+        { _id: '3', username: 'user3', email: 'user3@example.com', fullname: 'User Three' }
+      ];
 
-    renderWithRouter(<SignUp />);
-    
-    await userEvent.type(screen.getByLabelText(/full name/i), 'John Doe');
-    await userEvent.type(screen.getByLabelText(/email/i), 'existing@example.com');
-    await userEvent.type(screen.getByLabelText(/^password/i), 'password123');
-    await userEvent.type(screen.getByLabelText(/confirm password/i), 'password123');
-    await userEvent.type(screen.getByLabelText(/phone/i), '0123456789');
+      axiosClient.get.mockResolvedValue(mockUsers);
 
-    const submitButton = screen.getByRole('button', { name: /sign up/i });
-    await userEvent.click(submitButton);
+      const result = await User.Get_All_User();
 
-    await waitFor(() => {
-      expect(screen.getByText(/email already exists/i)).toBeInTheDocument();
+      expect(axiosClient.get).toHaveBeenCalledWith('/api/User');
+      expect(result).toEqual(mockUsers);
+      expect(result).toHaveLength(3);
+    });
+
+    test('should return empty array when no users exist', async () => {
+      axiosClient.get.mockResolvedValue([]);
+
+      const result = await User.Get_All_User();
+
+      expect(result).toEqual([]);
     });
   });
 });

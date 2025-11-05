@@ -315,7 +315,7 @@ app.use('/api/admin/Sale', Sale);
 
 // Stripe API routes
 const StripeAPI = require('./API/Router/stripe.router');
-app.use('/api/stripe', StripeAPI)
+app.use('/api/stripe', StripeAPI);
 
 
 io.on('connection', (socket) => {

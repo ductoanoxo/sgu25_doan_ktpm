@@ -1,5 +1,5 @@
 import axiosClient from '../../API/axiosClient';
-import * as ProductAPI from '../../API/Product';
+import Product from '../../API/Product';
 
 jest.mock('../../API/axiosClient');
 
@@ -8,16 +8,20 @@ describe('Product API', () => {
     {
       _id: '1',
       name_product: 'Product 1',
-      price_product: 100000,
-      count_product: 10,
-      img1: 'img1.jpg'
+      price_product: '100000',
+      image: 'img1.jpg',
+      describe: 'Description 1',
+      gender: 'male',
+      id_category: 'cat1'
     },
     {
       _id: '2',
       name_product: 'Product 2',
-      price_product: 200000,
-      count_product: 5,
-      img2: 'img2.jpg'
+      price_product: '200000',
+      image: 'img2.jpg',
+      describe: 'Description 2',
+      gender: 'female',
+      id_category: 'cat2'
     }
   ];
 
@@ -25,13 +29,13 @@ describe('Product API', () => {
     jest.clearAllMocks();
   });
 
-  describe('getProducts', () => {
+  describe('Get_All_Product', () => {
     test('fetches all products successfully', async () => {
       axiosClient.get.mockResolvedValue(mockProducts);
       
-      const products = await ProductAPI.getProducts();
+      const products = await Product.Get_All_Product();
       
-      expect(axiosClient.get).toHaveBeenCalledWith('/products');
+      expect(axiosClient.get).toHaveBeenCalledWith('/api/Product');
       expect(products).toEqual(mockProducts);
     });
 
@@ -39,92 +43,79 @@ describe('Product API', () => {
       const errorMessage = 'Network Error';
       axiosClient.get.mockRejectedValue(new Error(errorMessage));
       
-      await expect(ProductAPI.getProducts()).rejects.toThrow(errorMessage);
+      await expect(Product.Get_All_Product()).rejects.toThrow(errorMessage);
     });
   });
 
-  describe('getProductById', () => {
+  describe('Get_Detail_Product', () => {
     test('fetches product by id successfully', async () => {
       const mockProduct = mockProducts[0];
       axiosClient.get.mockResolvedValue(mockProduct);
       
-      const product = await ProductAPI.getProductById('1');
+      const product = await Product.Get_Detail_Product('1');
       
-      expect(axiosClient.get).toHaveBeenCalledWith('/products/1');
+      expect(axiosClient.get).toHaveBeenCalledWith('/api/Product/1');
       expect(product).toEqual(mockProduct);
     });
 
     test('handles error when product not found', async () => {
-        axiosClient.get.mockRejectedValue(new Error('Product not found'));
+      axiosClient.get.mockRejectedValue(new Error('Product not found'));
       
-      await expect(ProductAPI.getProductById('999')).rejects.toThrow('Product not found');
+      await expect(Product.Get_Detail_Product('999')).rejects.toThrow('Product not found');
     });
   });
 
-  describe('searchProducts', () => {
-    test('searches products by keyword successfully', async () => {
-      const searchResults = [mockProducts[0]];
-      axiosClient.get.mockResolvedValue(searchResults);
+  describe('Get_Category_Product', () => {
+    test('fetches products by category successfully', async () => {
+      axiosClient.get.mockResolvedValue(mockProducts);
       
-      const results = await ProductAPI.searchProducts('Product 1');
+      const products = await Product.Get_Category_Product('?category=cat1');
       
-      expect(axiosClient.get).toHaveBeenCalledWith('/products/search/Product 1');
-      expect(results).toEqual(searchResults);
+      expect(axiosClient.get).toHaveBeenCalledWith('/api/Product/category?category=cat1');
+      expect(products).toEqual(mockProducts);
     });
 
     test('returns empty array when no results found', async () => {
-        axiosClient.get.mockResolvedValue([]);
+      axiosClient.get.mockResolvedValue([]);
       
-      const results = await ProductAPI.searchProducts('NonexistentProduct');
+      const results = await Product.Get_Category_Product('?category=nonexistent');
       
       expect(results).toEqual([]);
     });
   });
 
-  describe('getProductsByCategory', () => {
-    test('fetches products by category successfully', async () => {
-        axiosClient.get.mockResolvedValue(mockProducts);
+  describe('Get_Category_Gender', () => {
+    test('fetches products by gender successfully', async () => {
+      const maleProducts = [mockProducts[0]];
+      axiosClient.get.mockResolvedValue(maleProducts);
       
-      const products = await ProductAPI.getProductsByCategory('category1');
+      const products = await Product.Get_Category_Gender('?gender=male');
       
-      expect(axiosClient.get).toHaveBeenCalledWith('/products/category/category1');
-      expect(products).toEqual(mockProducts);
+      expect(axiosClient.get).toHaveBeenCalledWith('/api/Product/category/gender?gender=male');
+      expect(products).toEqual(maleProducts);
     });
   });
 
-  describe('createProduct', () => {
-    test('creates a new product successfully', async () => {
-      const newProduct = { name: 'New Product', price: 150 };
-      axiosClient.post.mockResolvedValue(newProduct);
+  describe('Get_Pagination', () => {
+    test('fetches paginated products successfully', async () => {
+      axiosClient.get.mockResolvedValue({ products: mockProducts, totalPages: 5 });
 
-      const result = await ProductAPI.createProduct(newProduct);
+      const result = await Product.Get_Pagination('?page=1&limit=10');
 
-      expect(axiosClient.post).toHaveBeenCalledWith('/products', newProduct);
-      expect(result).toEqual(newProduct);
+      expect(axiosClient.get).toHaveBeenCalledWith('/api/Product/category/pagination?page=1&limit=10');
+      expect(result).toEqual({ products: mockProducts, totalPages: 5 });
     });
   });
 
-  describe('updateProduct', () => {
-    test('updates a product successfully', async () => {
-      const updatedProduct = { name: 'Updated Product', price: 200 };
-      axiosClient.put.mockResolvedValue(updatedProduct);
+  describe('get_search_list', () => {
+    test('searches products successfully', async () => {
+      const searchResults = [mockProducts[0]];
+      axiosClient.get.mockResolvedValue(searchResults);
 
-      const result = await ProductAPI.updateProduct('1', updatedProduct);
+      const result = await Product.get_search_list('?search=Product 1');
 
-      expect(axiosClient.put).toHaveBeenCalledWith('/products/1', updatedProduct);
-      expect(result).toEqual(updatedProduct);
-    });
-  });
-
-  describe('deleteProduct', () => {
-    test('deletes a product successfully', async () => {
-      const deleteResponse = { message: 'Product deleted' };
-      axiosClient.delete.mockResolvedValue(deleteResponse);
-
-      const result = await ProductAPI.deleteProduct('1');
-
-      expect(axiosClient.delete).toHaveBeenCalledWith('/products/1');
-      expect(result).toEqual(deleteResponse);
+      expect(axiosClient.get).toHaveBeenCalledWith('/api/Product/scoll/page?search=Product 1');
+      expect(result).toEqual(searchResults);
     });
   });
 });

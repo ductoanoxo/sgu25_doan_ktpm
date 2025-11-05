@@ -11,24 +11,24 @@ describe('Product API', () => {
 
   describe('getAPI', () => {
     test('should call GET request with query params', async () => {
-      const mockResponse = { data: [{ id: '1', name: 'Product 1' }] };
-      axiosClient.get.mockResolvedValue(mockResponse);
+      const mockData = [{ id: '1', name: 'Product 1' }];
+      axiosClient.get.mockResolvedValue(mockData);
 
       const query = '?page=1&limit=10';
       const result = await productAPI.getAPI(query);
 
       expect(axiosClient.get).toHaveBeenCalledWith(`/admin/product${query}`);
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(mockData);
     });
 
     test('should call GET request without query params', async () => {
-      const mockResponse = { data: [] };
-      axiosClient.get.mockResolvedValue(mockResponse);
+      const mockData = [];
+      axiosClient.get.mockResolvedValue(mockData);
 
       const result = await productAPI.getAPI('');
 
       expect(axiosClient.get).toHaveBeenCalledWith('/admin/product');
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(mockData);
     });
 
     test('should handle API errors', async () => {
@@ -46,21 +46,21 @@ describe('Product API', () => {
         name: 'Test Product', 
         price: 100000 
       };
-      axiosClient.get.mockResolvedValue({ data: mockProduct });
+      axiosClient.get.mockResolvedValue(mockProduct);
 
       const result = await productAPI.details('123');
 
       expect(axiosClient.get).toHaveBeenCalledWith('/admin/product/123');
-      expect(result.data).toEqual(mockProduct);
+      expect(result).toEqual(mockProduct);
     });
 
     test('should handle non-existent product', async () => {
-      axiosClient.get.mockResolvedValue({ data: null });
+      axiosClient.get.mockResolvedValue(null);
 
       const result = await productAPI.details('999');
 
       expect(axiosClient.get).toHaveBeenCalledWith('/admin/product/999');
-      expect(result.data).toBeNull();
+      expect(result).toBeNull();
     });
   });
 
@@ -74,7 +74,8 @@ describe('Product API', () => {
       };
       
       const mockResponse = { 
-        data: { id: '456', ...newProduct },
+        id: '456', 
+        ...newProduct,
         message: 'Product created successfully'
       };
       
@@ -105,7 +106,7 @@ describe('Product API', () => {
       };
       
       const mockResponse = { 
-        data: updateData,
+        ...updateData,
         message: 'Product updated successfully'
       };
       
@@ -158,22 +159,22 @@ describe('Product API', () => {
         { id: '3', name: 'Product 3', price: 300000 }
       ];
       
-      axiosClient.get.mockResolvedValue({ data: mockProducts });
+      axiosClient.get.mockResolvedValue(mockProducts);
 
       const result = await productAPI.getAll();
 
       expect(axiosClient.get).toHaveBeenCalledWith('/product');
-      expect(result.data).toEqual(mockProducts);
-      expect(result.data).toHaveLength(3);
+      expect(result).toEqual(mockProducts);
+      expect(result).toHaveLength(3);
     });
 
     test('should return empty array when no products', async () => {
-      axiosClient.get.mockResolvedValue({ data: [] });
+      axiosClient.get.mockResolvedValue([]);
 
       const result = await productAPI.getAll();
 
       expect(axiosClient.get).toHaveBeenCalledWith('/product');
-      expect(result.data).toEqual([]);
+      expect(result).toEqual([]);
     });
   });
 
