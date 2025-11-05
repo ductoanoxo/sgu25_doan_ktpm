@@ -10,7 +10,7 @@ describe('Order Model Unit Tests', () => {
   let testNote;
   let testCoupon;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // Tạo dữ liệu liên quan
     testUser = await Users.create({
       username: 'orderuser',
@@ -36,7 +36,15 @@ describe('Order Model Unit Tests', () => {
     });
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
+    await Order.deleteMany({});
+    await Users.deleteMany({});
+    await Payment.deleteMany({});
+    await Note.deleteMany({});
+    await Coupon.deleteMany({});
+  });
+
+  beforeEach(async () => {
     await Order.deleteMany({});
   });
 

@@ -26,19 +26,15 @@ describe('User API Integration Tests', () => {
   let adminPermission;
   let testUser;
 
-  beforeAll(async () => {
-    // Tạo permission
+  beforeEach(async () => {
     adminPermission = await Permission.create({ permission: 'Admin' });
   });
 
   beforeEach(async () => {
-    // Xóa users trước mỗi test
+    // Xóa và tạo lại user chính trước mỗi test để đảm bảo sự cô lập
     await Users.deleteMany({});
-    
-    // Tạo test user với bcrypt
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash('testpassword123', salt);
-    
     testUser = await Users.create({
       username: 'testuser',
       password: hashedPassword,
@@ -48,6 +44,11 @@ describe('User API Integration Tests', () => {
       gender: 'Nam',
       id_permission: adminPermission._id
     });
+  });
+
+  afterAll(async () => {
+    await Users.deleteMany({});
+    await Permission.deleteMany({});
   });
 
   describe('GET /api/user', () => {

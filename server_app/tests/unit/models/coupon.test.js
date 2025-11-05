@@ -1,7 +1,7 @@
 const Coupon = require('../../../Models/coupon');
 
 describe('Coupon Model Unit Tests', () => {
-  afterEach(async () => {
+  afterAll(async () => {
     await Coupon.deleteMany({});
   });
 

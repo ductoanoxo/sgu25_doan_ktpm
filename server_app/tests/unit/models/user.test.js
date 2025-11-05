@@ -1,6 +1,9 @@
 const User = require('../../../Models/user');
 
 describe('User Model Unit Tests', () => {
+  afterAll(async () => {
+    await User.deleteMany({});
+  });
   describe('User Creation', () => {
     test('should create a valid user', async () => {
       const validUser = {

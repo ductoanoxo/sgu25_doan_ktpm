@@ -22,44 +22,44 @@ app.use('/api/product', productRouter);
 
 describe('Product API Integration Tests', () => {
   let testCategory;
-  let testProducts;
+  let testProducts; // Add this variable
+  const testProductsData = [
+    {
+      name_product: 'Áo Thun Nam',
+      price_product: '199000',
+      image: 'aothunnam.jpg',
+      describe: 'Áo thun cotton cao cấp',
+      gender: 'Nam'
+    },
+    {
+      name_product: 'Áo Sơ Mi Nữ',
+      price_product: '299000',
+      image: 'aosominu.jpg',
+      describe: 'Áo sơ mi công sở',
+      gender: 'Nữ'
+    },
+    {
+      name_product: 'Áo Polo Unisex',
+      price_product: '249000',
+      image: 'aopolo.jpg',
+      describe: 'Áo polo thể thao',
+      gender: 'Unisex'
+    }
+  ];
 
-  beforeAll(async () => {
-    // Tạo category
+  beforeEach(async () => {
     testCategory = await Category.create({ category: 'Áo' });
   });
 
   beforeEach(async () => {
-    // Xóa products trước mỗi test
+    // Xóa và tạo lại products trước mỗi test để đảm bảo sự cô lập
     await Products.deleteMany({});
-    
-    // Tạo test products
-    testProducts = await Products.create([
-      {
-        id_category: testCategory._id,
-        name_product: 'Áo Thun Nam',
-        price_product: '199000',
-        image: 'aothunnam.jpg',
-        describe: 'Áo thun cotton cao cấp',
-        gender: 'Nam'
-      },
-      {
-        id_category: testCategory._id,
-        name_product: 'Áo Sơ Mi Nữ',
-        price_product: '299000',
-        image: 'aosominu.jpg',
-        describe: 'Áo sơ mi công sở',
-        gender: 'Nữ'
-      },
-      {
-        id_category: testCategory._id,
-        name_product: 'Áo Polo Unisex',
-        price_product: '249000',
-        image: 'aopolo.jpg',
-        describe: 'Áo polo thể thao',
-        gender: 'Unisex'
-      }
-    ]);
+    testProducts = await Products.create(testProductsData.map(p => ({ ...p, id_category: testCategory._id })));
+  });
+
+  afterAll(async () => {
+    await Products.deleteMany({});
+    await Category.deleteMany({});
   });
 
   describe('GET /api/product', () => {

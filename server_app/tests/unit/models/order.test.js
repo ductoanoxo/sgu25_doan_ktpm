@@ -13,6 +13,15 @@ describe('Order Model Unit Tests', () => {
     });
   });
 
+  afterAll(async () => {
+    await Order.deleteMany({});
+    await User.deleteMany({});
+  });
+
+  beforeEach(async () => {
+    await Order.deleteMany({});
+  });
+
   describe('Order Creation', () => {
     test('should create a valid order', async () => {
       const validOrder = {

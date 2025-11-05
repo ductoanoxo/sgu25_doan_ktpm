@@ -10,6 +10,11 @@ describe('Product Model Unit Tests', () => {
     });
   });
 
+  afterAll(async () => {
+    await Product.deleteMany({});
+    await Category.deleteMany({});
+  });
+
   describe('Product Creation', () => {
     test('should create a valid product', async () => {
       const validProduct = {

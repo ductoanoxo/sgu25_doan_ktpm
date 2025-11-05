@@ -1,7 +1,7 @@
 const Category = require('../../../Models/category');
 
 describe('Category Model Unit Tests', () => {
-  afterEach(async () => {
+  afterAll(async () => {
     await Category.deleteMany({});
   });
 

@@ -16,11 +16,13 @@ beforeAll(async () => {
   }
 });
 
-// Cleanup after each test
+// Clean up database after each test to prevent data pollution
 afterEach(async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    await collections[key].deleteMany();
+  if (mongoose.connection.readyState === 1) {
+    const collections = mongoose.connection.collections;
+    for (const key in collections) {
+      await collections[key].deleteMany({});
+    }
   }
 });
 

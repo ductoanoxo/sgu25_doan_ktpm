@@ -7,7 +7,7 @@ describe('Comment Model Unit Tests', () => {
   let testProduct;
   let testUser;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     // Tạo category
     const category = await Category.create({ category: 'Áo' });
     
@@ -29,7 +29,14 @@ describe('Comment Model Unit Tests', () => {
     });
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
+    await Comment.deleteMany({});
+    await Products.deleteMany({});
+    await Users.deleteMany({});
+    await Category.deleteMany({});
+  });
+
+  beforeEach(async () => {
     await Comment.deleteMany({});
   });
 

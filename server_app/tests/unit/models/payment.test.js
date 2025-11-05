@@ -1,7 +1,7 @@
 const Payment = require('../../../Models/payment');
 
 describe('Payment Model Unit Tests', () => {
-  afterEach(async () => {
+  afterAll(async () => {
     await Payment.deleteMany({});
   });
 
