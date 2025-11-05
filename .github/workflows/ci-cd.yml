@@ -94,14 +94,13 @@ jobs:
           echo "Test configuration:"
           echo "  - Running in CI mode"
           echo "  - Coverage enabled"
-          echo "  - Max workers: 50% (optimized for CI)"
+          echo "  - Max workers: default (script determines)"
           echo "---"
           npm test -- \
             --ci \
             --coverage \
             --coverageReporters=lcov,text-summary \
             --passWithNoTests \
-            --maxWorkers=50% \
             --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
           MONGO_URL: ${{ env.MONGO_URL }}
