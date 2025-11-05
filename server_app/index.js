@@ -43,10 +43,9 @@ const HOST = 'ktpm.dwb8wtz.mongodb.net';
 const uri = `mongodb+srv://${USER}:${PASS}@${HOST}/${DB}?retryWrites=true&w=majority`;
 
 
-if (process.env.NODE_ENV !== 'test') {
-    mongoose.connect(uri)
-        .then(async() => {
-                console.log('✅ Kết nối MongoDB Atlas');
+mongoose.connect(uri)
+    .then(async() => {
+        console.log('✅ Kết nối MongoDB Atlas');
 
         // ===== Permission =====
         let adminPerm = await Permission.findOne({ permission: 'Admin' });
@@ -277,7 +276,6 @@ if (process.env.NODE_ENV !== 'test') {
         console.log('✅ Hoàn tất seed toàn bộ dữ liệu mẫu');
     })
     .catch(err => console.error('❌ Lỗi:', err));
-}
 
 
 
@@ -331,11 +329,6 @@ io.on('connection', (socket) => {
     });
 });
 
-if (process.env.NODE_ENV !== 'test') {
-    http.listen(port, () => {
-        console.log('listening on *: ' + port);
-    });
-}
-
-// Export app for testing (do not start server in tests)
-module.exports = app;
+http.listen(port, () => {
+    console.log('listening on *: ' + port);
+});
