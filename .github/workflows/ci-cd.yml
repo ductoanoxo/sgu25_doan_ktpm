@@ -100,7 +100,6 @@ jobs:
             --ci \
             --coverage \
             --coverageReporters=lcov,text-summary \
-            --maxWorkers=100% \
             --passWithNoTests \
             --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}' \
             --verbose
