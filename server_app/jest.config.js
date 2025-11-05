@@ -7,6 +7,7 @@ module.exports = {
     '!**/node_modules/**',
     '!**/tests/**'
   ],
+  coverageReporters: ['lcov', 'text-summary'],
   testMatch: [
     '**/tests/**/*.test.js',
     '**/tests/**/*.spec.js'

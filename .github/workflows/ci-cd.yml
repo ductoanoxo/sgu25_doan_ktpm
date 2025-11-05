@@ -75,6 +75,12 @@ jobs:
           echo "Installing server dependencies..."
           npm ci --no-audit --no-fund --prefer-offline --legacy-peer-deps
 
+      - name: 5. Install OpenSSL 1.1 for MongoMemoryServer
+        run: |
+          echo "Installing OpenSSL 1.1 (required by MongoMemoryServer)..."
+          sudo apt-get update
+          sudo apt-get install -y libssl1.1
+
       # MongoDB Shell not needed - tests use in-memory DB
       # - name: 5. Install mongosh (MongoDB Shell)
       #   run: |
@@ -90,7 +96,7 @@ jobs:
       #     mongosh ${{ env.MONGO_URL }} --eval 'db.runCommand({ ping: 1 })' --quiet || echo "MongoDB connection check skipped"
       #     echo "MongoDB verification complete."
 
-      - name: 5. Run server tests with coverage
+      - name: 6. Run server tests with coverage
         working-directory: ./server_app
         run: |
           echo "Running server tests with Jest..."
@@ -103,14 +109,15 @@ jobs:
           npm test -- \
             --ci \
             --coverage \
-            --coverageReporters=lcov,text-summary \
+            --coverageReporters=lcov \
+            --coverageReporters=text-summary \
             --passWithNoTests \
             --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
           JWT_SECRET: ${{ env.JWT_SECRET }}
           NODE_ENV: test
 
-      - name: 6. Display test summary
+      - name: 7. Display test summary
         if: always()
         working-directory: ./server_app
         run: |
@@ -121,7 +128,7 @@ jobs:
             echo "No coverage summary found"
           fi
 
-      - name: 7. Upload server coverage to Codecov
+      - name: 8. Upload server coverage to Codecov
         if: always()
         uses: codecov/codecov-action@v4
         with:
