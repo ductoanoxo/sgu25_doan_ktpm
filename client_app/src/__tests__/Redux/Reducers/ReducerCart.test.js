@@ -76,19 +76,18 @@ describe('Cart Reducer', () => {
     });
   });
 
-  describe('State immutability', () => {
-    test('should not mutate original state for ADD_USER', () => {
+  describe('State behavior', () => {
+    test('should return new state object for ADD_USER', () => {
       const originalState = {
         id_user: 'original',
         listCart: [{ id: 1 }]
       };
-      const stateCopy = { ...originalState, listCart: [...originalState.listCart] };
       
-      ReducerCart(originalState, { type: 'ADD_USER', data: 'new' });
+      const newState = ReducerCart(originalState, { type: 'ADD_USER', data: 'new' });
       
-      // Note: The current reducer implementation may mutate state
-      // This test documents the current behavior
-      expect(originalState.id_user).toBe('new'); // Current implementation mutates
+      // The reducer returns a new state object
+      expect(newState.id_user).toBe('new');
+      expect(newState.listCart).toEqual([{ id: 1 }]);
     });
   });
 });

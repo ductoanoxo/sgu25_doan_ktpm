@@ -257,7 +257,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Permission = <span class="cstat-no" title="statement not covered" >require('../../../Models/permission')</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Permission = <span class="cstat-no" title="statement not covered" >require('../../../Models/permission');</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.index = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     let page = <span class="cstat-no" title="statement not covered" >parseInt(req.query.page) || 1;</span>
@@ -276,92 +276,92 @@
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             permission: permission.slice(start, end),
             totalPage: totalPage
-        })
+        });
 &nbsp;
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >permission.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            return value.permission.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||</span>
-                value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
-        })
+                value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
+        });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             permission: newData.slice(start, end),
             totalPage: totalPage
-        })
+        });
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.all = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const permission = <span class="cstat-no" title="statement not covered" >await Permission.find()</span>
+    const permission = <span class="cstat-no" title="statement not covered" >await Permission.find();</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(permission)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(permission);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.create = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const permission = <span class="cstat-no" title="statement not covered" >await Permission.find();</span>
 &nbsp;
     const permissionFilter = <span class="cstat-no" title="statement not covered" >permission.filter(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        return c.permission.toUpperCase() === req.query.name.toUpperCase().trim()</span>
+<span class="cstat-no" title="statement not covered" >        return c.permission.toUpperCase() === req.query.name.toUpperCase().trim();</span>
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (permissionFilter.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Quyền đã tồn tại' })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Quyền đã tồn tại' });</span>
     } else {
-        var newPermission = <span class="cstat-no" title="statement not covered" >new Permission()</span>
-<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
-<span class="cstat-no" title="statement not covered" >        newPermission.permission = req.query.name</span>
+        var newPermission = <span class="cstat-no" title="statement not covered" >new Permission();</span>
+<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
+<span class="cstat-no" title="statement not covered" >        newPermission.permission = req.query.name;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        newPermission.save();</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã thêm thành công" })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Bạn đã thêm thành công' });</span>
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.delete = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    console.log(req.query)</span>
+<span class="cstat-no" title="statement not covered" >    console.log(req.query);</span>
     const id = <span class="cstat-no" title="statement not covered" >req.query.id;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    await Permission.deleteOne({ _id: id }, <span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) {</span>
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: err })</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: err });</span>
 <span class="cstat-no" title="statement not covered" >            return;</span>
         }
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Thanh Cong" })</span>
-    })
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Thanh Cong' });</span>
+    });
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.details = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const permission = <span class="cstat-no" title="statement not covered" >await Permission.findOne({ _id: req.params.id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(permission)</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json(permission);</span>
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.update = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const permission = <span class="cstat-no" title="statement not covered" >await Permission.find();</span>
 &nbsp;
     const permissionFilter = <span class="cstat-no" title="statement not covered" >permission.filter(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        return c.permission.toUpperCase() === req.query.name.toUpperCase().trim() &amp;&amp; c.id !== req.query.id</span>
+<span class="cstat-no" title="statement not covered" >        return c.permission.toUpperCase() === req.query.name.toUpperCase().trim() &amp;&amp; c.id !== req.query.id;</span>
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (permissionFilter.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Quyền đã tồn tại' })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Quyền đã tồn tại' });</span>
     } else {
-<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
+<span class="cstat-no" title="statement not covered" >        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
 <span class="cstat-no" title="statement not covered" >        await Permission.updateOne({ _id: req.query.id }, { permission: req.query.name }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {</span>
 <span class="cstat-no" title="statement not covered" >            if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
         });
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã update thành công" })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Bạn đã update thành công' });</span>
     }
-}</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-05T15:42:34.243Z
+                at 2025-11-05T16:29:11.767Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

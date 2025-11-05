@@ -21,6 +21,19 @@ describe('Cart Actions', () => {
         expect(action.data).toBe(id);
       });
     });
+
+    test('should handle numeric user ID', () => {
+      const userId = 12345;
+      const action = addUser(userId);
+      expect(action.type).toBe('ADD_USER');
+      expect(action.data).toBe(userId);
+    });
+
+    test('should handle null user ID', () => {
+      const action = addUser(null);
+      expect(action.type).toBe('ADD_USER');
+      expect(action.data).toBeNull();
+    });
   });
 
   describe('addCart', () => {
@@ -28,7 +41,7 @@ describe('Cart Actions', () => {
       const cartItem = {
         id_product: 'prod123',
         name_product: 'Test Product',
-        price_product: 199000,
+        price_product: '199000',
         count: 1,
         size: 'M'
       };
@@ -43,9 +56,9 @@ describe('Cart Actions', () => {
 
     test('should handle multiple cart items', () => {
       const items = [
-        { id_product: '1', name_product: 'Item 1', price_product: 100000, count: 1 },
-        { id_product: '2', name_product: 'Item 2', price_product: 200000, count: 2 },
-        { id_product: '3', name_product: 'Item 3', price_product: 300000, count: 3 }
+        { id_product: '1', name_product: 'Item 1', price_product: '100000', count: 1 },
+        { id_product: '2', name_product: 'Item 2', price_product: '200000', count: 2 },
+        { id_product: '3', name_product: 'Item 3', price_product: '300000', count: 3 }
       ];
       
       items.forEach(item => {
@@ -53,6 +66,13 @@ describe('Cart Actions', () => {
         expect(action.type).toBe('ADD_CART');
         expect(action.data).toEqual(item);
       });
+    });
+
+    test('should handle cart item with minimal data', () => {
+      const minimalItem = { id_product: 'prod1' };
+      const action = addCart(minimalItem);
+      expect(action.type).toBe('ADD_CART');
+      expect(action.data).toEqual(minimalItem);
     });
   });
 
@@ -80,6 +100,18 @@ describe('Cart Actions', () => {
         expect(action.data.count).toBe(count);
       });
     });
+
+    test('should handle update with additional properties', () => {
+      const updateData = {
+        id_cart: 'cart123',
+        count: 5,
+        size: 'L',
+        color: 'red'
+      };
+      const action = updateCart(updateData);
+      expect(action.type).toBe('UPDATE_CART');
+      expect(action.data).toEqual(updateData);
+    });
   });
 
   describe('deleteCart', () => {
@@ -101,6 +133,42 @@ describe('Cart Actions', () => {
         const action = deleteCart(id);
         expect(action.type).toBe('DELETE_CART');
         expect(action.data).toBe(id);
+      });
+    });
+
+    test('should handle object as delete data', () => {
+      const deleteData = { id_cart: 'cart123' };
+      const action = deleteCart(deleteData);
+      expect(action.type).toBe('DELETE_CART');
+      expect(action.data).toEqual(deleteData);
+    });
+  });
+
+  describe('Action creators return correct structure', () => {
+    test('all actions should have type and data properties', () => {
+      const actions = [
+        addUser('user1'),
+        addCart({ id: 'prod1' }),
+        updateCart({ id: 'cart1', count: 1 }),
+        deleteCart('cart1')
+      ];
+
+      actions.forEach(action => {
+        expect(action).toHaveProperty('type');
+        expect(action).toHaveProperty('data');
+      });
+    });
+
+    test('action types should be strings', () => {
+      const actions = [
+        addUser('user1'),
+        addCart({ id: 'prod1' }),
+        updateCart({ id: 'cart1', count: 1 }),
+        deleteCart('cart1')
+      ];
+
+      actions.forEach(action => {
+        expect(typeof action.type).toBe('string');
       });
     });
   });

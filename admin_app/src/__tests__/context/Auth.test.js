@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import AuthContextProvider, { AuthContext } from '../../../component/context/Auth';
+import AuthContextProvider, { AuthContext } from '../../component/context/Auth';
 
 describe('AuthContext', () => {
   beforeEach(() => {

@@ -1,8 +1,8 @@
-import productAPI from '../../../component/Api/productAPI';
-import axiosClient from '../../../component/Api/axiosClient';
+import productAPI from '../../component/Api/productAPI';
+import axiosClient from '../../component/Api/axiosClient';
 
 // Mock axiosClient
-jest.mock('../../../component/Api/axiosClient');
+jest.mock('../../component/Api/axiosClient');
 
 describe('Product API', () => {
   afterEach(() => {

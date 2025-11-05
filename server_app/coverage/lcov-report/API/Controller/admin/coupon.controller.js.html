@@ -508,7 +508,7 @@ const Order = <span class="cstat-no" title="statement not covered" >require('../
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >coupon.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            return value.code.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||</span>
-                value.promotion.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
+                value.promotion.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
         });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
@@ -517,7 +517,7 @@ const Order = <span class="cstat-no" title="statement not covered" >require('../
         });
     }
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.create = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
@@ -525,139 +525,139 @@ const Order = <span class="cstat-no" title="statement not covered" >require('../
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Bạn đã thêm thành công'});</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.update = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
     const id = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ _id: id })</span>
+    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ _id: id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    coupon.code = req.body.code</span>
-<span class="cstat-no" title="statement not covered" >    coupon.count = req.body.count</span>
-<span class="cstat-no" title="statement not covered" >    coupon.promotion = req.body.promotion</span>
-<span class="cstat-no" title="statement not covered" >    coupon.describe = req.body.describe</span>
+<span class="cstat-no" title="statement not covered" >    coupon.code = req.body.code;</span>
+<span class="cstat-no" title="statement not covered" >    coupon.count = req.body.count;</span>
+<span class="cstat-no" title="statement not covered" >    coupon.promotion = req.body.promotion;</span>
+<span class="cstat-no" title="statement not covered" >    coupon.describe = req.body.describe;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    coupon.save()</span>
+<span class="cstat-no" title="statement not covered" >    coupon.save();</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Bạn đã cập nhật thành công'});</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.delete = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    await Coupon.deleteOne({ _id: id })</span>
+<span class="cstat-no" title="statement not covered" >    await Coupon.deleteOne({ _id: id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json("Thanh Cong")</span>
+<span class="cstat-no" title="statement not covered" >    res.json('Thanh Cong');</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.detail = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ _id: id })</span>
+    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ _id: id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(coupon)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(coupon);</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.checking = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const code = <span class="cstat-no" title="statement not covered" >req.query.code</span>
-    const id_user = <span class="cstat-no" title="statement not covered" >req.query.id_user</span>
-    const total_amount = <span class="cstat-no" title="statement not covered" >req.query.total_amount </span>// Thêm tham số tổng tiền
+    const code = <span class="cstat-no" title="statement not covered" >req.query.code;</span>
+    const id_user = <span class="cstat-no" title="statement not covered" >req.query.id_user;</span>
+    const total_amount = <span class="cstat-no" title="statement not covered" >req.query.total_amount;</span> // Thêm tham số tổng tiền
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    console.log('=== COUPON DEBUG ===')</span>
-<span class="cstat-no" title="statement not covered" >    console.log('Code nhận được:', code)</span>
-<span class="cstat-no" title="statement not covered" >    console.log('User ID:', id_user)</span>
-<span class="cstat-no" title="statement not covered" >    console.log('Total amount:', total_amount)</span>
+<span class="cstat-no" title="statement not covered" >    console.log('=== COUPON DEBUG ===');</span>
+<span class="cstat-no" title="statement not covered" >    console.log('Code nhận được:', code);</span>
+<span class="cstat-no" title="statement not covered" >    console.log('User ID:', id_user);</span>
+<span class="cstat-no" title="statement not covered" >    console.log('Total amount:', total_amount);</span>
 &nbsp;
-    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ code })</span>
+    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ code });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    console.log('Coupon tìm được:', coupon)</span>
+<span class="cstat-no" title="statement not covered" >    console.log('Coupon tìm được:', coupon);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!coupon){</span>
-<span class="cstat-no" title="statement not covered" >        console.log('Không tìm thấy coupon')</span>
-<span class="cstat-no" title="statement not covered" >        return res.json({ msg: "Không tìm thấy" })</span>
+<span class="cstat-no" title="statement not covered" >        console.log('Không tìm thấy coupon');</span>
+<span class="cstat-no" title="statement not covered" >        return res.json({ msg: 'Không tìm thấy' });</span>
     }
 &nbsp;
-    const checkCoupon = <span class="cstat-no" title="statement not covered" >await Order.findOne({ id_user: id_user, id_coupon: coupon._id })</span>
+    const checkCoupon = <span class="cstat-no" title="statement not covered" >await Order.findOne({ id_user: id_user, id_coupon: coupon._id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    console.log('Check đã sử dụng:', checkCoupon)</span>
+<span class="cstat-no" title="statement not covered" >    console.log('Check đã sử dụng:', checkCoupon);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (checkCoupon){</span>
-<span class="cstat-no" title="statement not covered" >        console.log('Đã sử dụng coupon này rồi')</span>
-<span class="cstat-no" title="statement not covered" >        return res.json({ msg: "Bạn đã sử dụng mã này rồi"})</span>
+<span class="cstat-no" title="statement not covered" >        console.log('Đã sử dụng coupon này rồi');</span>
+<span class="cstat-no" title="statement not covered" >        return res.json({ msg: 'Bạn đã sử dụng mã này rồi'});</span>
     }
 &nbsp;
     // Kiểm tra điều kiện áp dụng coupon từ describe
 <span class="cstat-no" title="statement not covered" >    if (coupon.describe &amp;&amp; total_amount) {</span>
-        const describe = <span class="cstat-no" title="statement not covered" >coupon.describe.toLowerCase()</span>
-        const totalAmount = <span class="cstat-no" title="statement not covered" >parseFloat(total_amount)</span>
+        const describe = <span class="cstat-no" title="statement not covered" >coupon.describe.toLowerCase();</span>
+        const totalAmount = <span class="cstat-no" title="statement not covered" >parseFloat(total_amount);</span>
         
-<span class="cstat-no" title="statement not covered" >        console.log('Kiểm tra điều kiện từ describe:', describe)</span>
-<span class="cstat-no" title="statement not covered" >        console.log('Tổng đơn hàng hiện tại:', totalAmount)</span>
+<span class="cstat-no" title="statement not covered" >        console.log('Kiểm tra điều kiện từ describe:', describe);</span>
+<span class="cstat-no" title="statement not covered" >        console.log('Tổng đơn hàng hiện tại:', totalAmount);</span>
         
         // Helper function để chuyển đổi số từ string (hỗ trợ k, triệu, etc.)
         const parseAmount = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(a</span>mountStr) =&gt; {</span>
-            const cleanStr = <span class="cstat-no" title="statement not covered" >amountStr.replace(/[.,]/g, '')</span>
-            let amount = <span class="cstat-no" title="statement not covered" >parseFloat(cleanStr)</span>
+            const cleanStr = <span class="cstat-no" title="statement not covered" >amountStr.replace(/[.,]/g, '');</span>
+            let amount = <span class="cstat-no" title="statement not covered" >parseFloat(cleanStr);</span>
             
 <span class="cstat-no" title="statement not covered" >            if (amountStr.includes('k') || amountStr.includes('K')) {</span>
-<span class="cstat-no" title="statement not covered" >                amount = amount * 1000</span>
+<span class="cstat-no" title="statement not covered" >                amount = amount * 1000;</span>
             } else <span class="cstat-no" title="statement not covered" >if (amountStr.includes('triệu') || amountStr.includes('tr')) {</span>
-<span class="cstat-no" title="statement not covered" >                amount = amount * 1000000</span>
+<span class="cstat-no" title="statement not covered" >                amount = amount * 1000000;</span>
             } else <span class="cstat-no" title="statement not covered" >if (amount &lt; 10000) {</span>
                 // Nếu số nhỏ hơn 10000 có thể là dạng viết tắt (500 = 500k)
-<span class="cstat-no" title="statement not covered" >                amount = amount * 1000</span>
+<span class="cstat-no" title="statement not covered" >                amount = amount * 1000;</span>
             }
             
-<span class="cstat-no" title="statement not covered" >            return amount</span>
-        }
+<span class="cstat-no" title="statement not covered" >            return amount;</span>
+        };
         
-        let isValid = <span class="cstat-no" title="statement not covered" >true</span>
-        let errorMessage = <span class="cstat-no" title="statement not covered" >''</span>
+        let isValid = <span class="cstat-no" title="statement not covered" >true;</span>
+        let errorMessage = <span class="cstat-no" title="statement not covered" >'';</span>
         
         // Case 1: Từ X đến Y (ví dụ: "từ 150k đến 300k")
-        const rangeMatch = <span class="cstat-no" title="statement not covered" >describe.match(/từ\s*(\d+(?:\.\d+)?)\s*k?\s*đến\s*(\d+(?:\.\d+)?)\s*k?/i)</span>
+        const rangeMatch = <span class="cstat-no" title="statement not covered" >describe.match(/từ\s*(\d+(?:\.\d+)?)\s*k?\s*đến\s*(\d+(?:\.\d+)?)\s*k?/i);</span>
 <span class="cstat-no" title="statement not covered" >        if (rangeMatch) {</span>
-            const minAmount = <span class="cstat-no" title="statement not covered" >parseAmount(rangeMatch[1] + (describe.includes('k') ? 'k' : ''))</span>
-            const maxAmount = <span class="cstat-no" title="statement not covered" >parseAmount(rangeMatch[2] + (describe.includes('k') ? 'k' : ''))</span>
+            const minAmount = <span class="cstat-no" title="statement not covered" >parseAmount(rangeMatch[1] + (describe.includes('k') ? 'k' : ''));</span>
+            const maxAmount = <span class="cstat-no" title="statement not covered" >parseAmount(rangeMatch[2] + (describe.includes('k') ? 'k' : ''));</span>
             
-<span class="cstat-no" title="statement not covered" >            console.log(`Điều kiện: từ ${minAmount} đến ${maxAmount}`)</span>
+<span class="cstat-no" title="statement not covered" >            console.log(`Điều kiện: từ ${minAmount} đến ${maxAmount}`);</span>
             
 <span class="cstat-no" title="statement not covered" >            if (totalAmount &lt; minAmount || totalAmount &gt; maxAmount) {</span>
-<span class="cstat-no" title="statement not covered" >                isValid = false</span>
-<span class="cstat-no" title="statement not covered" >                errorMessage = `Đơn hàng phải từ ${new Intl.NumberFormat('vi-VN').format(minAmount)} VNĐ đến ${new Intl.NumberFormat('vi-VN').format(maxAmount)} VNĐ`</span>
+<span class="cstat-no" title="statement not covered" >                isValid = false;</span>
+<span class="cstat-no" title="statement not covered" >                errorMessage = `Đơn hàng phải từ ${new Intl.NumberFormat('vi-VN').format(minAmount)} VNĐ đến ${new Intl.NumberFormat('vi-VN').format(maxAmount)} VNĐ`;</span>
             }
         }
         // Case 2: Tối thiểu X (ví dụ: "tối thiểu 500k", "từ 500k")
         else {
-            const minMatch = <span class="cstat-no" title="statement not covered" >describe.match(/(?:từ|tối thiểu|trên|ít nhất)\s*(\d+(?:\.\d+)?)\s*k?/i)</span>
+            const minMatch = <span class="cstat-no" title="statement not covered" >describe.match(/(?:từ|tối thiểu|trên|ít nhất)\s*(\d+(?:\.\d+)?)\s*k?/i);</span>
 <span class="cstat-no" title="statement not covered" >            if (minMatch) {</span>
-                const minAmount = <span class="cstat-no" title="statement not covered" >parseAmount(minMatch[1] + (describe.includes('k') ? 'k' : ''))</span>
+                const minAmount = <span class="cstat-no" title="statement not covered" >parseAmount(minMatch[1] + (describe.includes('k') ? 'k' : ''));</span>
                 
-<span class="cstat-no" title="statement not covered" >                console.log(`Điều kiện tối thiểu: ${minAmount}`)</span>
+<span class="cstat-no" title="statement not covered" >                console.log(`Điều kiện tối thiểu: ${minAmount}`);</span>
                 
 <span class="cstat-no" title="statement not covered" >                if (totalAmount &lt; minAmount) {</span>
-<span class="cstat-no" title="statement not covered" >                    isValid = false</span>
-<span class="cstat-no" title="statement not covered" >                    errorMessage = `Đơn hàng tối thiểu ${new Intl.NumberFormat('vi-VN').format(minAmount)} VNĐ`</span>
+<span class="cstat-no" title="statement not covered" >                    isValid = false;</span>
+<span class="cstat-no" title="statement not covered" >                    errorMessage = `Đơn hàng tối thiểu ${new Intl.NumberFormat('vi-VN').format(minAmount)} VNĐ`;</span>
                 }
             }
             // Case 3: Tối đa X (ví dụ: "tối đa 1 triệu")
             else {
-                const maxMatch = <span class="cstat-no" title="statement not covered" >describe.match(/(?:tối đa|không quá|dưới)\s*(\d+(?:\.\d+)?)\s*(?:k|triệu|tr)?/i)</span>
+                const maxMatch = <span class="cstat-no" title="statement not covered" >describe.match(/(?:tối đa|không quá|dưới)\s*(\d+(?:\.\d+)?)\s*(?:k|triệu|tr)?/i);</span>
 <span class="cstat-no" title="statement not covered" >                if (maxMatch) {</span>
-                    const maxAmount = <span class="cstat-no" title="statement not covered" >parseAmount(maxMatch[1] + (maxMatch[0].includes('k') ? 'k' : maxMatch[0].includes('triệu') || maxMatch[0].includes('tr') ? 'triệu' : ''))</span>
+                    const maxAmount = <span class="cstat-no" title="statement not covered" >parseAmount(maxMatch[1] + (maxMatch[0].includes('k') ? 'k' : maxMatch[0].includes('triệu') || maxMatch[0].includes('tr') ? 'triệu' : ''));</span>
                     
-<span class="cstat-no" title="statement not covered" >                    console.log(`Điều kiện tối đa: ${maxAmount}`)</span>
+<span class="cstat-no" title="statement not covered" >                    console.log(`Điều kiện tối đa: ${maxAmount}`);</span>
                     
 <span class="cstat-no" title="statement not covered" >                    if (totalAmount &gt; maxAmount) {</span>
-<span class="cstat-no" title="statement not covered" >                        isValid = false</span>
-<span class="cstat-no" title="statement not covered" >                        errorMessage = `Đơn hàng tối đa ${new Intl.NumberFormat('vi-VN').format(maxAmount)} VNĐ`</span>
+<span class="cstat-no" title="statement not covered" >                        isValid = false;</span>
+<span class="cstat-no" title="statement not covered" >                        errorMessage = `Đơn hàng tối đa ${new Intl.NumberFormat('vi-VN').format(maxAmount)} VNĐ`;</span>
                     }
                 }
             }
@@ -667,40 +667,40 @@ const Order = <span class="cstat-no" title="statement not covered" >require('../
         // Ví dụ: kiểm tra ngày, sản phẩm cụ thể, v.v.
         
 <span class="cstat-no" title="statement not covered" >        if (!isValid) {</span>
-<span class="cstat-no" title="statement not covered" >            console.log('Không đủ điều kiện áp dụng coupon:', errorMessage)</span>
+<span class="cstat-no" title="statement not covered" >            console.log('Không đủ điều kiện áp dụng coupon:', errorMessage);</span>
 <span class="cstat-no" title="statement not covered" >            return res.json({ </span>
-                msg: "Không đủ điều kiện", 
+                msg: 'Không đủ điều kiện', 
                 describe: coupon.describe,
                 errorMessage: errorMessage
-            })
+            });
         }
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    console.log('Coupon hợp lệ, trả về:', coupon)</span>
-<span class="cstat-no" title="statement not covered" >    res.json({ msg: "Thành công", coupon: coupon })</span>
+<span class="cstat-no" title="statement not covered" >    console.log('Coupon hợp lệ, trả về:', coupon);</span>
+<span class="cstat-no" title="statement not covered" >    res.json({ msg: 'Thành công', coupon: coupon });</span>
 &nbsp;
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.createCoupon = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 &nbsp;
-    const id = <span class="cstat-no" title="statement not covered" >req.params.id</span>
+    const id = <span class="cstat-no" title="statement not covered" >req.params.id;</span>
 &nbsp;
-    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ _id: id })</span>
+    const coupon = <span class="cstat-no" title="statement not covered" >await Coupon.findOne({ _id: id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    coupon.count = parseInt(coupon.count) - 1</span>
+<span class="cstat-no" title="statement not covered" >    coupon.count = parseInt(coupon.count) - 1;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    coupon.save()</span>
+<span class="cstat-no" title="statement not covered" >    coupon.save();</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json("Thanh Cong")</span>
+<span class="cstat-no" title="statement not covered" >    res.json('Thanh Cong');</span>
 &nbsp;
-}</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-05T15:42:34.243Z
+                at 2025-11-05T16:29:11.767Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

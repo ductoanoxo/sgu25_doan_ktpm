@@ -351,7 +351,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Product = <span class="cstat-no" title="statement not covered" >require('../../../Models/product')</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Product = <span class="cstat-no" title="statement not covered" >require('../../../Models/product');</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.index = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     let page = <span class="cstat-no" title="statement not covered" >parseInt(req.query.page) || 1;</span>
@@ -370,99 +370,99 @@
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             products: products.slice(start, end),
             totalPage: totalPage
-        })
+        });
 &nbsp;
     } else {
         var newData = <span class="cstat-no" title="statement not covered" >products.filter(<span class="fstat-no" title="function not covered" >va</span>lue =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >            return value.name_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||</span>
                 value.price_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
-                value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
+                value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
             // value.id_category.category.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
-        })
+        });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        res.json({</span>
             products: newData.slice(start, end),
             totalPage: totalPage
-        })
+        });
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.create = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const product = <span class="cstat-no" title="statement not covered" >await Product.find();</span>
 &nbsp;
     const productFilter = <span class="cstat-no" title="statement not covered" >product.filter(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        return c.name_product.toUpperCase() === req.body.name.toUpperCase().trim()</span>
+<span class="cstat-no" title="statement not covered" >        return c.name_product.toUpperCase() === req.body.name.toUpperCase().trim();</span>
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (productFilter.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Sản phẩm đã tồn tại' })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Sản phẩm đã tồn tại' });</span>
     } else {
-        var newProduct = <span class="cstat-no" title="statement not covered" >new Product()</span>
-<span class="cstat-no" title="statement not covered" >        req.body.name = req.body.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
-<span class="cstat-no" title="statement not covered" >        newProduct.name_product = req.body.name</span>
-<span class="cstat-no" title="statement not covered" >        newProduct.price_product = req.body.price</span>
-<span class="cstat-no" title="statement not covered" >        newProduct.id_category = req.body.category</span>
-        // newProduct.number = req.body.number
-<span class="cstat-no" title="statement not covered" >        newProduct.describe = req.body.description</span>
-<span class="cstat-no" title="statement not covered" >        newProduct.gender = req.body.gender</span>
+        var newProduct = <span class="cstat-no" title="statement not covered" >new Product();</span>
+<span class="cstat-no" title="statement not covered" >        req.body.name = req.body.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
+<span class="cstat-no" title="statement not covered" >        newProduct.name_product = req.body.name;</span>
+<span class="cstat-no" title="statement not covered" >        newProduct.price_product = req.body.price;</span>
+<span class="cstat-no" title="statement not covered" >        newProduct.id_category = req.body.category;</span>
+        // newProduct.number = req.body.number;
+<span class="cstat-no" title="statement not covered" >        newProduct.describe = req.body.description;</span>
+<span class="cstat-no" title="statement not covered" >        newProduct.gender = req.body.gender;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        if (req.files) {</span>
             var fileImage = <span class="cstat-no" title="statement not covered" >req.files.file;</span>
 &nbsp;
-            var fileName = <span class="cstat-no" title="statement not covered" >fileImage.name</span>
+            var fileName = <span class="cstat-no" title="statement not covered" >fileImage.name;</span>
 &nbsp;
-            var fileProduct = <span class="cstat-no" title="statement not covered" >"/img/" + fileName</span>
+            var fileProduct = <span class="cstat-no" title="statement not covered" >'/img/' + fileName;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >            newProduct.image = "http://localhost:8000" + fileProduct</span>
+<span class="cstat-no" title="statement not covered" >            newProduct.image = 'http://localhost:8000' + fileProduct;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >            fileImage.mv('./public/img/' + fileName)</span>
+<span class="cstat-no" title="statement not covered" >            fileImage.mv('./public/img/' + fileName);</span>
         }
-        else <span class="cstat-no" title="statement not covered" >newProduct.image = 'http://localhost:8000/img/nophoto.jpg'</span>
+        else <span class="cstat-no" title="statement not covered" >newProduct.image = 'http://localhost:8000/img/nophoto.jpg';</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        newProduct.save();</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Bạn đã thêm thành công" })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Bạn đã thêm thành công' });</span>
     }
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.delete = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const id = <span class="cstat-no" title="statement not covered" >req.query.id;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    await Product.deleteOne({ _id: id }, <span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (err) {</span>
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: err })</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: err });</span>
 <span class="cstat-no" title="statement not covered" >            return;</span>
         }
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: "Thanh Cong" })</span>
-    })
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Thanh Cong' });</span>
+    });
     
-}
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.details = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const product = <span class="cstat-no" title="statement not covered" >await Product.findOne({ _id: req.params.id });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(product)</span>
-}
+<span class="cstat-no" title="statement not covered" >    res.json(product);</span>
+};
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports.update = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
     const product = <span class="cstat-no" title="statement not covered" >await Product.find();</span>
 &nbsp;
     const productFilter = <span class="cstat-no" title="statement not covered" >product.filter(<span class="fstat-no" title="function not covered" >(c</span>) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        return c.name_product.toUpperCase() === req.body.name.toUpperCase().trim() &amp;&amp; c.id !== req.body.id</span>
+<span class="cstat-no" title="statement not covered" >        return c.name_product.toUpperCase() === req.body.name.toUpperCase().trim() &amp;&amp; c.id !== req.body.id;</span>
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (productFilter.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Sản phẩm đã tồn tại' })</span>
+<span class="cstat-no" title="statement not covered" >        res.json({ msg: 'Sản phẩm đã tồn tại' });</span>
     } else {
-<span class="cstat-no" title="statement not covered" >        req.body.name = req.body.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase() </span>})</span>
+<span class="cstat-no" title="statement not covered" >        req.body.name = req.body.name.toLowerCase().replace(/^.|\s\S/g, <span class="fstat-no" title="function not covered" >a </span>=&gt; { <span class="cstat-no" title="statement not covered" >return a.toUpperCase(); </span>});</span>
 &nbsp;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        if (req.files) {</span>
             var fileImage = <span class="cstat-no" title="statement not covered" >req.files.file;</span>
 &nbsp;
-            var fileName = <span class="cstat-no" title="statement not covered" >fileImage.name</span>
+            var fileName = <span class="cstat-no" title="statement not covered" >fileImage.name;</span>
 &nbsp;
 &nbsp;
-            var fileProduct = <span class="cstat-no" title="statement not covered" >"/img/" + fileName</span>
+            var fileProduct = <span class="cstat-no" title="statement not covered" >'/img/' + fileName;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >            await Product.updateOne({ _id: req.body.id }, {</span>
                 name_product: req.body.name,
@@ -471,13 +471,13 @@
                 // number: req.body.number,
                 describe: req.body.description,
                 gender: req.body.gender,
-                image: "http://localhost:8000" + fileProduct
+                image: 'http://localhost:8000' + fileProduct
             }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {
 <span class="cstat-no" title="statement not covered" >                if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
             });
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: "Bạn đã update thành công" })</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: 'Bạn đã update thành công' });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >            fileImage.mv('./public/img/' + fileName)</span>
+<span class="cstat-no" title="statement not covered" >            fileImage.mv('./public/img/' + fileName);</span>
         }
         else {
 <span class="cstat-no" title="statement not covered" >            await Product.updateOne({ _id: req.body.id }, {</span>
@@ -490,19 +490,19 @@
             }, <span class="fstat-no" title="function not covered" >fu</span>nction (err, res) {
 <span class="cstat-no" title="statement not covered" >                if (err) <span class="cstat-no" title="statement not covered" >return res.json({ msg: err });</span></span>
             });
-<span class="cstat-no" title="statement not covered" >            res.json({ msg: "Bạn đã update thành công" })</span>
+<span class="cstat-no" title="statement not covered" >            res.json({ msg: 'Bạn đã update thành công' });</span>
         }
 &nbsp;
 &nbsp;
     }
-}</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-05T15:42:34.243Z
+                at 2025-11-05T16:29:11.767Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

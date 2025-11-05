@@ -182,10 +182,7 @@
 <a name='L117'></a><a href='#L117'>117</a>
 <a name='L118'></a><a href='#L118'>118</a>
 <a name='L119'></a><a href='#L119'>119</a>
-<a name='L120'></a><a href='#L120'>120</a>
-<a name='L121'></a><a href='#L121'>121</a>
-<a name='L122'></a><a href='#L122'>122</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L120'></a><a href='#L120'>120</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -304,136 +301,133 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
-const Products = require('../../Models/product')
-const Category = require('../../Models/category')
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Products = require('../../Models/product');
+const Category = require('../../Models/category');
 &nbsp;
 &nbsp;
 module.exports.index = async (req, res) =&gt; {
 &nbsp;
-    const products = await Products.find()
+    const products = await Products.find();
 &nbsp;
-    res.json(products)
-}
+    res.json(products);
+};
 &nbsp;
 &nbsp;
 module.exports.gender = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
 &nbsp;
-    const gender = <span class="cstat-no" title="statement not covered" >req.query.gender</span>
+    const gender = <span class="cstat-no" title="statement not covered" >req.query.gender;</span>
 &nbsp;
-    const category = <span class="cstat-no" title="statement not covered" >await Category.find({ gender: gender })</span>
+    const category = <span class="cstat-no" title="statement not covered" >await Category.find({ gender: gender });</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    res.json(category)</span>
+<span class="cstat-no" title="statement not covered" >    res.json(category);</span>
 &nbsp;
-}
+};
 &nbsp;
 //TH: Hàm này dùng để phân loại sản phẩm
 module.exports.category = async (req, res) =&gt; {
 &nbsp;
-    const id_category = req.query.id_category
+    const id_category = req.query.id_category;
 &nbsp;
-    let products_category
+    let products_category;
 &nbsp;
     if (id_category === 'all'){
-        products_category = await Products.find()
+        products_category = await Products.find();
     }else{
-        products_category = await Products.find({ id_category: id_category })
+        products_category = await Products.find({ id_category: id_category });
     }
     
-    res.json(products_category)
-}
+    res.json(products_category);
+};
 &nbsp;
 //TH: Chi Tiết Sản Phẩm
 module.exports.detail = async (req, res) =&gt; {
 &nbsp;
-    const id = req.params.id
+    const id = req.params.id;
 &nbsp;
-    const product = await Products.findOne({ _id: id })
+    const product = await Products.findOne({ _id: id });
 &nbsp;
-    res.json(product)
+    res.json(product);
 &nbsp;
-}
+};
 &nbsp;
 &nbsp;
 // QT: Tìm kiếm phân loại và phân trang sản phẩm
 module.exports.pagination = async (req, res) =&gt; {
 &nbsp;
     //Lấy page từ query
-    const page = parseInt(req.query.page) || <span class="branch-1 cbranch-no" title="branch not covered" >1</span>
+    const page = parseInt(req.query.page) || <span class="branch-1 cbranch-no" title="branch not covered" >1;</span>
 &nbsp;
     //Lấy số lượng từ query
-    const numberProduct = parseInt(req.query.count) || <span class="branch-1 cbranch-no" title="branch not covered" >1</span>
+    const numberProduct = parseInt(req.query.count) || <span class="branch-1 cbranch-no" title="branch not covered" >1;</span>
 &nbsp;
     //Lấy key search từ query
-    const keyWordSearch = req.query.search
+    const keyWordSearch = req.query.search;
 &nbsp;
     //Lấy category từ query
-    const category = req.query.category
+    const category = req.query.category;
 &nbsp;
     //Lấy sản phẩm đầu và sẩn phẩm cuối
-    var start = (page - 1) * numberProduct
-    var end = page * numberProduct
+    var start = (page - 1) * numberProduct;
+    var end = page * numberProduct;
 &nbsp;
-    var products
+    var products;
 &nbsp;
     //Phân loại điều kiện category từ client gửi lên
     if (category === 'all'){
-        products = await Products.find()
+        products = await Products.find();
     }else{
-        products = await Products.find({ id_category: category })
+        products = await Products.find({ id_category: category });
     }
 &nbsp;
-    var paginationProducts = products.slice(start, end)
+    var paginationProducts = products.slice(start, end);
 &nbsp;
 &nbsp;
     if (!keyWordSearch){
         
-        res.json(paginationProducts)
+        res.json(paginationProducts);
 &nbsp;
     }else{
         var newData = paginationProducts.filter(value =&gt; {
             return value.name_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
-            value.price_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
-        })
+            value.price_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
+        });
 &nbsp;
-        res.json(newData)
+        res.json(newData);
     }
 &nbsp;
-}
+};
 &nbsp;
 // Hàm này dùng để hiện những sản phẩm search theo scoll ở component tìm kiếm bên client
 module.exports.scoll = async (req, res) =&gt; {
 &nbsp;
-    const page = req.query.page
+    const page = req.query.page;
     
-    const count = req.query.count
+    const count = req.query.count;
 &nbsp;
-    const search = req.query.search
+    const search = req.query.search;
 &nbsp;
     //Lấy sản phẩm đầu và sẩn phẩm cuối
-    const start = (page - 1) * count
-    const end = page * count   
+    const start = (page - 1) * count;
+    const end = page * count;   
 &nbsp;
-    const products = await Products.find()
+    const products = await Products.find();
 &nbsp;
     const newData = products.filter(value =&gt; {
-        return value.name_product.toUpperCase().indexOf(search.toUpperCase()) !== -1
-    })
+        return value.name_product.toUpperCase().indexOf(search.toUpperCase()) !== -1;
+    });
 &nbsp;
-    const paginationProducts = newData.slice(start, end)
+    const paginationProducts = newData.slice(start, end);
 &nbsp;
-    res.json(paginationProducts)
+    res.json(paginationProducts);
 &nbsp;
-}
-&nbsp;</pre></td></tr></table></pre>
+};</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-05T15:42:34.243Z
+                at 2025-11-05T16:29:11.767Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
