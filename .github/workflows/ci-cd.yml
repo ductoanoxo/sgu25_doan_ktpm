@@ -68,13 +68,16 @@ jobs:
           echo "Installing server dependencies..."
           npm ci --no-audit --no-fund --prefer-offline
 
-      - name: 5. Verify MongoDB Connection
+      - name: 5. Install mongosh
+        run: npm install -g mongosh
+
+      - name: 6. Verify MongoDB Connection
         run: |
           echo "Pinging MongoDB to verify connection..."
           mongosh ${{ env.MONGO_URL }} --eval 'db.runCommand({ ping: 1 })' --quiet
           echo "MongoDB connection successful."
 
-      - name: 6. Run server tests with coverage
+      - name: 7. Run server tests with coverage
         working-directory: ./server_app
         run: |
           echo "Running server tests..."
@@ -90,7 +93,7 @@ jobs:
             JWT_SECRET: test_secret_key_for_ci
             NODE_ENV: test
 
-      - name: 7. Upload server coverage to Codecov
+      - name: 8. Upload server coverage to Codecov
         if: always()
         uses: codecov/codecov-action@v4
         with:
