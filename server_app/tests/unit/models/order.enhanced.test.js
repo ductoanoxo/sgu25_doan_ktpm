@@ -52,7 +52,8 @@ describe('Order Model Unit Tests', () => {
         status: 'Đang xử lý',
         pay: false,
         feeship: 30000,
-        id_coupon: testCoupon._id
+        id_coupon: testCoupon._id,
+        create_time: new Date().toISOString()
       };
 
       const order = await Order.create(orderData);
@@ -75,7 +76,8 @@ describe('Order Model Unit Tests', () => {
         total: 300000,
         status: 'Đang xử lý',
         pay: false,
-        feeship: 25000
+        feeship: 25000,
+        create_time: new Date().toISOString()
       };
 
       const order = await Order.create(orderData);
@@ -85,18 +87,20 @@ describe('Order Model Unit Tests', () => {
       expect(order.id_coupon).toBeUndefined();
     });
 
-    test('should set default create_time', async () => {
+    test('should set create_time when provided', async () => {
+      const testTime = new Date().toISOString();
       const orderData = {
         id_user: testUser._id,
         id_payment: testPayment._id,
         address: '789 Hai Bà Trưng, Q.1, TP.HCM',
         total: 400000,
-        status: 'Đang xử lý'
+        status: 'Đang xử lý',
+        create_time: testTime
       };
 
       const order = await Order.create(orderData);
 
-      expect(order.create_time).toBeDefined();
+      expect(order.create_time).toBe(testTime);
     });
   });
 

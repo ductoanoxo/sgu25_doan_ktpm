@@ -4,7 +4,6 @@ const crypto = require('crypto')
 
 const Order = require('../../Models/order')
 const Detail_Order = require('../../Models/detail_order')
-const Note = require('../../Models/note')
 const Payment = require('../../Models/payment')
 
 // Đặt hàng

@@ -16,7 +16,7 @@ module.exports.detail = async (req, res) => {
 // Phuong Thuc Post
 module.exports.post_detail_order = async (req, res) => {
 
-    const detail_order = await Detail_Order.create(req.body)
+    await Detail_Order.create(req.body)
 
     res.send("Thanh Cong")
 

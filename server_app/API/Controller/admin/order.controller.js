@@ -1,7 +1,5 @@
 const Order = require('../../../Models/order')
 const Detail_History = require('../../../Models/detail_order')
-const Payment = require('../../../Models/payment')
-const Delivery = require('../../../Models/delivery')
 
 module.exports.index = async (req, res) => {
     let page = parseInt(req.query.page) || 1;

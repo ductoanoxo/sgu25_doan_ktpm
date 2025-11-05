@@ -53,7 +53,6 @@ jobs:
 
       - name: Run server tests (unit + integration) with coverage
         working-directory: ./server_app
-        # CHANGED: bỏ continue-on-error để fail khi test fail
         run: |
           npx jest \
             --ci \
@@ -63,9 +62,9 @@ jobs:
             --passWithNoTests \
             --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
-          MONGO_URL: ${{ env.MONGO_URL }}
-          JWT_SECRET: test_secret_key_for_ci
-          NODE_ENV: test
+            MONGO_URL: ${{ env.MONGO_URL }}
+            JWT_SECRET: test_secret_key_for_ci
+            NODE_ENV: test
 
       - name: Upload server coverage
         if: always()
@@ -98,7 +97,6 @@ jobs:
 
       - name: Run client tests
         working-directory: ./client_app
-        # CHANGED: bỏ continue-on-error để fail khi test fail
         run: npm run test:ci
         env:
           REACT_APP_API_URL: http://localhost:8000/
@@ -134,7 +132,6 @@ jobs:
 
       - name: Run admin tests
         working-directory: ./admin_app
-        # CHANGED: bỏ continue-on-error để fail khi test fail
         run: npm run test:ci
         env:
           REACT_APP_API_URL: http://localhost:8000/
@@ -163,29 +160,32 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Lint server code
+      # Server lint (fail on lint errors)
+      - name: Install & lint server code
         working-directory: ./server_app
         run: |
           npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          npm run lint || true
+          npm run lint
 
-      - name: Lint client code
+      # Client lint (fail on lint errors)
+      - name: Install & lint client code
         working-directory: ./client_app
         run: |
           npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          echo "Client app uses react-scripts linting built-in"
+          npm run lint
 
-      - name: Lint admin code
+      # Admin lint (fail on lint errors)
+      - name: Install & lint admin code
         working-directory: ./admin_app
         run: |
           npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          echo "Admin app uses react-scripts linting built-in"
+          npm run lint
 
-  # ============= BUILD & DOCKER (TỐI ƯU SONG SONG) =============
+  # ============= BUILD & DOCKER (GATED BY LINT + TESTS) =============
   build:
     name: Build Docker Images
     runs-on: ubuntu-latest
-    needs: [server-tests, client-tests, admin-tests]  # đảm bảo chỉ chạy khi test pass
+    needs: [lint, server-tests, client-tests, admin-tests]  # <-- tất cả phải pass mới build
     if: github.event_name != 'pull_request'
     permissions:
       contents: read
@@ -219,7 +219,7 @@ jobs:
             type=ref,event=branch
             type=raw,value=latest,enable={{is_default_branch}}
 
-      # NEW: In ra nhánh, ref, SHA và các tag trước khi build & push
+      # In ra nhánh, ref, SHA và các tag trước khi build & push
       - name: Print build context (branch, ref, SHA, tags)
         run: |
           echo "Branch name     : ${{ github.ref_name }}"
@@ -238,11 +238,11 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
-  # ============= DEPLOY =============
+  # ============= DEPLOY (GATED BY BUILD SUCCESS) =============
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build]  # <-- build xong & pass mới deploy
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:

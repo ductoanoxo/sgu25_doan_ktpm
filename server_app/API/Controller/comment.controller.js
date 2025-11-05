@@ -1,6 +1,5 @@
 
 const Comment = require('../../Models/comment')
-const Users = require('../../Models/user')
 
 // Gọi API hiện thị list comment của sản phẩm 
 // Phương thức GET

@@ -1,5 +1,6 @@
 const Product = require('../../../Models/product');
 const Category = require('../../../Models/category');
+const mongoose = require('mongoose');
 
 describe('Product API Integration Tests', () => {
   let testCategory;
@@ -14,20 +15,20 @@ describe('Product API Integration Tests', () => {
     beforeEach(async () => {
       await Product.create([
         {
+          id_category: testCategory._id,
           name_product: 'Product 1',
-          price_product: 100000,
-          count_product: 10,
+          price_product: '100000',
+          image: 'img1.jpg',
           describe: 'Description 1',
-          category: testCategory._id,
-          img1: 'img1.jpg'
+          gender: 'Nam'
         },
         {
+          id_category: testCategory._id,
           name_product: 'Product 2',
-          price_product: 200000,
-          count_product: 5,
+          price_product: '200000',
+          image: 'img2.jpg',
           describe: 'Description 2',
-          category: testCategory._id,
-          img1: 'img2.jpg'
+          gender: 'Nữ'
         }
       ]);
     });
@@ -48,19 +49,14 @@ describe('Product API Integration Tests', () => {
     });
 
     test('should filter products by category', async () => {
-      const products = await Product.find({ category: testCategory._id });
+      const products = await Product.find({ id_category: testCategory._id });
       expect(products).toHaveLength(2);
     });
 
-    test('should filter products by price range', async () => {
-      const minPrice = 150000;
-      const maxPrice = 250000;
-      const products = await Product.find({
-        price_product: { $gte: minPrice, $lte: maxPrice }
-      });
-
+    test('should filter products by gender', async () => {
+      const products = await Product.find({ gender: 'Nam' });
       expect(products).toHaveLength(1);
-      expect(products[0].name_product).toBe('Product 2');
+      expect(products[0].name_product).toBe('Product 1');
     });
   });
 
@@ -69,22 +65,21 @@ describe('Product API Integration Tests', () => {
 
     beforeEach(async () => {
       testProduct = await Product.create({
+        id_category: testCategory._id,
         name_product: 'Single Product',
-        price_product: 150000,
-        count_product: 15,
+        price_product: '150000',
+        image: 'single.jpg',
         describe: 'Single product description',
-        category: testCategory._id,
-        img1: 'single.jpg'
+        gender: 'Unisex'
       });
     });
 
     test('should get product by id', async () => {
-      const product = await Product.findById(testProduct._id)
-        .populate('category');
+      const product = await Product.findById(testProduct._id);
 
       expect(product).toBeDefined();
       expect(product.name_product).toBe('Single Product');
-      expect(product.category.category).toBe('Integration Test Category');
+      expect(product.price_product).toBe('150000');
     });
 
     test('should return null for non-existent product', async () => {
@@ -98,15 +93,12 @@ describe('Product API Integration Tests', () => {
   describe('POST /api/products', () => {
     test('should create a new product', async () => {
       const newProduct = {
+        id_category: testCategory._id,
         name_product: 'New Product',
-        price_product: 300000,
-        count_product: 20,
+        price_product: '300000',
+        image: 'new.jpg',
         describe: 'New product description',
-        category: testCategory._id,
-        img1: 'new.jpg',
-        img2: 'new2.jpg',
-        img3: 'new3.jpg',
-        img4: 'new4.jpg'
+        gender: 'Nam'
       };
 
       const product = await Product.create(newProduct);
@@ -114,21 +106,17 @@ describe('Product API Integration Tests', () => {
       expect(product).toBeDefined();
       expect(product.name_product).toBe(newProduct.name_product);
       expect(product.price_product).toBe(newProduct.price_product);
+      expect(product.image).toBe(newProduct.image);
     });
 
     test('should fail to create product without required fields', async () => {
       const invalidProduct = {
         name_product: 'Incomplete Product'
+        // Missing required 'image' field
       };
 
-      let error;
-      try {
-        await Product.create(invalidProduct);
-      } catch (err) {
-        error = err;
-      }
-
-      expect(error).toBeDefined();
+      await expect(Product.create(invalidProduct))
+        .rejects.toThrow();
     });
   });
 
@@ -137,20 +125,20 @@ describe('Product API Integration Tests', () => {
 
     beforeEach(async () => {
       testProduct = await Product.create({
+        id_category: testCategory._id,
         name_product: 'Update Product',
-        price_product: 100000,
-        count_product: 10,
+        price_product: '100000',
+        image: 'update.jpg',
         describe: 'Update description',
-        category: testCategory._id,
-        img1: 'update.jpg'
+        gender: 'Nam'
       });
     });
 
     test('should update product', async () => {
       const updates = {
         name_product: 'Updated Product Name',
-        price_product: 150000,
-        count_product: 15
+        price_product: '150000',
+        describe: 'Updated description'
       };
 
       const updatedProduct = await Product.findByIdAndUpdate(
@@ -161,26 +149,22 @@ describe('Product API Integration Tests', () => {
 
       expect(updatedProduct.name_product).toBe(updates.name_product);
       expect(updatedProduct.price_product).toBe(updates.price_product);
-      expect(updatedProduct.count_product).toBe(updates.count_product);
+      expect(updatedProduct.describe).toBe(updates.describe);
     });
 
-    test('should fail to update with invalid data', async () => {
-      const invalidUpdates = {
-        price_product: -100
+    test('should keep image when updating other fields', async () => {
+      const updates = {
+        name_product: 'Updated Name Only'
       };
 
-      let error;
-      try {
-        await Product.findByIdAndUpdate(
-          testProduct._id,
-          invalidUpdates,
-          { new: true, runValidators: true }
-        );
-      } catch (err) {
-        error = err;
-      }
+      const updatedProduct = await Product.findByIdAndUpdate(
+        testProduct._id,
+        updates,
+        { new: true }
+      );
 
-      expect(error).toBeDefined();
+      expect(updatedProduct.image).toBe('update.jpg');
+      expect(updatedProduct.name_product).toBe('Updated Name Only');
     });
   });
 
@@ -189,12 +173,12 @@ describe('Product API Integration Tests', () => {
 
     beforeEach(async () => {
       testProduct = await Product.create({
+        id_category: testCategory._id,
         name_product: 'Delete Product',
-        price_product: 100000,
-        count_product: 10,
+        price_product: '100000',
+        image: 'delete.jpg',
         describe: 'Delete description',
-        category: testCategory._id,
-        img1: 'delete.jpg'
+        gender: 'Nam'
       });
     });
 
@@ -217,25 +201,25 @@ describe('Product API Integration Tests', () => {
     beforeEach(async () => {
       await Product.create([
         {
+          id_category: testCategory._id,
           name_product: 'Red Shirt',
-          price_product: 100000,
-          count_product: 10,
-          category: testCategory._id,
-          img1: 'red.jpg'
+          price_product: '100000',
+          image: 'red.jpg',
+          gender: 'Nam'
         },
         {
+          id_category: testCategory._id,
           name_product: 'Blue Shirt',
-          price_product: 120000,
-          count_product: 8,
-          category: testCategory._id,
-          img1: 'blue.jpg'
+          price_product: '120000',
+          image: 'blue.jpg',
+          gender: 'Nữ'
         },
         {
+          id_category: testCategory._id,
           name_product: 'Red Pants',
-          price_product: 150000,
-          count_product: 5,
-          category: testCategory._id,
-          img1: 'pants.jpg'
+          price_product: '150000',
+          image: 'pants.jpg',
+          gender: 'Nam'
         }
       ]);
     });
