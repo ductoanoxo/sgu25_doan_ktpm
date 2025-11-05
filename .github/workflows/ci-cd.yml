@@ -39,7 +39,7 @@ jobs:
   server-tests:
     name: Server Unit & Integration Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10 # Reduced from 20 to 10
 
     services:
       mongodb:
@@ -72,7 +72,7 @@ jobs:
         working-directory: ./server_app
         run: |
           echo "Installing server dependencies..."
-          npm ci --no-audit --no-fund --prefer-offline
+          npm ci --no-audit --no-fund --prefer-offline --legacy-peer-deps
 
       - name: 5. Install mongosh (MongoDB Shell)
         run: |
@@ -94,15 +94,15 @@ jobs:
           echo "Test configuration:"
           echo "  - Running in CI mode"
           echo "  - Coverage enabled"
-          echo "  - Max workers: 100%"
+          echo "  - Max workers: 50% (optimized for CI)"
           echo "---"
           npm test -- \
             --ci \
             --coverage \
             --coverageReporters=lcov,text-summary \
             --passWithNoTests \
-            --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}' \
-            --verbose
+            --maxWorkers=50% \
+            --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
           MONGO_URL: ${{ env.MONGO_URL }}
           JWT_SECRET: ${{ env.JWT_SECRET }}
@@ -135,7 +135,8 @@ jobs:
   frontend-tests:
     name: ${{ matrix.app }} Unit & Integration Tests
     runs-on: ubuntu-latest
-    needs: [server-tests] # Run after server tests
+    # needs: [server-tests] # REMOVED: Run in parallel with server tests
+    timeout-minutes: 10 # Reduced from 20 to 10
     strategy:
       matrix:
         app: [client, admin]
@@ -160,7 +161,7 @@ jobs:
         working-directory: ./${{ matrix.app }}_app
         run: |
           echo "Installing dependencies for ${{ matrix.app }}..."
-          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund --legacy-peer-deps || npm install --no-audit --no-fund --legacy-peer-deps
 
       - name: 5. Run ${{ matrix.app }} tests
         working-directory: ./${{ matrix.app }}_app
@@ -170,8 +171,9 @@ jobs:
           echo "  - Test command: test:ci"
           echo "  - Coverage enabled"
           echo "  - CI mode: true"
+          echo "  - Max workers: 50% (optimized)"
           echo "---"
-          npm run test:ci || npm test -- --watchAll=false --coverage
+          npm run test:ci -- --maxWorkers=50% || npm test -- --watchAll=false --coverage --maxWorkers=50%
         env:
           REACT_APP_API_URL: ${{ env.REACT_APP_API_URL }}
           CI: true
