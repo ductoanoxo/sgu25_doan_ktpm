@@ -1,26 +1,26 @@
-var express = require('express')
+var express = require('express');
 
-var router = express.Router()
+var router = express.Router();
 
-const Order = require('../Controller/order.controller')
+const Order = require('../Controller/order.controller');
 
 // Hiển thị danh sách đơn đặt hàng
-router.get('/order/:id', Order.get_order)
+router.get('/order/:id', Order.get_order);
 
 // Hiển thị chi tiết đơn đặt hàng
-router.get('/order/detail/:id', Order.get_detail)
+router.get('/order/detail/:id', Order.get_detail);
 
 // Đặt Hàng thêm vào hóa đơn
-router.post('/order', Order.post_order)
+router.post('/order', Order.post_order);
 
-router.post('/momo', Order.post_momo)
+router.post('/momo', Order.post_momo);
 
-router.post('/email', Order.send_mail)
+router.post('/email', Order.send_mail);
 
-router.get('/payments', Order.get_payments)
+router.get('/payments', Order.get_payments);
 
-router.delete('/clean-invalid', Order.clean_invalid_orders)
+router.delete('/clean-invalid', Order.clean_invalid_orders);
 
-router.delete('/clear-all', Order.clear_all_orders)
+router.delete('/clear-all', Order.clear_all_orders);
 
-module.exports = router
+module.exports = router;

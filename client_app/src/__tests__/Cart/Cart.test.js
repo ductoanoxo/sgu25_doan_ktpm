@@ -74,7 +74,9 @@ describe('Cart Component', () => {
     
     await waitFor(() => {
       // Total = (100000 * 2) + (200000 * 1) = 400000
-      expect(screen.getByText(/400,000/)).toBeInTheDocument();
+      // The component formats this to '400.000 ₫'
+      const totalElement = screen.getByText(/Total:/i);
+      expect(totalElement.textContent).toContain('400.000');
     });
   });
 

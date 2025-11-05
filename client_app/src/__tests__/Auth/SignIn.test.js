@@ -1,12 +1,16 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import SignIn from '../../Auth/SignIn';
 import * as UserAPI from '../../API/User';
 
-// Mock the User API
+// Mock the User API and useNavigate
 jest.mock('../../API/User');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}));
 
 const renderWithRouter = (component) => {
   return render(
@@ -17,8 +21,11 @@ const renderWithRouter = (component) => {
 };
 
 describe('SignIn Component', () => {
+  const navigate = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    useNavigate.mockReturnValue(navigate);
   });
 
   test('renders sign in form', () => {
@@ -124,6 +131,7 @@ describe('SignIn Component', () => {
 
     await waitFor(() => {
       expect(UserAPI.Login).toHaveBeenCalled();
+      expect(navigate).toHaveBeenCalledWith('/');
     });
   });
 });

@@ -1,11 +1,11 @@
-var express = require('express')
+var express = require('express');
 
-var router = express.Router()
+var router = express.Router();
 
-const Note = require('../Controller/note.controller')
+const Note = require('../Controller/note.controller');
 
-router.post('/', Note.post_delivery)
+router.post('/', Note.post_delivery);
 
-router.get('/:id', Note.get_delivery)
+router.get('/:id', Note.get_delivery);
 
-module.exports = router
+module.exports = router;

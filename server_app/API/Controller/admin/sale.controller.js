@@ -1,4 +1,4 @@
-const Sale = require('../../../Models/sale')
+const Sale = require('../../../Models/sale');
 
 
 module.exports.index = async (req, res) => {
@@ -17,34 +17,34 @@ module.exports.index = async (req, res) => {
         res.json({
             sale: sale.slice(start, end),
             totalPage: totalPage
-        })
+        });
 
     } else {
         var newData = sale.filter(value => {
-            return value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
-        })
+            return value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
+        });
 
         res.json({
             sale: newData.slice(start, end),
             totalPage: totalPage
-        })
+        });
     }
-}
+};
 
 module.exports.create = async (req, res) => {
 
-    const check = await Sale.find({ id_product: req.body.id_product })
+    const check = await Sale.find({ id_product: req.body.id_product });
 
-    let flag = false
+    let flag = false;
 
     check.forEach(value => {
         if (value.status === true){
-            flag = true
+            flag = true;
         } 
-    })
+    });
 
     if (flag){
-        res.send("Sản phẩm này đã có khuyến mãi")
+        res.send('Sản phẩm này đã có khuyến mãi');
     }else{
         // Xử lý promotion: loại bỏ ký tự % và chuyển thành số
         let promotionValue = req.body.promotion;
@@ -55,7 +55,7 @@ module.exports.create = async (req, res) => {
 
         // Kiểm tra promotion value hợp lệ
         if (isNaN(promotionValue) || promotionValue < 0 || promotionValue > 100) {
-            return res.send("Giá trị khuyến mãi không hợp lệ (0-100)")
+            return res.send('Giá trị khuyến mãi không hợp lệ (0-100)');
         }
 
         // Tạo object data với promotion đã được xử lý
@@ -64,28 +64,28 @@ module.exports.create = async (req, res) => {
             promotion: promotionValue
         };
 
-        await Sale.create(saleData)
+        await Sale.create(saleData);
 
-        res.send("Bạn đã thêm thành công")
+        res.send('Bạn đã thêm thành công');
     }
 
-}
+};
 
 module.exports.detail = async (req, res) => {
 
-    const id = req.params.id
+    const id = req.params.id;
 
-    const sale = await Sale.findOne({ _id: id })
+    const sale = await Sale.findOne({ _id: id });
 
-    res.json(sale)
+    res.json(sale);
 
-}
+};
 
 module.exports.update = async (req, res) => {
 
-    const id = req.params.id
+    const id = req.params.id;
 
-    const sale = await Sale.findOne({ _id: id })
+    const sale = await Sale.findOne({ _id: id });
 
     // Xử lý promotion: loại bỏ ký tự % và chuyển thành số
     let promotionValue = req.body.promotion;
@@ -96,42 +96,42 @@ module.exports.update = async (req, res) => {
 
     // Kiểm tra promotion value hợp lệ
     if (isNaN(promotionValue) || promotionValue < 0 || promotionValue > 100) {
-        return res.json("Giá trị khuyến mãi không hợp lệ (0-100)")
+        return res.json('Giá trị khuyến mãi không hợp lệ (0-100)');
     }
 
-    sale.promotion = promotionValue
-    sale.describe = req.body.describe
-    sale.status = req.body.status
-    sale.id_product = req.body.id_product
+    sale.promotion = promotionValue;
+    sale.describe = req.body.describe;
+    sale.status = req.body.status;
+    sale.id_product = req.body.id_product;
 
-    sale.save()
+    sale.save();
 
-    res.json("Bạn đã cập nhật thành công")
+    res.json('Bạn đã cập nhật thành công');
 
-}
+};
 
 module.exports.list = async (req, res) => {
 
-    const sale = await Sale.find({ status: true }).populate('id_product')
+    const sale = await Sale.find({ status: true }).populate('id_product');
 
-    res.json(sale)
+    res.json(sale);
 
-}
+};
 
 module.exports.detailList = async (req, res) => {
 
-    const id = req.params.id
+    const id = req.params.id;
 
     const sale = await (await Sale.findOne({ id_product: id, status: true }).populate('id_product'));
 
     if (sale){
         res.json({
-            msg: "Thanh Cong",
+            msg: 'Thanh Cong',
             sale: sale
-        })
+        });
     }else{
         res.json({
-            msg: "That Bai"
-        })
+            msg: 'That Bai'
+        });
     }
-}
+};

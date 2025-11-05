@@ -9,7 +9,7 @@ const Users = require('../../Models/user');
 router.get('/statistics', async (req, res) => {
     try {
         const totalProducts = await Products.countDocuments();
-        const totalOrders = await Orders.countDocuments();
+        const totalOrders = await Order.countDocuments();
         const totalUsers = await Users.countDocuments();
         
         // Tính doanh thu tháng hiện tại

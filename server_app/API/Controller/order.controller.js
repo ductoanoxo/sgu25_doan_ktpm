@@ -1,29 +1,28 @@
+const mailer = require('../../mailer');
+const crypto = require('crypto');
 
-const mailer = require('../../mailer')
-const crypto = require('crypto')
-
-const Order = require('../../Models/order')
-const Detail_Order = require('../../Models/detail_order')
-const Payment = require('../../Models/payment')
+const Order = require('../../Models/order');
+const Detail_Order = require('../../Models/detail_order');
+const Payment = require('../../Models/payment');
 
 // Đặt hàng
 module.exports.post_order = async (req, res) => {
 
-    const order = await Order.create(req.body)
+    const order = await Order.create(req.body);
 
-    res.json(order)
+    res.json(order);
 
-}
+};
 
 module.exports.send_mail = async (req, res) => {
 
-    const carts = await Detail_Order.find({ id_order: req.body.id_order }).populate('id_product')
+    const carts = await Detail_Order.find({ id_order: req.body.id_order }).populate('id_product');
 
     //B3: Bắt đầu gửi Mail xác nhận đơn hàng
     const htmlHead = '<table style="width:50%">' +
-        '<tr style="border: 1px solid black;"><th style="border: 1px solid black;">Tên Sản Phẩm</th><th style="border: 1px solid black;">Hình Ảnh</th><th style="border: 1px solid black;">Giá</th><th style="border: 1px solid black;">Số Lượng</th><th style="border: 1px solid black;">Size</th><th style="border: 1px solid black;">Thành Tiền</th>'
+        '<tr style="border: 1px solid black;"><th style="border: 1px solid black;">Tên Sản Phẩm</th><th style="border: 1px solid black;">Hình Ảnh</th><th style="border: 1px solid black;">Giá</th><th style="border: 1px solid black;">Số Lượng</th><th style="border: 1px solid black;">Size</th><th style="border: 1px solid black;">Thành Tiền</th>';
 
-    let htmlContent = ""
+    let htmlContent = '';
 
     for (let i = 0; i < carts.length; i++) {
         htmlContent += '<tr>' +
@@ -33,74 +32,74 @@ module.exports.send_mail = async (req, res) => {
             '<td style="border: 1px solid black; font-size: 1.2rem; text-align: center;">' + carts[i].count + '</td>' +
             '<td style="border: 1px solid black; font-size: 1.2rem; text-align: center;">' + carts[i].size + '</td>' +
             '<td style="border: 1px solid black; font-size: 1.2rem; text-align: center;">' + (parseInt(carts[i].id_product.price_product) * parseInt(carts[i].count)) + '$</td>' +
-            '<tr>'
+            '</tr>';
     }
 
     const htmlResult = '<h1>Xin Chào ' + req.body.fullname + '</h1>' + '<h3>Phone: ' + req.body.phone + '</h3>' + '<h3>Address:' + req.body.address + '</h3>' +
-        htmlHead + htmlContent + '<h1>Phí Vận Chuyển: ' + req.body.price + '$</h1></br>' + '<h1>Tổng Thanh Toán: ' + req.body.total + '$</h1></br>' + '<p>Cảm ơn bạn!</p>'
+        htmlHead + htmlContent + '</table><h1>Phí Vận Chuyển: ' + req.body.price + '$</h1></br>' + '<h1>Tổng Thanh Toán: ' + req.body.total + '$</h1></br>' + '<p>Cảm ơn bạn!</p>';
 
     // Thực hiện gửi email (to, subject, htmlContent)
-    await mailer.sendMail(req.body.email, 'Hóa Đơn Đặt Hàng', htmlResult)
+    await mailer.sendMail(req.body.email, 'Hóa Đơn Đặt Hàng', htmlResult);
 
-    res.send("Gui Email Thanh Cong")
+    res.send('Gui Email Thanh Cong');
 
-}
+};
 
 module.exports.get_order = async (req, res) => {
 
-    const id_user = req.params.id
+    const id_user = req.params.id;
 
-    const order = await Order.find({ id_user }).populate(['id_user', 'id_note'])
+    const order = await Order.find({ id_user }).populate(['id_user', 'id_note']);
 
-    res.json(order)
+    res.json(order);
 
-}
+};
 
 module.exports.get_detail = async (req, res) => {
 
-    const id_order = req.params.id
+    const id_order = req.params.id;
 
-    const order = await Order.findOne({ _id: id_order }).populate(['id_user', 'id_note', 'id_payment'])
+    const order = await Order.findOne({ _id: id_order }).populate(['id_user', 'id_note', 'id_payment']);
 
-    res.json(order)
+    res.json(order);
 
-}
+};
 
 module.exports.post_momo = async (req, res) => {
 
-    const serectkey = "uLb683H8g9dWuiyipZbLHgO6zjSDlVm5"
-    const accessKey = req.body.accessKey
-    const amount = req.body.amount
-    const extraData = req.body.extraData
-    const errorCode = req.body.errorCode
-    const localMessage = req.body.localMessage
-    const message = req.body.message
-    const orderId = req.body.orderId
-    const orderInfo = req.body.orderInfo
-    const orderType = req.body.orderType
-    const partnerCode = req.body.partnerCode
-    const payType = req.body.payType
-    const requestId = req.body.requestId
-    const responseTime = req.body.responseTime
-    const transId = req.body.transId
+    const serectkey = 'uLb683H8g9dWuiyipZbLHgO6zjSDlVm5';
+    const accessKey = req.body.accessKey;
+    const amount = req.body.amount;
+    const extraData = req.body.extraData;
+    const errorCode = req.body.errorCode;
+    const localMessage = req.body.localMessage;
+    const message = req.body.message;
+    const orderId = req.body.orderId;
+    const orderInfo = req.body.orderInfo;
+    const orderType = req.body.orderType;
+    const partnerCode = req.body.partnerCode;
+    const payType = req.body.payType;
+    const requestId = req.body.requestId;
+    const responseTime = req.body.responseTime;
+    const transId = req.body.transId;
 
-    let param = `partnerCode=${partnerCode}&accessKey=${accessKey}&requestId=${requestId}&amount=${amount}&orderId=${orderId}&orderInfo=${orderInfo}&orderType=${orderType}&transId=${transId}&message=${message}&localMessage=${localMessage}&responseTime=${responseTime}&errorCode=${errorCode}&payType=${payType}&extraData=${extraData}`
+    let param = `partnerCode=${partnerCode}&accessKey=${accessKey}&requestId=${requestId}&amount=${amount}&orderId=${orderId}&orderInfo=${orderInfo}&orderType=${orderType}&transId=${transId}&message=${message}&localMessage=${localMessage}&responseTime=${responseTime}&errorCode=${errorCode}&payType=${payType}&extraData=${extraData}`;
 
     var signature = crypto.createHmac('sha256', serectkey)
         .update(param)
         .digest('hex');
 
     if (req.body.signature !== signature) {
-        res.send("Thông tin request không hợp lệ")
+        res.send('Thông tin request không hợp lệ');
         return;
     }
     if (errorCode == 0) {
-        res.send("Thanh Cong")
+        res.send('Thanh Cong');
     } else {
-        res.send("Thanh toán thất bại")
+        res.send('Thanh toán thất bại');
     }
 
-}
+};
 
 
 
@@ -190,9 +189,9 @@ module.exports.post_momo = async (req, res) => {
 //         }
 //     });
 
-//     res.send("Thanh Cong")
+//     res.send("Thanh Cong");
 
-// }
+// };
 
 // Get payment methods
 module.exports.get_payments = async (req, res) => {
@@ -202,7 +201,7 @@ module.exports.get_payments = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
 // Clean invalid stripe orders
 module.exports.clean_invalid_orders = async (req, res) => {
@@ -222,7 +221,7 @@ module.exports.clean_invalid_orders = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
 // Clear all test data - xóa tất cả lịch sử đơn hàng
 module.exports.clear_all_orders = async (req, res) => {
@@ -241,4 +240,4 @@ module.exports.clear_all_orders = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};

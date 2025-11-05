@@ -80,17 +80,19 @@ const StripeController = {
 
             // Xử lý các loại event
             switch (event.type) {
-                case 'payment_intent.succeeded':
+                case 'payment_intent.succeeded': {
                     const paymentIntent = event.data.object;
                     console.log('Payment succeeded:', paymentIntent.id);
                     // Xử lý logic khi thanh toán thành công
                     break;
+                }
 
-                case 'payment_intent.payment_failed':
+                case 'payment_intent.payment_failed': {
                     const failedPayment = event.data.object;
                     console.log('Payment failed:', failedPayment.id);
                     // Xử lý logic khi thanh toán thất bại
                     break;
+                }
 
                 default:
                     console.log(`Unhandled event type ${event.type}`);
