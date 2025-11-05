@@ -243,7 +243,7 @@ jobs:
   build:
     name: Build ${{ matrix.app }} Docker Image
     runs-on: ubuntu-latest
-    needs: [frontend-tests]
+    needs: [server-tests, frontend-tests]
     if: github.event_name != 'pull_request'
     permissions:
       contents: read
