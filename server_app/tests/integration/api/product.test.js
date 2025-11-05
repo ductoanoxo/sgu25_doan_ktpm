@@ -1,6 +1,5 @@
 const Product = require('../../../Models/product');
 const Category = require('../../../Models/category');
-const mongoose = require('mongoose');
 
 describe('Product API Integration Tests', () => {
   let testCategory;

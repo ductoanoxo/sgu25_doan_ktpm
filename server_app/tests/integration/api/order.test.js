@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Order = require('../../../Models/order');
 const User = require('../../../Models/user');
 const Product = require('../../../Models/product');
