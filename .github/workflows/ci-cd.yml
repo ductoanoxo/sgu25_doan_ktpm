@@ -41,16 +41,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10 # Reduced from 20 to 10
 
-    services:
-      mongodb:
-        image: mongo:5
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # MongoDB service removed - tests use MongoMemoryServer (in-memory DB)
+    # services:
+    #   mongodb:
+    #     image: mongo:5
+    #     ports:
+    #       - 27017:27017
+    #     options: >-
+    #       --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
 
     steps:
       - name: 1. Checkout code
@@ -74,26 +75,29 @@ jobs:
           echo "Installing server dependencies..."
           npm ci --no-audit --no-fund --prefer-offline --legacy-peer-deps
 
-      - name: 5. Install mongosh (MongoDB Shell)
-        run: |
-          echo "Installing MongoDB Shell..."
-          npm install -g mongosh
+      # MongoDB Shell not needed - tests use in-memory DB
+      # - name: 5. Install mongosh (MongoDB Shell)
+      #   run: |
+      #     echo "Installing MongoDB Shell..."
+      #     npm install -g mongosh
 
-      - name: 6. Verify MongoDB Connection
-        run: |
-          echo "Waiting for MongoDB to be ready..."
-          sleep 5
-          echo "Pinging MongoDB to verify connection..."
-          mongosh ${{ env.MONGO_URL }} --eval 'db.runCommand({ ping: 1 })' --quiet || echo "MongoDB connection check skipped"
-          echo "MongoDB verification complete."
+      # MongoDB verification not needed - tests use in-memory DB
+      # - name: 6. Verify MongoDB Connection
+      #   run: |
+      #     echo "Waiting for MongoDB to be ready..."
+      #     sleep 5
+      #     echo "Pinging MongoDB to verify connection..."
+      #     mongosh ${{ env.MONGO_URL }} --eval 'db.runCommand({ ping: 1 })' --quiet || echo "MongoDB connection check skipped"
+      #     echo "MongoDB verification complete."
 
-      - name: 7. Run server tests with coverage
+      - name: 5. Run server tests with coverage
         working-directory: ./server_app
         run: |
           echo "Running server tests with Jest..."
           echo "Test configuration:"
           echo "  - Running in CI mode"
           echo "  - Coverage enabled"
+          echo "  - Using MongoMemoryServer (in-memory database)"
           echo "  - Max workers: default (script determines)"
           echo "---"
           npm test -- \
@@ -103,11 +107,10 @@ jobs:
             --passWithNoTests \
             --coverageThreshold='{"global":{"statements":0,"branches":0,"lines":0,"functions":0}}'
         env:
-          MONGO_URL: ${{ env.MONGO_URL }}
           JWT_SECRET: ${{ env.JWT_SECRET }}
           NODE_ENV: test
 
-      - name: 8. Display test summary
+      - name: 6. Display test summary
         if: always()
         working-directory: ./server_app
         run: |
@@ -118,7 +121,7 @@ jobs:
             echo "No coverage summary found"
           fi
 
-      - name: 9. Upload server coverage to Codecov
+      - name: 7. Upload server coverage to Codecov
         if: always()
         uses: codecov/codecov-action@v4
         with:
