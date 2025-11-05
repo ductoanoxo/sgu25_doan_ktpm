@@ -18,33 +18,33 @@ module.exports.index = async (req, res) => {
         res.json({
             coupons: coupon.slice(start, end),
             totalPage: totalPage
-        })
+        });
 
     } else {
         var newData = coupon.filter(value => {
             return value.code.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
                 value.promotion.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1
-        })
+        });
 
         res.json({
             coupons: newData.slice(start, end),
             totalPage: totalPage
-        })
+        });
     }
 
 }
 
 module.exports.create = async (req, res) => {
 
-    await Coupon.create(req.body)
+    await Coupon.create(req.body);
 
-    res.json({ msg: "Bạn đã thêm thành công"})
+    res.json({ msg: 'Bạn đã thêm thành công'});
 
 }
 
 module.exports.update = async (req, res) => {
 
-    const id = req.params.id
+    const id = req.params.id;
 
     const coupon = await Coupon.findOne({ _id: id })
 
@@ -55,7 +55,7 @@ module.exports.update = async (req, res) => {
 
     coupon.save()
 
-    res.json({ msg: "Bạn đã cập nhật thành công"})
+    res.json({ msg: 'Bạn đã cập nhật thành công'});
 
 }
 

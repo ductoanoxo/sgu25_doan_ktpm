@@ -48,7 +48,7 @@ module.exports.create = async (req, res) => {
         newcategory.category = req.query.name;
 
         newcategory.save();
-        res.json({ msg: "Bạn đã thêm thành công" });
+        res.json({ msg: 'Bạn đã thêm thành công' });
     }
 };
 
@@ -61,7 +61,7 @@ module.exports.delete = async (req, res) => {
             res.json({ msg: err });
             return;
         }
-        res.json({ msg: "Thanh Cong" });
+        res.json({ msg: 'Thanh Cong' });
     });
 
 };
@@ -118,7 +118,7 @@ module.exports.update = async (req, res) => {
         await Category.updateOne({ _id: req.query.id }, { category: req.query.name }, function (err, res) {
             if (err) return res.json({ msg: err });
         });
-        res.json({ msg: "Bạn đã update thành công" });
+        res.json({ msg: 'Bạn đã update thành công' });
     }
 };
 

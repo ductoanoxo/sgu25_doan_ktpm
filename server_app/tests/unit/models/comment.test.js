@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Comment = require('../../../Models/comment');
 const Products = require('../../../Models/product');
 const Users = require('../../../Models/user');
