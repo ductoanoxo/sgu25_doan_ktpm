@@ -308,6 +308,28 @@ app.use('/api/Note', NoteAPI);
 app.use('/api/DetailOrder', Detail_OrderAPI);
 app.use('/api/Category', CategoryAPI);
 
+// Health check endpoint for Railway
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+    res.status(200).json({ 
+        message: 'Server is running',
+        version: '1.0.0',
+        endpoints: {
+            health: '/health',
+            api: '/api'
+        }
+    });
+});
+
 app.use('/api/admin/Product', ProductAdmin);
 app.use('/api/admin/Category', CategoryAdmin);
 app.use('/api/admin/Permission', PermissionRouter);
@@ -335,4 +357,27 @@ io.on('connection', (socket) => {
 
 http.listen(port, '0.0.0.0', () => {
     console.log('listening on *: ' + port);
+});
+
+// Graceful shutdown for Railway
+process.on('SIGTERM', () => {
+    console.log('👋 SIGTERM received, closing HTTP server gracefully...');
+    http.close(() => {
+        console.log('✅ HTTP server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
+    });
+});
+
+process.on('SIGINT', () => {
+    console.log('👋 SIGINT received, closing HTTP server gracefully...');
+    http.close(() => {
+        console.log('✅ HTTP server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
+    });
 });
