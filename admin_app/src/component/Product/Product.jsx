@@ -85,6 +85,7 @@ function Product() {
                                                 <th>Price</th>
                                                 <th>Image</th>
                                                 <th>Describe</th>
+                                                <th>Stock</th>
                                                 {/* <th>Producer</th> */}
                                                 <th>Category</th>
                                                 <th>Edit</th>
@@ -100,6 +101,11 @@ function Product() {
                                                         <td>{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.price_product)+ ' VNĐ'}</td>
                                                         <td><img src={value.image} alt="" style={{ width: '70px' }} /></td>
                                                         <td className="name" style={{ width: '40px' }}>{value.describe}</td>
+                                                        <td className="text-center">
+                                                            <span className={`badge ${value.number === 0 ? 'badge-danger' : value.number < 5 ? 'badge-warning' : 'badge-success'}`}>
+                                                                {value.number || 0}
+                                                            </span>
+                                                        </td>
                                                         <td>{value.id_category ? value.id_category.category : ""}</td>
                                                         <td>
                                                             <div className="d-flex">
