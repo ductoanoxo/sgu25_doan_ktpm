@@ -6,11 +6,13 @@ services:
       - "8000:8000"
     environment:
       - NODE_ENV=development
-      - MONGO_URL=mongodb://mongo:27017/Clothes
     env_file:
-      - server_app/.env  
-    depends_on:
-      - mongo
+      - server_app/.env
+    # Use Google DNS to resolve MongoDB Atlas hostname
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    # Removed depends_on mongo - connecting to Atlas instead
     develop:
       watch:
         - path: ./server_app
@@ -70,13 +72,6 @@ services:
         - path: ./admin_app/package.json
           action: rebuild
 
-  mongo:
-    image: mongo:5
-    container_name: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
+# MongoDB local container removed - using MongoDB Atlas (cloud) instead
+# volumes:
+#   mongo-data:
