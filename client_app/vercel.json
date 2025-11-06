@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "buildCommand": "npm install --legacy-peer-deps && npm run build",
+    "devCommand": "npm start",
+    "builds": [{
+        "src": "package.json",
+        "use": "@vercel/static-build",
+        "config": {
+            "distDir": "build",
+            "installCommand": "npm install --legacy-peer-deps"
+        }
+    }],
+    "routes": [
+        { "src": "/static/(.*)", "dest": "/static/$1" },
+        { "src": "/favicon.ico", "dest": "/favicon.ico" },
+        { "src": "/manifest.json", "dest": "/manifest.json" },
+        { "src": "/robots.txt", "dest": "/robots.txt" },
+        { "src": "/(.*\\.(js|css|json|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))", "dest": "/$1" },
+        { "src": "/(.*)", "dest": "/index.html" }
+    ]
+}

@@ -1,14 +1,37 @@
-FROM node:16
+# Build stage
+FROM node:18-alpine AS build
 
-WORKDIR /usr/src/app
+# Build arguments - Railway will pass these from Environment Variables
+ARG REACT_APP_API_URL
 
+# Set as environment variables for build
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
+WORKDIR /app
+
+# Copy package files
 COPY package*.json ./
 
-RUN npm install --legacy-peer-deps \
-    && npm install ajv@6 ajv-keywords@3 --save-exact
+# Clean install dependencies with resolutions
+RUN rm -f package-lock.json && \
+    npm install --legacy-peer-deps && \
+    npm install ajv@^8.12.0 --save-exact --legacy-peer-deps
 
+# Copy source code
 COPY . .
 
-EXPOSE 3001
+# Build production with env vars
+RUN npm run build
 
-CMD ["npm", "start"]
+# Production stage
+FROM nginx:alpine
+
+# Copy built files to nginx
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

@@ -2,7 +2,7 @@
 # Đồ án môn kiểm thử phần mềm
 
 ## Thông tin chung
-- **Tên đề tài:** Website bán quần áo 
+- **Tên đề tài:** [Tên đề tài cần được thêm vào]
 - **Môn học:** Kiểm thử phần mềm
 - **Lớp:** [DCT122C3]
 
@@ -13,7 +13,7 @@
 4. Trà Đức Toàn
 
 ## Mô tả dự án
-Website Fear Of God hỗ trợ các kịch bản kinh doanh chính bao gồm: Danh mục sản phẩm, Giỏ hàng, Quy trình đặt hàng, Thanh toán, Giao hàng, Trò chuyện trực tuyến, Xác nhận Email và Kiểm soát truy cập.
+[Thêm mô tả ngắn về dự án và mục tiêu]
 
 ## Công nghệ sử dụng
 - [Liệt kê các công nghệ/framework được sử dụng]
@@ -33,6 +33,23 @@ project/
 
 ## Hướng dẫn chạy test
 [Thêm hướng dẫn để chạy các test case]
+
+## 🚀 CI/CD Pipeline
+
+Dự án này đã được tích hợp GitHub Actions để tự động hóa quy trình CI/CD.
+
+### Status Badges
+
+![CI/CD Pipeline](https://github.com/Babyfat012/sgu25_doan_ktpm/workflows/CI%2FCD%20Pipeline/badge.svg)
+![Development CI](https://github.com/Babyfat012/sgu25_doan_ktpm/workflows/Development%20Branch%20CI/badge.svg)
+
+### Workflows
+
+- **CI/CD Pipeline**: Chạy tests và build Docker images khi push code
+- **Development CI**: Quick validation cho development branches
+- **Deploy**: Tự động deploy lên production khi merge vào `main`
+
+📖 **Chi tiết**: Xem [CI/CD Guide](./docs/CI_CD_GUIDE.md) và [Workflows Documentation](./.github/WORKFLOWS.md)
 
 ## 4.2 Tools
 
@@ -364,4 +381,4 @@ docker compose up --watch
 - Nodemailer. 
 > ⚠️ **Lưu ý:**  
 > Do chưa cập nhật **sinh trắc học** vào **môi trường giả lập của MoMo**, nên hiện tại **không thể thực hiện chuyển khoản giả lập qua MoMo Developer**.  
-> Hệ thống giả lập vẫn chưa được cập nhật nên **chưa thể tiến hành test** được.
+> Hệ thống giả lập vẫn chưa được cập nhật nên **chưa thể tiến hành test** được. .....

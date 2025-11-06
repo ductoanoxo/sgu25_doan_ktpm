@@ -40,21 +40,40 @@ function Products(props) {
         }
     }, [products])
 
-    if (sort === 'DownToUp') {
-        products.sort((a, b) => {
-            return a.price_product - b.price_product
-        });
+    // Hàm lấy giá sau khi sale
+    const getSalePrice = (product) => {
+        const sale = salesData[product._id]
+        const basePrice = product.price_product
+        
+        if (sale && sale.promotion) {
+            const discountPercent = Number(sale.promotion) || 0
+            return Math.round(basePrice * (1 - discountPercent / 100))
+        }
+        
+        return basePrice
     }
-    else if (sort === 'UpToDown') {
-        products.sort((a, b) => {
-            return b.price_product - a.price_product
-        });
+
+    // Sắp xếp sản phẩm
+    const sortedProducts = [...products]
+    
+    if (sort === 'DownToUp') {
+        sortedProducts.sort((a, b) => {
+            const priceA = getSalePrice(a)
+            const priceB = getSalePrice(b)
+            return priceA - priceB
+        })
+    } else if (sort === 'UpToDown') {
+        sortedProducts.sort((a, b) => {
+            const priceA = getSalePrice(a)
+            const priceB = getSalePrice(b)
+            return priceB - priceA
+        })
     }
 
     return (
         <div className="row">
             {
-                products && products.map(value => {
+                sortedProducts && sortedProducts.map(value => {
                     const sale = salesData[value._id]
                     const basePrice = value.price_product
                     let salePrice = null

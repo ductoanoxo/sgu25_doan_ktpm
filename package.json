@@ -1,0 +1,23 @@
+{
+  "name": "sgu25_doan_ktpm",
+  "version": "1.0.0",
+  "description": "E-commerce application",
+  "scripts": {
+    "test": "npm run test:server && npm run test:client && npm run test:admin",
+    "test:server": "cd server_app && npm test",
+    "test:client": "cd client_app && npm test -- --watchAll=false --passWithNoTests",
+    "test:admin": "cd admin_app && npm test -- --watchAll=false --passWithNoTests",
+    "test:coverage": "npm run test:coverage:server && npm run test:coverage:client && npm run test:coverage:admin",
+    "test:coverage:server": "cd server_app && npm run test:coverage",
+    "test:coverage:client": "cd client_app && npm run test:coverage",
+    "test:coverage:admin": "cd admin_app && npm run test:coverage",
+    "test:all": "concurrently \"npm run test:server\" \"npm run test:client\" \"npm run test:admin\"",
+    "install:all": "npm install && cd server_app && npm install && cd ../client_app && npm install && cd ../admin_app && npm install",
+    "start:server": "cd server_app && npm start",
+    "start:client": "cd client_app && npm start",
+    "start:admin": "cd admin_app && npm start"
+  },
+  "dependencies": {
+    "stripe": "^19.1.0"
+  }
+}

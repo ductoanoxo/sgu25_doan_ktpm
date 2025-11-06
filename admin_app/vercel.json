@@ -1,0 +1,7 @@
+{
+    "buildCommand": "npm install --legacy-peer-deps && npm run build",
+    "devCommand": "npm start",
+    "installCommand": "npm install --legacy-peer-deps",
+    "framework": null,
+    "outputDirectory": "build"
+}

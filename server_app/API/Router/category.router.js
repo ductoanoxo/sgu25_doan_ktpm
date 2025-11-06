@@ -1,10 +1,10 @@
-var express = require('express')
+var express = require('express');
 
-var router = express.Router()
+var router = express.Router();
 
-const Category = require('../Controller/category.controller')
+const Category = require('../Controller/category.controller');
 
-router.get('/', Category.index)
+router.get('/', Category.index);
 
 
-module.exports = router
+module.exports = router;

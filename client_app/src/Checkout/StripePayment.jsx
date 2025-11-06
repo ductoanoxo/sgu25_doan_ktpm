@@ -17,12 +17,12 @@ import CouponAPI from '../API/CouponAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeCount } from '../Redux/Action/ActionCount';
 
-const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:8000', {
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const socket = io(API_URL, {
     transports: ['websocket'], 
     jsonp: false
 });
 socket.connect();
-
 // Khởi tạo Stripe với publishable key
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 

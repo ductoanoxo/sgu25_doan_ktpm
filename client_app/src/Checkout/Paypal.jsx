@@ -10,7 +10,8 @@ import NoteAPI from '../API/NoteAPI';
 import Detail_OrderAPI from '../API/Detail_OrderAPI';
 import CouponAPI from '../API/CouponAPI';
 
-const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:8000', {
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const socket = io(API_URL, {
     transports: ['websocket'], jsonp: false
 });
 socket.connect();

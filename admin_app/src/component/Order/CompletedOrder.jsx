@@ -1,316 +1,285 @@
-import React, { useState, useEffect } from 'react';
-
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import queryString from 'query-string'
-
+import queryString from 'query-string';
 import orderAPI from '../Api/orderAPI';
-import Pagination from '../Shared/Pagination'
-import Search from '../Shared/Search'
+import Pagination from '../Shared/Pagination';
 
-function CompletedOrder(props) {
-    const [filter, setFilter] = useState({
-        page: '1',
-        limit: '10',
-        getDate: '',
-    })
+// Datepicker
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { vi } from 'date-fns/locale';
 
-    const [order, setOrder] = useState([])
-    const [totalPage, setTotalPage] = useState()
-    const [totalMoney, setTotalMoney] = useState()
+function CompletedOrder() {
+  const [filter, setFilter] = useState({
+    page: '1',
+    limit: '10',
+  });
 
-    useEffect(() => {
-        const query = '?' + queryString.stringify(filter)
+  const [ordersRaw, setOrdersRaw] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-        const fetchAllData = async () => {
-            const od = await orderAPI.completeOrder(query)
-            console.log('Order data:', od)
-            console.log('Orders array:', od.orders)
-            if (od.orders) {
-                od.orders.forEach((order, index) => {
-                    console.log(`Order ${index}:`, order)
-                    console.log(`User data:`, order.id_user)
-                    console.log(`Note data:`, order.id_note)
-                })
-            }
-            setTotalPage(od.totalPage)
-            setOrder(od.orders)
-            setTotalMoney(od.totalMoney)
-        }
-        fetchAllData()
+  // Bộ lọc theo ngày (frontend) - dùng Date | null
+  const [dateFrom, setDateFrom] = useState(null); // Date | null
+  const [dateTo, setDateTo] = useState(null);     // Date | null
+  const [errMessage, setErrMessage] = useState('');
+  const [subMessage, setSubMessage] = useState('');
 
-    }, [filter])
+  // Fetch đơn hoàn thành
+  useEffect(() => {
+    const query =
+      '?' + queryString.stringify(filter, { skipEmptyString: true, skipNull: true });
 
-    const onPageChange = (value) => {
-        setFilter({
-            ...filter,
-            page: value
-        })
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const res = await orderAPI.completeOrder(query);
+        const list = Array.isArray(res?.orders) ? res.orders : [];
+        setOrdersRaw(list);
+      } catch (err) {
+        console.error(err);
+        setError('Không tải được dữ liệu.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [filter]);
+
+  // Parse chuỗi dd/MM/yyyy thành Date object
+  const parseDateDMY = (str) => {
+    if (!str) return null;
+    const [d, m, y] = String(str).split('/');
+    if (!d || !m || !y) return null;
+    const date = new Date(+y, +m - 1, +d);
+    return isNaN(date) ? null : date;
+  };
+
+  // Lọc client theo status = 4 (hoàn thành) + khoảng ngày
+  const filteredOrders = useMemo(() => {
+    const completed = ordersRaw.filter((o) => String(o.status) === '4');
+
+    if (!dateFrom && !dateTo) return completed;
+
+    const from = dateFrom ? new Date(dateFrom) : null;
+    const to = dateTo ? new Date(dateTo) : null;
+    if (to) to.setHours(23, 59, 59, 999);
+
+    return completed.filter((o) => {
+      const od = parseDateDMY(o.create_time);
+      if (!od) return false;
+      if (from && od < from) return false;
+      if (to && od > to) return false;
+      return true;
+    });
+  }, [ordersRaw, dateFrom, dateTo]);
+
+  const totalMoney = useMemo(() => {
+    return filteredOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  }, [filteredOrders]);
+
+  const pageSize = Number(filter.limit) || 10;
+  const currentPage = Number(filter.page) || 1;
+  const totalPage = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+
+  const displayOrders = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredOrders.slice(start, start + pageSize);
+  }, [filteredOrders, currentPage, pageSize]);
+
+  const onPageChange = (val) => {
+    setFilter((prev) => ({ ...prev, page: val }));
+  };
+
+  // Khi nhấn Lọc
+  const handlerStatistic = (e) => {
+    e.preventDefault();
+    if (!dateFrom || !dateTo) {
+      setErrMessage('Vui lòng chọn đủ Từ ngày và Đến ngày!');
+      setSubMessage('');
+      return;
     }
-
-    const handler_Report = () => {
-
-        // source code HTML table to PDF
-
-        var sTable = document.getElementById('customers').innerHTML;
-
-        var style = "<style>";
-        style = style + "table {width: 100%;font: 17px Calibri;}";
-        style = style + "table, th, td {border: solid 1px #DDD; border-collapse: collapse;";
-        style = style + "padding: 2px 3px;text-align: center;}";
-        style = style + "</style>";
-
-        // CREATE A WINDOW OBJECT.
-        var win = window.open('', '', 'height=900,width=1000');
-
-        win.document.write('<html><head>');
-        win.document.write('<title>Profile</title>');   // <title> FOR PDF HEADER.
-        win.document.write(style);          // ADD STYLE INSIDE THE HEAD TAG.
-        win.document.write('</head>');
-        win.document.write('<body>');
-        win.document.write(sTable);         // THE TABLE CONTENTS INSIDE THE BODY TAG.
-        win.document.write('</body></html>');
-
-        win.document.close(); 	// CLOSE THE CURRENT WINDOW.
-
-        win.print();    // PRINT THE CONTENTS.
-
+    if (dateFrom > dateTo) {
+      setErrMessage('Khoảng ngày không hợp lệ!');
+      setSubMessage('');
+      return;
     }
+    setErrMessage('');
+    setSubMessage('Đã lọc hóa đơn hoàn thành theo khoảng thời gian!');
+  };
 
+  // Reset bộ lọc
+  const handleResetFilter = () => {
+    setDateFrom(null);
+    setDateTo(null);
+    setErrMessage('');
+    setSubMessage('');
+  };
 
-    let day = [] 
-    let month = []
-    let year = []
+  // In PDF
+  const handler_Report = () => {
+    const container = document.getElementById('customers');
+    if (!container) return;
+    const sTable = container.innerHTML;
+    const style =
+      '<style>table{width:100%;font:17px Calibri;}table,th,td{border:1px solid #DDD;border-collapse:collapse;padding:4px;text-align:center;}</style>';
+    const win = window.open('', '', 'height=900,width=1000');
+    win.document.write('<html><head><title>Report</title>' + style + '</head><body>');
+    win.document.write(sTable);
+    win.document.write('</body></html>');
+    win.document.close();
+    win.print();
+  };
 
-    for (let i = 1; i < 32; i++){
-        day.push(i)
-    }
+  return (
+    <div className="page-wrapper">
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-12">
+            <div className="card">
+              <div className="card-body">
+                <h4 className="card-title">Complete Orders</h4>
 
-    for (let i = 1; i < 13; i++){
-        month.push(i)
-    }
-
-    // Tạo danh sách năm từ 2020 đến năm hiện tại + 1
-    const currentYear = new Date().getFullYear()
-    for (let i = 2020; i <= currentYear + 1; i++){
-        year.push(i)
-    }
-
-
-    const [getDay, setGetDay] = useState('null')
-    const [getMonth, setGetMonth] = useState('null')
-    const [getYear, setGetYear] = useState('null')
-
-    const [errMessage, setErrMessage] = useState('')
-    const [subMessage, setSubMessage] = useState('')
-
-    const handlerStatistic = (e) => {
-
-        e.preventDefault()
-
-        // Check Validation
-
-        // Kiểm tra ngày tháng năm đều rỗng
-        if ((getDay === 'null' && getMonth === 'null' && getYear === 'null')){
-            setErrMessage('Vui lòng kiểm tra lại!')
-            console.log("123")
-            setSubMessage('')
-            return
-        }
-
-        // Kiểm tra chỉ tháng là rỗng
-        if (getDay !== 'null' && getYear !== 'null' && getMonth === 'null'){
-            setErrMessage('Vui lòng kiểm tra lại!')
-            console.log("456")
-            setSubMessage('')
-            return
-        }
-
-        // Kiểm tra chỉ năm là rỗng
-        if (getDay !== 'null' && getMonth !== 'null' && getYear === 'null'){
-            setErrMessage('Vui lòng kiểm tra lại!')
-            console.log("789")
-            setSubMessage('')
-            return
-        }
-
-        // Kiểm tra năm và tháng là rỗng
-        if (getDay !== 'null' && getMonth === 'null' && getYear === 'null'){
-            setErrMessage('Vui lòng kiểm tra lại!')
-            console.log("11")
-            setSubMessage('')
-            return
-        } 
-        
-        // Kiểm tra ngày và năm là rỗng
-        if (getDay === 'null' && getMonth !== 'null' && getYear === 'null'){
-            setErrMessage('Vui lòng kiểm tra lại!')
-            console.log("10")
-            setSubMessage('')
-            return
-        }           
-        // Check Validation
-
-
-
-        //Xử lý thanh toán theo ngày
-        if ((getDay !== 'null') && (getMonth !== 'null') && (getYear !== 'null')){
-
-            setFilter({
-                ...filter,
-                getDate: `${getDay}/${getMonth}/${getYear}`
-            })
-
-            setSubMessage('Thống Kê Theo Ngày Thành Công!')
-            setErrMessage('')
-        }        
-
-        // Xử lý thanh toán theo tháng
-        if (getDay === 'null' && getMonth !== 'null' && getYear !== 'null'){
-
-            setFilter({
-                ...filter,
-                getDate: `/${getMonth}/${getYear}`
-            })
-
-            setSubMessage('Thống Kê Theo Tháng Thành Công!')
-            setErrMessage('')
-        }
-
-        //Xử lý thanh toán theo năm
-        if (getDay === 'null' && getMonth === 'null' && getYear !== 'null'){
-
-            setFilter({
-                ...filter,
-                getDate: `/${getYear}`
-            })
-
-            setSubMessage('Thống Kê Năm Thành Công!')
-            setErrMessage('')
-        }
-
-    }
-
-    return (
-        <div className="page-wrapper">
-
-            <div className="container-fluid">
-                <div className="row">
-                    <div className="col-12">
-                        <div className="card">
-                            <div className="card-body">
-                                <h4 className="card-title">Complete Order</h4>
-                                <div className="table-responsive mt-3" id="customers">
-                                    <table className="table table-striped table-bordered no-wrap" id="tab_customers">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Phone</th>
-                                                <th>Address</th>
-                                                <th>Status</th>
-                                                <th>Total</th>
-                                                <th>Payment</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            {
-                                                order && order.map((value, index) => (
-                                                    <tr key={index}>
-                                                        <td className="name">{value._id}</td>
-                                                        <td className="name">{value.id_note ? value.id_note.fullname : 'N/A'}</td>
-                                                        <td className="name">{value.id_user ? value.id_user.email : 'N/A'}</td>
-                                                        <td className="name">{value.id_note ? value.id_note.phone : 'N/A'}</td>
-                                                        <td className="name">{value.address}</td>
-                                                        <td>
-                                                            {(() => {
-                                                                switch (value.status) {
-                                                                    case "1": return "Đang xử lý";
-                                                                    case "2": return "Đã xác nhận";
-                                                                    case "3": return "Đang giao";
-                                                                    case "4": return "Hoàn thành";
-                                                                    default: return "Đơn bị hủy";
-                                                                }
-                                                            })()}
-                                                        </td>
-                                                        <td className="name">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.total)+ ' VNĐ'}</td>
-                                                        <td className="name">{value.pay === true ? "Đã thanh toán" : "Chưa thanh toán"}</td>
-                                                        <td>
-                                                            <div className="d-flex">
-                                                                <Link to={"/order/detail/" + value._id} className="btn btn-info mr-1">Detail</Link>
-
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            }
-                                        </tbody>
-                                    </table>
-                                    <h4 className="card-title">Total Money: {new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(totalMoney)+ ' VNĐ'}</h4>
-                                </div>
-                                <Pagination filter={filter} onPageChange={onPageChange} totalPage={totalPage} />
-                                    <div>
-                                        <div className="d-flex">
-                                            <h4>Chọn phương thức thống kê</h4>
-                                        </div>
-                                        <br />
-                                        <select className="custom-select" style={{ color: 'gray', width: '85px'}}
-                                            value={getDay} onChange={(e) => setGetDay(e.target.value)}>
-                                            <option value="null">Ngày</option>
-                                            {
-                                                day && day.map(d => (
-                                                    <option value={d} key={d}>{d}</option>
-                                                ))
-                                            }
-                                        </select>
-                                        &nbsp;/&nbsp;
-                                        <select className="custom-select" style={{ color: 'gray', width: '85px'}}
-                                            value={getMonth} onChange={(e) => setGetMonth(e.target.value)}>
-                                            <option value="null" >Tháng</option>
-                                            {
-                                                month && month.map(m => (
-                                                    <option value={m} key={m}>{m}</option>
-                                                ))
-                                            }
-                                        </select>
-                                        &nbsp;/&nbsp;
-                                        <select className="custom-select" style={{ color: 'gray', width: '85px'}}
-                                            value={getYear} onChange={(e) => setGetYear(e.target.value)}>
-                                            <option value="null">Năm</option>
-                                            {
-                                                year && year.map(y => (
-                                                    <option value={y} key={y}>{y}</option>
-                                                ))
-                                            }
-                                        </select>
-                                        &nbsp;
-                                        <input type="submit" className="btn btn-primary" value="Lọc Hóa Đơn" onClick={handlerStatistic} />
-                                    </div>
-                                    <div>
-                                    {
-                                        errMessage !== '' && <span className="text-danger">{errMessage}</span>
-                                    }
-                                    {
-                                        subMessage !== '' && <span className="text-success">{subMessage}</span>
-                                    }
-                                    </div>
-                                    <br />
-                                    <a className="btn btn-success mb-5"
-                                        onClick={handler_Report}
-                                        style={{ color: '#fff', cursor: 'pointer' }}>Thống Kê</a>
-                            </div>
-                        </div>
+                {/* Bộ lọc */}
+                <div style={{ marginBottom: 20 }}>
+                  <div className="d-flex align-items-center gap-2" style={{ flexWrap: 'wrap' }}>
+                    <div style={{ display: 'inline-block' }}>
+                      <label style={{ marginRight: 8 }}>Từ ngày:</label>
+                      <div style={{ display: 'inline-block', width: 200 }}>
+                        <DatePicker
+                          selected={dateFrom}
+                          onChange={(d) => setDateFrom(d)}
+                          dateFormat="dd/MM/yyyy"
+                          placeholderText="dd/mm/yyyy"
+                          className="form-control"
+                          locale={vi}
+                          maxDate={dateTo || undefined}
+                          isClearable
+                          shouldCloseOnSelect
+                        />
+                      </div>
                     </div>
+
+                    <div style={{ display: 'inline-block' }}>
+                      <label style={{ marginRight: 8 }}>Đến ngày:</label>
+                      <div style={{ display: 'inline-block', width: 200 }}>
+                        <DatePicker
+                          selected={dateTo}
+                          onChange={(d) => setDateTo(d)}
+                          dateFormat="dd/MM/yyyy"
+                          placeholderText="dd/mm/yyyy"
+                          className="form-control"
+                          locale={vi}
+                          minDate={dateFrom || undefined}
+                          isClearable
+                          shouldCloseOnSelect
+                        />
+                      </div>
+                    </div>
+
+                    <button className="btn btn-primary" onClick={handlerStatistic}>
+                      Lọc Hóa Đơn
+                    </button>
+                    <button className="btn btn-secondary" onClick={handleResetFilter}>
+                      Xóa Bộ Lọc
+                    </button>
+                  </div>
+                  {errMessage && <p className="text-danger mt-2 mb-0">{errMessage}</p>}
+                  {subMessage && <p className="text-success mt-2 mb-0">{subMessage}</p>}
+                  {error && <p className="text-danger mt-2 mb-0">{error}</p>}
                 </div>
+
+                {/* Bảng */}
+                <div className="table-responsive" id="customers">
+                  <table className="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Điện thoại</th>
+                        <th>Địa chỉ</th>
+                        <th>Ngày tạo</th>
+                        <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
+                        <th>Trạng thái</th>
+                        <th>Chi tiết</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <tr>
+                          <td colSpan={10}>Đang tải...</td>
+                        </tr>
+                      ) : displayOrders.length === 0 ? (
+                        <tr>
+                          <td colSpan={10}>Không có đơn phù hợp.</td>
+                        </tr>
+                      ) : (
+                        displayOrders.map((value, index) => (
+                          <tr key={index}>
+                            <td>{value._id}</td>
+                            <td>{value.id_note?.fullname || 'N/A'}</td>
+                            <td>{value.id_user?.email || 'N/A'}</td>
+                            <td>{value.id_note?.phone || 'N/A'}</td>
+                            <td>{value.address}</td>
+                            {/* create_time đã là dd/MM/yyyy từ backend */}
+                            <td>{value.create_time}</td>
+                            <td>
+                              {new Intl.NumberFormat('vi-VN').format(Number(value.total) || 0)} VNĐ
+                            </td>
+                            <td>{value.pay ? 'Đã thanh toán' : 'Chưa thanh toán'}</td>
+                            <td>
+                              {(() => {
+                                switch (String(value.status)) {
+                                  case '1':
+                                    return 'Đang xử lý';
+                                  case '2':
+                                    return 'Đã xác nhận';
+                                  case '3':
+                                    return 'Đang giao';
+                                  case '4':
+                                    return 'Hoàn thành';
+                                  default:
+                                    return 'Đã hủy';
+                                }
+                              })()}
+                            </td>
+                            <td>
+                              <Link to={`/order/detail/${value._id}`} className="btn btn-info btn-sm">
+                                Xem
+                              </Link>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+
+                  <h4>
+                    Tổng tiền: {new Intl.NumberFormat('vi-VN').format(totalMoney)} VNĐ
+                  </h4>
+                </div>
+
+                <Pagination filter={filter} onPageChange={onPageChange} totalPage={totalPage} />
+
+                <br />
+                <button className="btn btn-success" style={{ color: '#fff' }} onClick={handler_Report}>
+                  In thống kê
+                </button>
+              </div>
             </div>
-            <footer className="footer text-center text-muted">
-                All Rights Reserved by Adminmart. Designed and Developed by
-            <a href="https://www.facebook.com/KimTien.9920/"> Tiền Kim</a>.
-        </footer>
+          </div>
         </div>
-    );
+      </div>
+
+      <footer className="footer text-center text-muted">
+        All Rights Reserved by Adminmart. Designed and Developed by
+        <a href="https://www.facebook.com/KimTien.9920/"> Tiền Kim</a>.
+      </footer>
+    </div>
+  );
 }
 
 export default CompletedOrder;

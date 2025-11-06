@@ -1,17 +1,17 @@
-var express = require('express')
+var express = require('express');
 
-var router = express.Router()
+var router = express.Router();
 
-const Products = require('../../Controller/admin/product.controller')
+const Products = require('../../Controller/admin/product.controller');
 
-router.get('/', Products.index)
-router.get('/:id', Products.details)
+router.get('/', Products.index);
+router.get('/:id', Products.details);
 
-router.post('/create', Products.create)
+router.post('/create', Products.create);
 
-router.patch('/update', Products.update)
+router.patch('/update', Products.update);
 
-router.delete('/delete', Products.delete)
+router.delete('/delete', Products.delete);
 
 
-module.exports = router
+module.exports = router;

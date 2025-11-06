@@ -16,6 +16,7 @@ function Shop(props) {
     const { id } = useParams()
 
     const [products, setProducts] = useState([])
+    const [sort, setSort] = useState('')
 
     //Tổng số trang
     const [totalPage, setTotalPage] = useState()
@@ -159,6 +160,11 @@ function Shop(props) {
 
     }
 
+    // Handler cho sort
+    const handlerChangeSort = (e) => {
+        setSort(e.target.value)
+    }
+
 
 
     return (
@@ -222,10 +228,10 @@ function Shop(props) {
                                 <div className="product-select-box">
                                     <div className="product-short">
                                         <p>Sort By:</p>
-                                        <select className="nice-select">
-                                            <option value="trending">Relevance</option>
-                                            <option value="rating">Price (Low &gt; High)</option>
-                                            <option value="rating">Price (High &gt; Low)</option>
+                                        <select className="nice-select" value={sort} onChange={handlerChangeSort}>
+                                            <option value="">Relevance</option>
+                                            <option value="DownToUp">Price (Low &gt; High)</option>
+                                            <option value="UpToDown">Price (High &gt; Low)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -234,7 +240,7 @@ function Shop(props) {
                                 <div className="tab-content">
                                     <div id="grid-view" className="tab-pane active" role="tabpanel">
                                         <div className="product-area shop-product-area">
-                                            <Products products={products} />
+                                            <Products products={products} sort={sort} />
                                         </div>
                                     </div>
                                     <div className="paginatoin-area">
