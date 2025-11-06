@@ -42,8 +42,12 @@ const HOST = 'ktpm.dwb8wtz.mongodb.net';
 
 const uri = `mongodb+srv://${USER}:${PASS}@${HOST}/${DB}?retryWrites=true&w=majority`;
 
+console.log('🔌 Đang kết nối đến MongoDB Atlas...');
 
-mongoose.connect(uri)
+mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
     .then(async() => {
         console.log('✅ Kết nối MongoDB Atlas');
 
