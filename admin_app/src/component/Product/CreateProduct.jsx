@@ -49,6 +49,7 @@ function CreateProduct(props) {
 
     const validateAll = () => {
         const priceRegex = /^[1-9](?=.+[0-9]).{0,}$/
+        const numberRegex = /^\d+$/  // Chỉ chấp nhận số nguyên không âm
         let msg = {}
         if (isEmpty(name)) {
             msg.name = "Tên không được để trống"
@@ -61,11 +62,11 @@ function CreateProduct(props) {
         if (isEmpty(description)) {
             msg.description = "Mô tả không được để trống"
         }
-        // if (isEmpty(number)) {
-        //     msg.number = "Số lượng không được để trống"
-        // } else if (!priceRegex.test(number)) {
-        //     msg.number = "Số lượng sai định dạng"
-        // }
+        if (isEmpty(number.toString())) {
+            msg.number = "Số lượng không được để trống"
+        } else if (!numberRegex.test(number) || Number(number) < 0) {
+            msg.number = "Số lượng phải là số nguyên không âm"
+        }
         if (isEmpty(categoryChoose)) {
             msg.category = "Vui lòng chọn loại"
         }
@@ -91,7 +92,7 @@ function CreateProduct(props) {
         formData.append("name", name)
         formData.append("price", price)
         formData.append("category", categoryChoose)
-        // formData.append("number", number)
+        formData.append("number", number)
         formData.append("description", description)
         formData.append("gender", genderChoose)
 
@@ -101,7 +102,7 @@ function CreateProduct(props) {
             setName('');
             setPrice('');
             setDescription('');
-            // setNumber('')
+            setNumber('');
             setCategoryChoose('')
             setGenderChoose('Unisex')
             setFile('')
@@ -120,7 +121,7 @@ function CreateProduct(props) {
                     <div className="col-12">
                         <div className="card">
                             <div className="card-body">
-                                <h4 className="card-title">Create Product</h4>
+                                <h4 className="card-title">Create Products</h4>
                                 {
                                     validationMsg.api === "Bạn đã thêm thành công" ?
                                         (
@@ -153,11 +154,11 @@ function CreateProduct(props) {
                                         <input type="text" className="form-control" id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} required />
                                         <p className="form-text text-danger">{validationMsg.description}</p>
                                     </div>
-                                    {/* <div className="form-group w-50">
-                                        <label htmlFor="number">Số lượng: </label>
-                                        <input type="number" className="form-control" id="number" name="number" value={number} onChange={(e) => onChangeNumber(e)} required />
+                                    <div className="form-group w-50">
+                                        <label htmlFor="number">Số lượng tồn kho</label>
+                                        <input type="number" className="form-control" id="number" name="number" value={number} onChange={(e) => onChangeNumber(e)} required min="0" />
                                         <p className="form-text text-danger">{validationMsg.number}</p>
-                                    </div> */}
+                                    </div>
 
                                     <div className="form-group w-50">
                                         {/* <label htmlFor="categories" className="mr-2">Chọn loại:</label> */}

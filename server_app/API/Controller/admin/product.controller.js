@@ -1,6 +1,6 @@
 const Product = require('../../../Models/product');
 
-module.exports.index = async (req, res) => {
+module.exports.index = async(req, res) => {
     let page = parseInt(req.query.page) || 1;
     const keyWordSearch = req.query.search;
 
@@ -34,7 +34,7 @@ module.exports.index = async (req, res) => {
     }
 };
 
-module.exports.create = async (req, res) => {
+module.exports.create = async(req, res) => {
     const product = await Product.find();
 
     const productFilter = product.filter((c) => {
@@ -49,7 +49,7 @@ module.exports.create = async (req, res) => {
         newProduct.name_product = req.body.name;
         newProduct.price_product = req.body.price;
         newProduct.id_category = req.body.category;
-        // newProduct.number = req.body.number;
+        newProduct.number = req.body.number || 0;
         newProduct.describe = req.body.description;
         newProduct.gender = req.body.gender;
 
@@ -60,18 +60,17 @@ module.exports.create = async (req, res) => {
 
             var fileProduct = '/img/' + fileName;
 
-            newProduct.image = 'http://localhost:8000' + fileProduct;
+            newProduct.image = process.env.API_URL || 'http://localhost:8000' + fileProduct;
 
             fileImage.mv('./public/img/' + fileName);
-        }
-        else newProduct.image = 'http://localhost:8000/img/nophoto.jpg';
+        } else newProduct.image = process.env.API_URL || 'http://localhost:8000' + '/img/nophoto.jpg';
 
         newProduct.save();
         res.json({ msg: 'Bạn đã thêm thành công' });
     }
 };
 
-module.exports.delete = async (req, res) => {
+module.exports.delete = async(req, res) => {
     const id = req.query.id;
 
     await Product.deleteOne({ _id: id }, (err) => {
@@ -81,16 +80,16 @@ module.exports.delete = async (req, res) => {
         }
         res.json({ msg: 'Thanh Cong' });
     });
-    
+
 };
 
-module.exports.details = async (req, res) => {
+module.exports.details = async(req, res) => {
     const product = await Product.findOne({ _id: req.params.id });
 
     res.json(product);
 };
 
-module.exports.update = async (req, res) => {
+module.exports.update = async(req, res) => {
     const product = await Product.find();
 
     const productFilter = product.filter((c) => {
@@ -115,26 +114,25 @@ module.exports.update = async (req, res) => {
                 name_product: req.body.name,
                 price_product: req.body.price,
                 id_category: req.body.category,
-                // number: req.body.number,
+                number: req.body.number,
                 describe: req.body.description,
                 gender: req.body.gender,
-                image: 'http://localhost:8000' + fileProduct
-            }, function (err, res) {
+                image: (process.env.API_URL || 'http://localhost:8000') + fileProduct
+            }, function(err, res) {
                 if (err) return res.json({ msg: err });
             });
             res.json({ msg: 'Bạn đã update thành công' });
 
             fileImage.mv('./public/img/' + fileName);
-        }
-        else {
+        } else {
             await Product.updateOne({ _id: req.body.id }, {
                 name_product: req.body.name,
                 price_product: req.body.price,
                 id_category: req.body.category,
-                // number: req.body.number,
+                number: req.body.number,
                 describe: req.body.description,
                 gender: req.body.gender
-            }, function (err, res) {
+            }, function(err, res) {
                 if (err) return res.json({ msg: err });
             });
             res.json({ msg: 'Bạn đã update thành công' });
