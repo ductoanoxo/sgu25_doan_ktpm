@@ -7,7 +7,7 @@ import orderAPI from '../Api/orderAPI';
 import Pagination from '../Shared/Pagination'
 import Search from '../Shared/Search'
 
-const socket = io('http://localhost:8000/', {
+const socket = io('http://localhost:8000/'|| import.meta.env.REACT_APP_API_URL, {
     transports: ['websocket'], jsonp: false
 });
 socket.connect();

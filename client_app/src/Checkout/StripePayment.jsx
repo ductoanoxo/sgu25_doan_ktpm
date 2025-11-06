@@ -17,7 +17,7 @@ import CouponAPI from '../API/CouponAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import { changeCount } from '../Redux/Action/ActionCount';
 
-const socket = io('http://localhost:8000', {
+const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:8000', {
     transports: ['websocket'], 
     jsonp: false
 });

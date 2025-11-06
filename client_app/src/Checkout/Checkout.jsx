@@ -15,7 +15,7 @@ import MoMo from './MoMo.jsx';
 import MapComponent from './MapComponent';
 import StripePayment from './StripePayment';
 
-const socket = io('http://localhost:8000', {
+const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:8000', {
     transports: ['websocket'], jsonp: false
 });
 socket.connect();
