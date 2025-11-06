@@ -6,23 +6,25 @@ services:
       - "8000:8000"
     environment:
       - NODE_ENV=development
+      - MONGO_URL=mongodb://mongo:27017/Clothes
     env_file:
-      - server_app/.env
-    # Use Google DNS to resolve MongoDB Atlas hostname
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    # Removed depends_on mongo - connecting to Atlas instead
+      - server_app/.env  
+    depends_on:
+      - mongo
     develop:
       watch:
         - path: ./server_app
           action: sync
           target: /usr/src/app
+          ignore:
+            - node_modules/
         - path: ./server_app/package.json
           action: rebuild
 
   client_app:
-    build: ./client_app
+    build:
+      context: ./client_app
+      dockerfile: Dockerfile.dev
     container_name: client_app
     ports:
       - "3000:3000"
@@ -30,24 +32,28 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - HOST=0.0.0.0
-      - REACT_APP_API_URL=http://localhost:8000/
-    volumes:
-      - ./client_app:/usr/src/app
-      - /usr/src/app/node_modules
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_51SCj0G2OdrtKbthC9DWQntFsFgwYnXBMtJOEVnPR0K3YT2F4EuIXIVGd6cK642YgGKEyd3yJEKSZB1yZ54vEQqiT00FFhUeJCb
+      - REACT_APP_SOCKET_URL=http://localhost:8000
     stdin_open: true
     tty: true
     depends_on:
       - server_app
     develop:
       watch:
-        - path: ./client_app
+        - path: ./client_app/src
           action: sync
-          target: /usr/src/app
+          target: /usr/src/app/src
+        - path: ./client_app/public
+          action: sync+restart
+          target: /usr/src/app/public
         - path: ./client_app/package.json
           action: rebuild
 
   admin_app:
-    build: ./admin_app
+    build:
+      context: ./admin_app
+      dockerfile: Dockerfile.dev
     container_name: admin_app
     ports:
       - "3001:3001"
@@ -56,22 +62,29 @@ services:
       - WATCHPACK_POLLING=true
       - HOST=0.0.0.0
       - PORT=3001
-      - REACT_APP_API_URL=http://localhost:8000/
-    volumes:
-      - ./admin_app:/usr/src/app
-      - /usr/src/app/node_modules
+      - REACT_APP_API_URL=http://localhost:8000
     stdin_open: true
     tty: true
     depends_on:
       - server_app
     develop:
       watch:
-        - path: ./admin_app
+        - path: ./admin_app/src
           action: sync
-          target: /usr/src/app
+          target: /usr/src/app/src
+        - path: ./admin_app/public
+          action: sync+restart
+          target: /usr/src/app/public
         - path: ./admin_app/package.json
           action: rebuild
 
-# MongoDB local container removed - using MongoDB Atlas (cloud) instead
-# volumes:
-#   mongo-data:
+  mongo:
+    image: mongo:5
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
