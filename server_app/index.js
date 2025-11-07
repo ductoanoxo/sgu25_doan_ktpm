@@ -320,14 +320,7 @@ app.get('/health', (req, res) => {
 
 // Root endpoint
 app.get('/', (req, res) => {
-    res.status(200).json({ 
-        message: 'Server is running',
-        version: '1.0.0',
-        endpoints: {
-            health: '/health',
-            api: '/api'
-        }
-    });
+    res.status(200).send('Server is running');
 });
 
 app.use('/api/admin/Product', ProductAdmin);
@@ -359,9 +352,9 @@ http.listen(port, '0.0.0.0', () => {
     console.log('listening on *: ' + port);
 });
 
-// Graceful shutdown for Railway
+// Graceful shutdown handlers
 process.on('SIGTERM', () => {
-    console.log('👋 SIGTERM received, closing HTTP server gracefully...');
+    console.log('👋 SIGTERM received, shutting down gracefully');
     http.close(() => {
         console.log('✅ HTTP server closed');
         mongoose.connection.close(false, () => {
@@ -372,7 +365,7 @@ process.on('SIGTERM', () => {
 });
 
 process.on('SIGINT', () => {
-    console.log('👋 SIGINT received, closing HTTP server gracefully...');
+    console.log('👋 SIGINT received, shutting down gracefully');
     http.close(() => {
         console.log('✅ HTTP server closed');
         mongoose.connection.close(false, () => {
