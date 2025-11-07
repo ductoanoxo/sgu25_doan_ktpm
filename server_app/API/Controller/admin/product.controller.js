@@ -121,7 +121,7 @@ module.exports.update = async(req, res) => {
             }, function(err, res) {
                 if (err) return res.json({ msg: err });
             });
-            res.json({ msg: 'Bạn đã update thành công' });
+            res.json({ msg: 'Bạn đã update thành công', redirect: '/admin/products' });
 
             fileImage.mv('./public/img/' + fileName);
         } else {
@@ -135,7 +135,7 @@ module.exports.update = async(req, res) => {
             }, function(err, res) {
                 if (err) return res.json({ msg: err });
             });
-            res.json({ msg: 'Bạn đã update thành công' });
+            res.json({ msg: 'Bạn đã update thành công', redirect: '/admin/products' });
         }
 
 

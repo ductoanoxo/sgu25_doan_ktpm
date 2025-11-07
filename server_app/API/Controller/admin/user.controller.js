@@ -7,17 +7,30 @@ module.exports.index = async(req, res) => {
     const keyWordSearch = req.query.search;
 
     const perPage = parseInt(req.query.limit) || 8;
-    const totalPage = Math.ceil(await User.countDocuments() / perPage);
-
+    
+    let users;
+    let query = {};
+    
+    // Nếu có filter permission cụ thể
+    if (req.query.permission) {
+        query.id_permission = req.query.permission;
+    }
+    
+    // Nếu chỉ muốn lấy customers
+    if (req.query.customerOnly === 'true') {
+        query.id_permission = '6087dcb5f269113b3460fce4';
+    }
+    
+    // Nếu muốn loại trừ customers (chỉ lấy admin/staff)
+    if (req.query.excludeCustomer === 'true') {
+        query.id_permission = { $ne: '6087dcb5f269113b3460fce4' };
+    }
+    
+    users = await User.find(query).populate('id_permission');
+    
+    const totalPage = Math.ceil(users.length / perPage);
     let start = (page - 1) * perPage;
     let end = page * perPage;
-    let users;
-    if (req.query.permission) {
-        users = await User.find({ id_permission: req.query.permission }).populate('id_permission');
-    } else {
-        users = await User.find({}).populate('id_permission');
-    }
-
 
     if (!keyWordSearch) {
         res.json({
