@@ -1,8 +1,0 @@
-[build]
-builder = "nixpacks"
-
-[deploy]
-healthcheckPath = "/health"
-healthcheckTimeout = 300
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3
