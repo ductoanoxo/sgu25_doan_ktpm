@@ -13,7 +13,7 @@ function CreateUserCus(props) {
     const [username, setUserName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [permissionChoose, setPermissionChoose] = useState('6087dcb5f269113b3460fce4');
+    const [permissionChoose, setPermissionChoose] = useState('');  // Để trống, sẽ tự động gán customer permission
     const [validationMsg, setValidationMsg] = useState('');
     const { handleSubmit } = useForm();
 
@@ -21,6 +21,11 @@ function CreateUserCus(props) {
         const fetchAllData = async () => {
             const ps = await permissionAPI.getAPI();
             setPermission(ps)
+            // Tự động tìm và gán customer permission
+            const customerPermission = ps.find(p => p.permission.toLowerCase() === 'customer');
+            if (customerPermission) {
+                setPermissionChoose(customerPermission._id);
+            }
         }
         fetchAllData()
     }, [])
@@ -94,7 +99,7 @@ function CreateUserCus(props) {
                     <div className="col-12">
                         <div className="card">
                             <div className="card-body">
-                                <h4 className="card-title">Create User</h4>
+                                <h4 className="card-title">Create Customer</h4>
                                 {
                                     validationMsg.api === "Bạn đã thêm thành công" ?
                                         (

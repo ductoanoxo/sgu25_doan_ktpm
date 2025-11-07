@@ -8,11 +8,12 @@ import permissionAPI from '../Api/permissionAPI'
 
 function UpdateUserCus(props) {
     const [id] = useState(props.match.params.id)
+    const [permission, setPermission] = useState([])
     const [name, setName] = useState('');
     const [username, setUserName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [permissionChoose, setPermissionChoose] = useState('6087dcb5f269113b3460fce4');
+    const [permissionChoose, setPermissionChoose] = useState('');
     const [validationMsg, setValidationMsg] = useState('');
     const { handleSubmit } = useForm();
 
@@ -24,6 +25,16 @@ function UpdateUserCus(props) {
             setEmail(rs.email)
             setUserName(rs.username)
             setName(rs.fullname)
+            setPermission(ps)
+            // Giữ nguyên permission hiện tại hoặc tự động gán customer
+            if (rs.id_permission) {
+                setPermissionChoose(rs.id_permission);
+            } else {
+                const customerPermission = ps.find(p => p.permission.toLowerCase() === 'customer');
+                if (customerPermission) {
+                    setPermissionChoose(customerPermission._id);
+                }
+            }
         }
         fetchAllData()
     }, [])
@@ -37,9 +48,9 @@ function UpdateUserCus(props) {
             msg.name = "Tên sai định dạng (Ít nhất 3 kí tự alphabet)"
         }
 
-
+        // Customer luôn phải có permission
         if (isEmpty(permissionChoose)) {
-            msg.permission = "Vui lòng chọn quyền"
+            msg.permission = "Permission không hợp lệ"
         }
         setValidationMsg(msg)
         if (Object.keys(msg).length > 0) return false;
@@ -80,7 +91,7 @@ function UpdateUserCus(props) {
                     <div className="col-12">
                         <div className="card">
                             <div className="card-body">
-                                <h4 className="card-title">Update User</h4>
+                                <h4 className="card-title">Update Customer</h4>
                                 {
                                     validationMsg.api === "Bạn đã update thành công" ?
                                         (
