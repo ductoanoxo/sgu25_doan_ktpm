@@ -27,7 +27,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: client_app
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Dev server runs on 3000
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
@@ -56,7 +56,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: admin_app
     ports:
-      - "3001:3001"
+      - "3001:3001"  # Dev server runs on 3001
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true

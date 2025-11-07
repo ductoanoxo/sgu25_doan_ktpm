@@ -45,9 +45,9 @@ const uri = `mongodb+srv://${USER}:${PASS}@${HOST}/${DB}?retryWrites=true&w=majo
 console.log('🔌 Đang kết nối đến MongoDB Atlas...');
 
 mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
     .then(async() => {
         console.log('✅ Kết nối MongoDB Atlas');
 
@@ -310,8 +310,8 @@ app.use('/api/Category', CategoryAPI);
 
 // Health check endpoint for Railway
 app.get('/health', (req, res) => {
-    res.status(200).json({ 
-        status: 'ok', 
+    res.status(200).json({
+        status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
