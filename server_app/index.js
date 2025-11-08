@@ -21,6 +21,7 @@ const Detail_OrderAPI = require('./API/Router/detail_order.router');
 const CommentAPI = require('./API/Router/comment.router');
 const CategoryAPI = require('./API/Router/category.router');
 const NoteAPI = require('./API/Router/note.router');
+const FavoriteAPI = require('./API/Router/favorite.router');
 
 const ProductAdmin = require('./API/Router/admin/product.router');
 const CategoryAdmin = require('./API/Router/admin/category.router');
@@ -307,6 +308,7 @@ app.use('/api/Comment', CommentAPI);
 app.use('/api/Note', NoteAPI);
 app.use('/api/DetailOrder', Detail_OrderAPI);
 app.use('/api/Category', CategoryAPI);
+app.use('/api/favorite', FavoriteAPI);
 
 // Health check endpoint for Railway
 app.get('/health', (req, res) => {

@@ -314,12 +314,19 @@ function Header(props) {
                             </form>
                             <div className="header-middle-right">
                                 <ul className="hm-menu">
-                                    <li className="hm-wishlist d-flex">
-                                        <li className="hm-minicart">
-                                            <div className="hm-minicart-trigger"
-                                                data-toggle="collapse"
-                                                data-target="#collapse_carts"
-                                                aria-expanded="false"
+                                    {/* Wishlist/Favorite Link */}
+                                    <li className="hm-wishlist">
+                                        <Link to="/favorite">
+                                            <span className="cart-item-icon">
+                                                <i className="fa fa-heart-o"></i>
+                                            </span>
+                                        </Link>
+                                    </li>
+                                    <li className="hm-minicart">
+                                        <div className="hm-minicart-trigger"
+                                            data-toggle="collapse"
+                                            data-target="#collapse_carts"
+                                            aria-expanded="false"
                                                 aria-controls="collapse_carts">
                                                 <span className="item-icon"></span>
                                                 <span className="item-text">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(total_price)+ ' VNĐ'}
@@ -353,7 +360,6 @@ function Header(props) {
                                                     </Link>
                                                 </div>
                                             </div>
-                                        </li>
                                     </li>
                                 </ul>
                             </div>
@@ -370,7 +376,7 @@ function Header(props) {
 
                                             <li className="dropdown-holder"><Link to="/">Home</Link></li>
                                             <li className="megamenu-holder"><Link to="/shop/all">Menu</Link>
-                                                <ul class="megamenu hb-megamenu">
+                                                <ul className="megamenu hb-megamenu">
                                                     <li><Link to="/shop/all">Male</Link>
                                                         <ul>
                                                             {
