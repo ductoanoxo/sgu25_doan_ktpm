@@ -1,0 +1,104 @@
+/* Filter Sidebar Styles */
+
+.li-price-filter li,
+.li-size-filter li {
+    margin-bottom: 10px;
+}
+
+
+/* Category List Styles */
+
+.li-blog-archive li {
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.li-blog-archive li a {
+    display: block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.li-blog-archive li a:hover {
+    background-color: #f8f8f8;
+    padding-left: 15px;
+}
+
+.li-price-filter label,
+.li-size-filter label {
+    font-size: 14px;
+    font-weight: normal;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.li-price-filter label:hover,
+.li-size-filter label:hover {
+    color: #fed700;
+}
+
+.li-price-filter input[type="radio"],
+.li-size-filter input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.li-price-filter input[type="radio"]:checked,
+.li-size-filter input[type="checkbox"]:checked {
+    accent-color: #fed700;
+}
+
+
+/* Reset Filters Button */
+
+.reset-filters-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #fed700;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.reset-filters-btn:hover {
+    background-color: #e5c200;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Active Filter Badge */
+
+.active-filters {
+    background-color: #f8f8f8;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.filter-tag {
+    display: inline-block;
+    background-color: #fed700;
+    color: #333;
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+
+/* Responsive */
+
+@media (max-width: 991px) {
+    .li-blog-sidebar-wrapper {
+        margin-bottom: 30px;
+    }
+}

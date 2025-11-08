@@ -31,6 +31,8 @@ function Detail_Product(props) {
     const count_change = useSelector(state => state.Count.isLoad)
 
     const [sale, setSale] = useState()
+    
+    const [relatedProducts, setRelatedProducts] = useState([]) // FR-011: Related products
 
     // Hàm này dùng để gọi API hiển thị sản phẩm
     useEffect(() => {
@@ -45,6 +47,22 @@ function Detail_Product(props) {
             
             if (resDetail.msg === "Thanh Cong"){
                 setSale(resDetail.sale)
+            }
+            
+            // FR-011: Fetch related products (same category, exclude current product)
+            if (response.id_category && response.id_category._id) {
+                const categoryId = response.id_category._id
+                console.log('Fetching related products for category:', categoryId); // Debug
+                
+                const relatedRes = await Product.Get_Category_Product(`?id_category=${categoryId}`)
+                console.log('Related products response:', relatedRes); // Debug
+                
+                // Filter out current product and limit to 4 items
+                const filtered = relatedRes.filter(p => p._id !== id).slice(0, 4)
+                console.log('Filtered related products:', filtered); // Debug
+                setRelatedProducts(filtered)
+            } else {
+                console.log('No category found for product:', response); // Debug
             }
 
         }
@@ -510,6 +528,72 @@ function Detail_Product(props) {
                     </div>
                 </div>
             </div>
+            
+            {/* FR-011: Related Products Section */}
+            {console.log('Rendering related products, count:', relatedProducts.length)}
+            {relatedProducts.length > 0 ? (
+                <div className="related-products-area pt-60 pb-50" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <div className="section-title text-center mb-40">
+                                    <h2 style={{ fontSize: '28px', fontWeight: 'bold' }}>Sản phẩm liên quan</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            {relatedProducts.map((relatedProduct) => (
+                                <div className="col-lg-3 col-md-4 col-sm-6 mt-40" key={relatedProduct._id}>
+                                    <div className="single-product-wrap">
+                                        <div className="product-image" style={{ position: 'relative' }}>
+                                            <Link to={`/detail/${relatedProduct._id}`}>
+                                                <img 
+                                                    src={relatedProduct.image} 
+                                                    alt={relatedProduct.name_product}
+                                                    style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+                                                />
+                                            </Link>
+                                            {relatedProduct.id_sale && relatedProduct.id_sale.sale > 0 && (
+                                                <span className="sticker">-{relatedProduct.id_sale.sale}%</span>
+                                            )}
+                                        </div>
+                                        <div className="product_desc">
+                                            <div className="product_desc_info">
+                                                <div className="product-review">
+                                                    <h5 className="manufacturer">
+                                                        <Link to={`/detail/${relatedProduct._id}`}>
+                                                            {relatedProduct.name_product}
+                                                        </Link>
+                                                    </h5>
+                                                </div>
+                                                <div className="price-box">
+                                                    {relatedProduct.id_sale && relatedProduct.id_sale.sale > 0 ? (
+                                                        <>
+                                                            <span className="new-price" style={{ color: 'red', fontWeight: 'bold' }}>
+                                                                {new Intl.NumberFormat('vi-VN', {style: 'decimal', decimal: 'VND'}).format(
+                                                                    relatedProduct.price_product - (relatedProduct.price_product * relatedProduct.id_sale.sale / 100)
+                                                                ) + ' VNĐ'}
+                                                            </span>
+                                                            <br />
+                                                            <del style={{ color: '#999', fontSize: '14px' }}>
+                                                                {new Intl.NumberFormat('vi-VN', {style: 'decimal', decimal: 'VND'}).format(relatedProduct.price_product) + ' VNĐ'}
+                                                            </del>
+                                                        </>
+                                                    ) : (
+                                                        <span className="new-price">
+                                                            {new Intl.NumberFormat('vi-VN', {style: 'decimal', decimal: 'VND'}).format(relatedProduct.price_product) + ' VNĐ'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }
