@@ -5418,6 +5418,52 @@ span.required {
 	color: #fff;
 }
 
+/* Clickable row and overlay for clearer affordance */
+.table-content table tbody tr.clickable-row {
+	transition: background .12s ease, transform .12s ease;
+}
+.table-content table tbody tr.clickable-row:hover {
+	background: #f4f8ff;
+	transform: translateY(-1px);
+	cursor: pointer;
+}
+.table-content table td.li-product-thumbnail a { position: relative; display: inline-block; }
+.table-content table td.li-product-thumbnail a .view-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-weight: 700;
+	font-size: 12px;
+	background: rgba(0,0,0,0.45);
+	border-radius: 4px;
+	opacity: 0;
+	transition: opacity .12s ease;
+}
+.table-content table td.li-product-thumbnail a:hover .view-overlay { opacity: 1; }
+
+
+/* --- Force clickable hint for product image/name in cart (higher specificity) --- */
+.table-content table td.li-product-thumbnail a img:hover,
+.table-content table td.li-product-thumbnail a:hover img {
+	transform: scale(1.04) !important;
+	box-shadow: 0 8px 20px rgba(0,0,0,0.14) !important;
+	transition: transform .15s ease, box-shadow .15s ease !important;
+	cursor: pointer !important;
+}
+.table-content table td.li-product-name a:hover,
+.table-content table td.li-product-name a:focus {
+	color: #007bff !important;
+	text-decoration: underline !important;
+	cursor: pointer !important;
+}
+
+
 .pb_header{
 	padding-bottom: 2rem;
 }

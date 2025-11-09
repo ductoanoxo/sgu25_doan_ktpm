@@ -1,0 +1,188 @@
+/* General Cart Enhancements */
+.remove-btn, .proceed-checkout-btn {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 8px;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+.remove-btn .fa-times {
+    color: #ff6b6b;
+    font-size: 1.2rem;
+}
+
+.remove-btn:hover .fa-times {
+    color: #c93c3c;
+    transform: scale(1.2);
+}
+
+.cart-product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cart-product-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.proceed-checkout-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.proceed-checkout-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Enhancements for clickable product image and name */
+.li-product-thumbnail a {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden; /* Ensures overlay stays within bounds */
+    border-radius: 8px;
+}
+
+.li-product-thumbnail a:hover .cart-product-image {
+    transform: scale(1.08); /* Slightly more pronounced hover */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.li-product-thumbnail .view-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem; /* Increased size for the icon */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    border-radius: 8px;
+}
+
+.li-product-thumbnail a:hover .view-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+.li-product-name a {
+    cursor: pointer;
+    color: inherit; /* Ensure default color */
+    text-decoration: none; /* No underline by default */
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.li-product-name a:hover {
+    color: #007bff; /* Highlight color */
+    text-decoration: underline; /* Add underline on hover */
+}
+
+
+/* Toast Notification Styles */
+.notification-overlay {
+    position: fixed;
+    top: 80px; /* Position below the header */
+    right: 20px;
+    z-index: 1050;
+    width: auto;
+    pointer-events: none; /* Allow clicking through the container */
+}
+
+.notification-card {
+    background-color: #fff;
+    color: #333;
+    border-radius: 8px;
+    padding: 16px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    opacity: 0;
+    transform: translateX(120%);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    pointer-events: auto; /* Toasts themselves are clickable */
+}
+
+.notification-overlay.show .notification-card {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    width: 30px;
+    text-align: center;
+    margin-top: 2px;
+}
+
+.notification-card.success .notification-icon {
+    color: #28a745;
+}
+
+.notification-card.error .notification-icon {
+    color: #dc3545;
+}
+
+.notification-card.warning .notification-icon {
+    color: #ffc107;
+}
+
+.notification-card.info .notification-icon {
+    color: #17a2b8;
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-content h4 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.notification-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.notification-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.notification-close-btn:hover {
+    color: #333;
+}
