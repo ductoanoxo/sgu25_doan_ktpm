@@ -18,6 +18,7 @@ function Cart(props) {
     const dispatch = useDispatch()
 
     const [list_carts, set_list_carts] = useState([])
+    const [hovered, setHovered] = useState(null)
 
     // state get from redux
     const count_change = useSelector(state => state.Count.isLoad)
@@ -380,8 +381,40 @@ function Cart(props) {
                                                         <td className="li-product-remove" onClick={() => handler_delete_carts(value.id_cart)}>
                                                             <a style={{ cursor: 'pointer' }}><i className="fa fa-times"></i></a>
                                                         </td>
-                                                        <td className="li-product-thumbnail"><Link to={`/detail/${value.id_product}`}><img src={value.image} style={{ width: '5rem' }} alt="Li's Product Image" /></Link></td>
-                                                        <td className="li-product-name"><Link to={`/detail/${value.id_product}`}>{value.name_product}</Link></td>
+                                                        <td className="li-product-thumbnail">
+                                                            <Link to={`/detail/${value.id_product}`}
+                                                                title={`Xem chi tiết ${value.name_product}`}
+                                                                onMouseEnter={() => setHovered(index)}
+                                                                onMouseLeave={() => setHovered(null)}
+                                                            >
+                                                                <img
+                                                                    src={value.image}
+                                                                    alt={`${value.name_product}`}
+                                                                    style={{
+                                                                        width: '5rem',
+                                                                        cursor: 'pointer',
+                                                                        transform: hovered === index ? 'scale(1.03)' : 'none',
+                                                                        transition: 'transform .15s ease, box-shadow .15s ease',
+                                                                        boxShadow: hovered === index ? '0 6px 18px rgba(0,0,0,0.12)' : 'none',
+                                                                        borderRadius: '4px'
+                                                                    }}
+                                                                />
+                                                            </Link>
+                                                        </td>
+                                                        <td className="li-product-name">
+                                                            <Link to={`/detail/${value.id_product}`}
+                                                                title={`Xem chi tiết ${value.name_product}`}
+                                                                onMouseEnter={() => setHovered(index)}
+                                                                onMouseLeave={() => setHovered(null)}
+                                                                style={{
+                                                                    cursor: 'pointer',
+                                                                    color: hovered === index ? '#007bff' : 'inherit',
+                                                                    textDecoration: hovered === index ? 'underline' : 'none'
+                                                                }}
+                                                            >
+                                                                {value.name_product}
+                                                            </Link>
+                                                        </td>
                                                         <td className="li-product-price"><span className="amount">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.price_product)+ ' VNĐ'}</span></td>
                                                         <td className="li-product-price"><span className="amount">{value.size}</span></td>
                                                         <td className="quantity">
