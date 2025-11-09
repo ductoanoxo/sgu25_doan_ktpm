@@ -1,348 +1,175 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, Redirect } from 'react-router-dom';
-import { deleteCart, updateCart } from '../Redux/Action/ActionCart';
+import { Link, useHistory } from 'react-router-dom';
 import { changeCount } from '../Redux/Action/ActionCount';
-import CartAPI from '../API/CartAPI'
-import queryString from 'query-string'
+import CartAPI from '../API/CartAPI';
+import queryString from 'query-string';
 import CartsLocal from '../Share/CartsLocal';
 import CouponAPI from '../API/CouponAPI';
+import './Cart.css'; // Import a dedicated CSS file for styling
 
-Cart.propTypes = {
+// A reusable Notification component for displaying alerts
+const Notification = ({ status, onClose }) => {
+    if (!status) return null;
 
+    const icons = {
+        success: 'fa fa-check-circle',
+        warning: 'fa fa-exclamation-triangle',
+        error: 'fa fa-times-circle',
+        info: 'fa fa-info-circle',
+    };
+
+    const titles = {
+        success: 'Thành Công!',
+        warning: 'Cảnh Báo!',
+        error: 'Lỗi!',
+        info: 'Thông Báo',
+    };
+
+    return (
+        <div className={`notification-overlay ${status ? 'show' : ''}`}>
+            <div className={`notification-card ${status.type}`}>
+                <i className={`notification-icon ${icons[status.type]}`}></i>
+                <div className="notification-content">
+                    <h4>{status.title || titles[status.type]}</h4>
+                    {status.message && <p>{status.message}</p>}
+                </div>
+                <button onClick={onClose} className="notification-close-btn">&times;</button>
+            </div>
+        </div>
+    );
 };
 
+
 function Cart(props) {
+    const dispatch = useDispatch();
+    const history = useHistory();
 
-    const dispatch = useDispatch()
+    // Centralized state for notifications
+    const [notification, setNotification] = useState(null);
 
-    const [list_carts, set_list_carts] = useState([])
+    const [list_carts, set_list_carts] = useState([]);
+    const [total_price, set_total_price] = useState(0);
+    const [coupon, set_coupon] = useState('');
+    const [discount, setDiscount] = useState(0);
+    const [new_price, set_new_price] = useState(0);
 
-    // state get from redux
-    const count_change = useSelector(state => state.Count.isLoad)
+    const count_change = useSelector(state => state.Count.isLoad);
 
-    const [total_price, set_total_price] = useState(0)
+    // --- Cart Management ---
+    const Sum_Price = useCallback((carts) => {
+        const sum = carts.reduce((acc, value) => acc + parseInt(value.count) * parseInt(value.price_product), 0);
+        set_total_price(sum);
+    }, []);
 
-    // Hàm này dùng để hiện thị danh sách sản phẩm đã thêm vào giỏ hàng
-    // và tính tổng tiền
     useEffect(() => {
+        const carts = JSON.parse(localStorage.getItem('carts')) || [];
+        set_list_carts(carts);
+        Sum_Price(carts);
+    }, [count_change, Sum_Price]);
 
-        set_list_carts(JSON.parse(localStorage.getItem('carts')))
+    const updateCartCount = (id_cart, current_count, delta) => {
+        const newCount = parseInt(current_count) + delta;
+        if (newCount < 1) return;
+        CartsLocal.updateProduct({ id_cart, count: newCount });
+        const action_change_count = changeCount(count_change);
+        dispatch(action_change_count);
+    };
 
-        Sum_Price(JSON.parse(localStorage.getItem('carts')), 0)
-
-    }, [count_change])
-
-
-
-    // Hàm này dùng để tính tổng tiền
-    function Sum_Price(carts, sum_price) {
-        carts.map(value => {
-            return sum_price += parseInt(value.count) * parseInt(value.price_product)
-        })
-
-        set_total_price(sum_price)
-        set_new_price(sum_price)
-    }
-
-    // Hàm này dùng để tăng số lượng
-    const upCount = (count, id_cart) => {
-
-        const data = {
-            id_cart: id_cart,
-            count: parseInt(count) + 1
-        }
-
-        console.log(data)
-
-
-
-        CartsLocal.updateProduct(data)
-
-        const action_change_count = changeCount(count_change)
-        dispatch(action_change_count)
-
-    }
-
-    // Hàm này dùng để giảm số lượng
-    const downCount = (count, id_cart) => {
-
-        if (parseInt(count) === 1) {
-            return
-        }
-
-        const data = {
-            id_cart: id_cart,
-            count: parseInt(count) - 1
-        }
-
-        console.log(data)
-
-        CartsLocal.updateProduct(data)
-
-        const action_change_count = changeCount(count_change)
-        dispatch(action_change_count)
-
-    }
-
-    // Hàm này dùng để xóa giỏ hàng
     const handler_delete_carts = (id_cart) => {
+        CartsLocal.deleteProduct(id_cart);
+        const action_change_count = changeCount(count_change);
+        dispatch(action_change_count);
+    };
 
-        CartsLocal.deleteProduct(id_cart)
-
-        // Thay đổi trạng thái trong redux để load lại cart ở phần header
-        const action_change_count = changeCount(count_change)
-        dispatch(action_change_count)
-
-    }
-
-
-    // Hàm này này dùng để kiểm tra đăng nhập checkout
-    const [show_error, set_show_error] = useState(false)
-
-    const [show_null_cart, set_show_null_cart] = useState(false)
-
+    // --- Checkout ---
     const handler_checkout = () => {
-
         if (sessionStorage.getItem('id_user')) {
             if (list_carts.length < 1) {
-                set_show_null_cart(true)
+                setNotification({ type: 'error', title: 'Giỏ Hàng Rỗng!', message: 'Vui lòng thêm sản phẩm vào giỏ hàng.' });
             } else {
-                window.location.replace('/checkout')
+                history.push('/checkout');
             }
         } else {
-
-            set_show_error(true)
-
+            setNotification({ type: 'error', title: 'Vui Lòng Đăng Nhập!', message: 'Bạn cần đăng nhập để tiếp tục thanh toán.' });
         }
+    };
 
-        setTimeout(() => {
-            set_show_error(false)
-            set_show_null_cart(false)
-        }, 1500)
-
-    }
-
-
-    // Hàm này dùng để kiểm tra coupon
-    const [coupon, set_coupon] = useState('')
-
-    const [discount, setDiscount] = useState(0)
-
-    const [new_price, set_new_price] = useState(0)
-
-    const [show_success, set_show_success] = useState(false)
-
-    const [errorCode, setErrorCode] = useState(false)
-    const [alreadyUsed, setAlreadyUsed] = useState(false) // Thêm state cho đã sử dụng coupon
-
-    const [notEligible, setNotEligible] = useState(false) // Thêm state cho không đủ điều kiện
-
-    const [couponRequirement, setCouponRequirement] = useState('') // Thêm state để lưu yêu cầu coupon
-
+    // --- Coupon Management ---
     const handlerCoupon = async (e) => {
-
-        e.preventDefault()
-        
-        // If coupon input is empty -> remove applied coupon
+        e.preventDefault();
         if (!coupon || coupon.trim() === '') {
-            // remove coupon from localStorage and reset values
-            localStorage.removeItem('id_coupon')
-            localStorage.removeItem('coupon')
-            setDiscount(0)
-            set_new_price(total_price)
-            set_show_success(false)
-            setErrorCode(false)
-            setAlreadyUsed(false)
-            setNotEligible(false)
-            setCouponRequirement('')
-            return
+            localStorage.removeItem('id_coupon');
+            localStorage.removeItem('coupon');
+            setDiscount(0);
+            set_new_price(total_price);
+            return;
         }
 
-        if (!sessionStorage.getItem('id_user')){
-            set_show_error(true)
-        }else{
-
-            const params = {
-                id_user: sessionStorage.getItem('id_user'),
-                code: coupon,
-                total_amount: total_price // Thêm tổng tiền vào params
-            }
-
-            const query = '?' + queryString.stringify(params)
-
-            console.log('=== CLIENT COUPON DEBUG ===')
-            console.log('Gửi request với params:', params)
-            console.log('Query string:', query)
-
-            const response = await CouponAPI.checkCoupon(query)
-
-            console.log('Response nhận được:', response)
-            console.log('Response.coupon:', response.coupon)
-            if (response.coupon) {
-                console.log('Promotion value:', response.coupon.promotion)
-                console.log('Promotion type:', typeof response.coupon.promotion)
-            }
-
-            if (response.msg === 'Không tìm thấy'){
-                setErrorCode(true)
-                setAlreadyUsed(false)
-                setNotEligible(false)
-            }else if (response.msg === 'Bạn đã sử dụng mã này rồi'){
-                setAlreadyUsed(true)
-                setErrorCode(false)
-                setNotEligible(false)
-            }else if (response.msg === 'Không đủ điều kiện'){
-                // Xử lý trường hợp không đủ điều kiện
-                setNotEligible(true)
-                setErrorCode(false)
-                setAlreadyUsed(false)
-                setCouponRequirement(response.errorMessage || response.describe || 'Không đủ điều kiện áp dụng coupon này')
-            }else{
-                localStorage.setItem('id_coupon', response.coupon._id)
-                localStorage.setItem('coupon', JSON.stringify(response.coupon))
-
-                // Chuyển promotion từ string sang number - hỗ trợ nhiều format
-                let promotionPercent = 0
-                const promotionStr = response.coupon.promotion.toString()
-                
-                // Tìm số trong string (hỗ trợ "50%", "Giảm 20%", "20", v.v.)
-                const numberMatch = promotionStr.match(/\d+(\.\d+)?/)
-                if (numberMatch) {
-                    promotionPercent = parseFloat(numberMatch[0])
-                }
-
-                const discountAmount = (total_price * promotionPercent) / 100
-
-                console.log('Total price:', total_price)
-                console.log('Promotion string:', promotionStr)
-                console.log('Promotion percent extracted:', promotionPercent)
-                console.log('Discount amount:', discountAmount)
-
-                setDiscount(discountAmount)
-
-                const newTotal = total_price - discountAmount
-
-                console.log('New total:', newTotal)
-
-                set_new_price(newTotal)
-                set_show_success(true)
-            }
-
+        if (!sessionStorage.getItem('id_user')) {
+            setNotification({ type: 'error', title: 'Vui Lòng Đăng Nhập!', message: 'Bạn cần đăng nhập để áp dụng mã giảm giá.' });
+            return;
         }
 
-        setTimeout(() => {
-            set_show_error(false)
-            set_show_null_cart(false)
-            set_show_success(false)
-            setErrorCode(false)
-            setAlreadyUsed(false)
-            setNotEligible(false) // Reset state không đủ điều kiện
-        }, 1500)
-    }
+        const params = {
+            id_user: sessionStorage.getItem('id_user'),
+            code: coupon,
+            total_amount: total_price,
+        };
+        const query = '?' + queryString.stringify(params);
+        const response = await CouponAPI.checkCoupon(query);
 
-    // Nếu giỏ hàng thay đổi (ví dụ xóa sản phẩm) và đã có coupon trong localStorage,
-    // cần tái tính lại discount/new_price theo total mới. Lắng nghe total_price thay đổi.
+        if (response.msg === 'Không tìm thấy') {
+            setNotification({ type: 'error', title: 'Mã Không Hợp Lệ!', message: 'Vui lòng kiểm tra lại mã giảm giá.' });
+        } else if (response.msg === 'Bạn đã sử dụng mã này rồi') {
+            setNotification({ type: 'warning', title: 'Mã Đã Được Sử Dụng!', message: 'Mỗi mã giảm giá chỉ có thể sử dụng một lần.' });
+        } else if (response.msg === 'Không đủ điều kiện') {
+            setNotification({ type: 'warning', title: 'Không Đủ Điều Kiện!', message: response.errorMessage || response.describe });
+        } else {
+            localStorage.setItem('id_coupon', response.coupon._id);
+            localStorage.setItem('coupon', JSON.stringify(response.coupon));
+            const promotionPercent = parseFloat(response.coupon.promotion.match(/\d+(\.\d+)?/)[0]) || 0;
+            const discountAmount = (total_price * promotionPercent) / 100;
+            setDiscount(discountAmount);
+            set_new_price(total_price - discountAmount);
+            setNotification({ type: 'success', title: 'Áp Dụng Thành Công!' });
+        }
+    };
+
+    // Recalculate discount if cart changes
     useEffect(() => {
-        const storedCoupon = localStorage.getItem('coupon')
+        const storedCoupon = localStorage.getItem('coupon');
         if (storedCoupon) {
             try {
-                const couponObj = JSON.parse(storedCoupon)
-                let promotionPercent = 0
-                const promotionStr = couponObj.promotion.toString()
-                const numberMatch = promotionStr.match(/\d+(\.\d+)?/)
-                if (numberMatch) {
-                    promotionPercent = parseFloat(numberMatch[0])
-                }
-
-                const discountAmount = (total_price * promotionPercent) / 100
-                setDiscount(discountAmount)
-                set_new_price(total_price - discountAmount)
+                const couponObj = JSON.parse(storedCoupon);
+                const promotionPercent = parseFloat(couponObj.promotion.match(/\d+(\.\d+)?/)[0]) || 0;
+                const discountAmount = (total_price * promotionPercent) / 100;
+                setDiscount(discountAmount);
+                set_new_price(total_price - discountAmount);
             } catch (err) {
-                // nếu parse lỗi thì clear coupon
-                localStorage.removeItem('coupon')
-                localStorage.removeItem('id_coupon')
-                setDiscount(0)
-                set_new_price(total_price)
+                localStorage.removeItem('coupon');
+                localStorage.removeItem('id_coupon');
+                setDiscount(0);
+                set_new_price(total_price);
             }
         } else {
-            // không có coupon lưu, đảm bảo giá hiển thị đúng
-            setDiscount(0)
-            set_new_price(total_price)
+            set_new_price(total_price);
         }
-    }, [total_price])
+    }, [total_price]);
+    
+    // Auto-hide notification
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => {
+                setNotification(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
 
     return (
         <div>
-            {
-                notEligible &&
-                <div className="modal_success">
-                    <div className="group_model_success pt-3">
-                        <div className="text-center p-2">
-                            <i className="fa fa-exclamation-triangle fix_icon_bell" style={{ fontSize: '40px', color: '#fff', backgroundColor: '#f84545' }}></i>
-                        </div>
-                        <h4 className="text-center p-3" style={{ color: '#fff' }}>Không Đủ Điều Kiện!</h4>
-                        <p className="text-center pb-3" style={{ color: '#fff', fontSize: '14px' }}>{couponRequirement}</p>
-                    </div>
-                </div>
-            }
-            {
-                errorCode &&
-                <div className="modal_success">
-                    <div className="group_model_success pt-3">
-                        <div className="text-center p-2">
-                            <i className="fa fa-bell fix_icon_bell" style={{ fontSize: '40px', color: '#fff', backgroundColor: '#f84545' }}></i>
-                        </div>
-                        <h4 className="text-center p-3" style={{ color: '#fff' }}>Vui Lòng Kiểm Tra Lại Mã Code!</h4>
-                    </div>
-                </div>
-            }
-            {
-                alreadyUsed &&
-                <div className="modal_success">
-                    <div className="group_model_success pt-3">
-                        <div className="text-center p-2">
-                            <i className="fa fa-exclamation-triangle fix_icon_bell" style={{ fontSize: '40px', color: '#fff', backgroundColor: '#ff9800' }}></i>
-                        </div>
-                        <h4 className="text-center p-3" style={{ color: '#fff' }}>Bạn Đã Sử Dụng Mã Code Này Rồi!</h4>
-                        <p className="text-center" style={{ color: '#fff', fontSize: '14px' }}>Mỗi mã giảm giá chỉ có thể sử dụng một lần.</p>
-                    </div>
-                </div>
-            }
-            {
-                show_success &&
-                <div className="modal_success">
-                    <div className="group_model_success pt-3">
-                        <div className="text-center p-2">
-                            <i className="fa fa-bell fix_icon_bell" style={{ fontSize: '40px', color: '#fff' }}></i>
-                        </div>
-                        <h4 className="text-center p-3" style={{ color: '#fff' }}>Áp Dụng Mã Code Thành Công!</h4>
-                    </div>
-                </div>
-            }
-            {
-                show_error &&
-                <div className="modal_success">
-                    <div className="group_model_success pt-3">
-                        <div className="text-center p-2">
-                            <i className="fa fa-bell fix_icon_bell" style={{ fontSize: '40px', color: '#fff', backgroundColor: '#f84545' }}></i>
-                        </div>
-                        <h4 className="text-center p-3" style={{ color: '#fff' }}>Vui Lòng Kiểm Tra Tình Trạng Đăng Nhập!</h4>
-                    </div>
-                </div>
-            }
-            {
-                show_null_cart &&
-                <div className="modal_success">
-                    <div className="group_model_success pt-3">
-                        <div className="text-center p-2">
-                            <i className="fa fa-bell fix_icon_bell" style={{ fontSize: '40px', color: '#fff', backgroundColor: '#f84545' }}></i>
-                        </div>
-                        <h4 className="text-center p-3" style={{ color: '#fff' }}>Vui Lòng Kiểm Tra Lại Giỏ Hàng!</h4>
-                    </div>
-                </div>
-            }
+            <Notification status={notification} onClose={() => setNotification(null)} />
 
             <div className="breadcrumb-area">
                 <div className="container">
@@ -364,8 +191,8 @@ function Cart(props) {
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th className="li-product-remove">remove</th>
-                                                <th className="li-product-thumbnail">images</th>
+                                                <th className="li-product-remove">Remove</th>
+                                                <th className="li-product-thumbnail">Images</th>
                                                 <th className="cart-product-name">Product</th>
                                                 <th className="li-product-price">Price</th>
                                                 <th className="li-product-price">Size</th>
@@ -374,54 +201,72 @@ function Cart(props) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {
-                                                list_carts && list_carts.map((value, index) => (
-                                                    <tr key={index}>
-                                                        <td className="li-product-remove" onClick={() => handler_delete_carts(value.id_cart)}>
-                                                            <a style={{ cursor: 'pointer' }}><i className="fa fa-times"></i></a>
-                                                        </td>
-                                                        <td className="li-product-thumbnail"><Link to={`/detail/${value.id_product}`}><img src={value.image} style={{ width: '5rem' }} alt="Li's Product Image" /></Link></td>
-                                                        <td className="li-product-name"><a href="#">{value.name_product}</a></td>
-                                                        <td className="li-product-price"><span className="amount">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.price_product)+ ' VNĐ'}</span></td>
-                                                        <td className="li-product-price"><span className="amount">{value.size}</span></td>
-                                                        <td className="quantity">
-                                                            <label>Quantity</label>
-                                                            <div className="cart-plus-minus">
-                                                                <input className="cart-plus-minus-box" value={value.count} type="text" />
-                                                                <div className="dec qtybutton" onClick={() => downCount(value.count, value.id_cart)}><i className="fa fa-angle-down"></i></div>
-                                                                <div className="inc qtybutton" onClick={() => upCount(value.count, value.id_cart)}><i className="fa fa-angle-up"></i></div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="product-subtotal"><span className="amount">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(parseInt(value.price_product) * parseInt(value.count))+ ' VNĐ'}</span></td>
-                                                    </tr>
-                                                ))
-                                            }
+                                            {list_carts.length > 0 ? list_carts.map((value) => (
+                                                <tr key={value.id_cart}>
+                                                    <td className="li-product-remove">
+                                                        <button type="button" className="remove-btn" onClick={() => handler_delete_carts(value.id_cart)}>
+                                                            <i className="fa fa-times"></i>
+                                                        </button>
+                                                    </td>
+                                                    <td className="li-product-thumbnail">
+                                                        <Link to={`/detail/${value.id_product}`} title={`Xem chi tiết ${value.name_product}`}>
+                                                            <img src={value.image} alt={value.name_product} className="cart-product-image" />
+                                                            <span className="view-overlay"><i className="fa fa-search"></i></span>
+                                                        </Link>
+                                                    </td>
+                                                    <td className="li-product-name">
+                                                        <Link to={`/detail/${value.id_product}`} title={`Xem chi tiết ${value.name_product}`}>{value.name_product}</Link>
+                                                    </td>
+                                                    <td className="li-product-price"><span className="amount">{new Intl.NumberFormat('vi-VN').format(value.price_product)} VNĐ</span></td>
+                                                    <td className="li-product-price"><span className="amount">{value.size}</span></td>
+                                                    <td className="quantity">
+                                                        <label>Quantity</label>
+                                                        <div className="cart-plus-minus">
+                                                            <input className="cart-plus-minus-box" value={value.count} type="text" readOnly />
+                                                            <div className="dec qtybutton" onClick={() => updateCartCount(value.id_cart, value.count, -1)}><i className="fa fa-angle-down"></i></div>
+                                                            <div className="inc qtybutton" onClick={() => updateCartCount(value.id_cart, value.count, 1)}><i className="fa fa-angle-up"></i></div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="product-subtotal"><span className="amount">{new Intl.NumberFormat('vi-VN').format(parseInt(value.price_product) * parseInt(value.count))} VNĐ</span></td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan="7" className="text-center pt-5 pb-5">
+                                                        <h4>Giỏ hàng của bạn đang trống.</h4>
+                                                        <Link to="/shop" className="btn btn-primary mt-3">Tiếp tục mua sắm</Link>
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="coupon-all">
-                                            <div class="coupon">
-                                                <input id="coupon_code" class="input-text" onChange={(e) => set_coupon(e.target.value)} value={coupon} placeholder="Coupon code" type="text" /> &nbsp;
-                                                <input class="button" value="Apply coupon" type="submit" onClick={handlerCoupon} />
+                                {list_carts.length > 0 && (
+                                    <>
+                                        <div className="row">
+                                            <div className="col-12">
+                                                <div className="coupon-all">
+                                                    <div className="coupon">
+                                                        <input id="coupon_code" className="input-text" onChange={(e) => set_coupon(e.target.value)} value={coupon} placeholder="Mã giảm giá" type="text" />
+                                                        <input className="button" value="Áp dụng" type="submit" onClick={handlerCoupon} />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="row">
-                                    <div className="col-md-5 ml-auto">
-                                        <div className="cart-page-total">
-                                            <h2>Cart totals</h2>
-                                            <ul>
-                                                <li>Sub Total <span>{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(total_price) + ' VNĐ'}</span></li>
-                                                <li>Discount <span>{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(discount) + ' VNĐ'}</span></li>
-                                                <li>Total <span>{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(new_price) + ' VNĐ'}</span></li>
-                                            </ul>
-                                            <a style={{ color: '#fff', cursor: 'pointer', fontWeight: '600' }} onClick={handler_checkout}>Proceed to checkout</a>
+                                        <div className="row">
+                                            <div className="col-md-5 ml-auto">
+                                                <div className="cart-page-total">
+                                                    <h2>Tổng cộng giỏ hàng</h2>
+                                                    <ul>
+                                                        <li>Tạm tính <span>{new Intl.NumberFormat('vi-VN').format(total_price)} VNĐ</span></li>
+                                                        <li>Giảm giá <span>- {new Intl.NumberFormat('vi-VN').format(discount)} VNĐ</span></li>
+                                                        <li>Tổng cộng <span>{new Intl.NumberFormat('vi-VN').format(new_price)} VNĐ</span></li>
+                                                    </ul>
+                                                    <button type="button" className="proceed-checkout-btn" onClick={handler_checkout}>Tiến hành thanh toán</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
+                                    </>
+                                )}
                             </form>
                         </div>
                     </div>

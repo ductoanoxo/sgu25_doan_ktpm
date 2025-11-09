@@ -108,7 +108,13 @@ function DetailHistory(props) {
                                                 detail_order && detail_order.map(value => (
                                                     <tr key={value._id}>
                                                         <td className="li-product-thumbnail"><img src={value.id_product.image} style={{ width: '5rem' }} alt="Li's Product Image" /></td>
-                                                        <td className="li-product-name"><a href="#">{value.name_product}</a></td>
+                                                        <td className="li-product-name">
+                                                            {value.id_product && value.id_product._id ? (
+                                                                <Link to={`/detail/${value.id_product._id}`}>{value.name_product}</Link>
+                                                            ) : (
+                                                                <span>{value.name_product}</span>
+                                                            )}
+                                                        </td>
                                                         <td className="li-product-price"><span className="amount">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.price_product) + ' VNĐ'}</span></td>
                                                         <td className="li-product-price"><span className="amount">{value.count}</span></td>
                                                         <td className="li-product-price"><span className="amount">{value.size}</span></td>

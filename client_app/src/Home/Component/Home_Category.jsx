@@ -103,7 +103,11 @@ function Home_Category(props) {
                     <div className="product_desc_info">
                       <div className="product-review">
                         <h5 className="manufacturer">
-                          <a href="#!">{name}</a>
+                          {p?._id ? (
+                            <Link to={detailHref}>{name}</Link>
+                          ) : (
+                            <span>{name}</span>
+                          )}
                         </h5>
                         <div className="rating-box">
                           <ul className="rating">

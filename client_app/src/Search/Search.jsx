@@ -179,7 +179,7 @@ function Search(props) {
                                                                 <div className="product_desc_info">
                                                                     <div className="product-review">
                                                                         <h5 className="manufacturer">
-                                                                            <a href="product-details.html">{value.name_product}</a>
+                                                                            <Link to={`/detail/${value._id}`}>{value.name_product}</Link>
                                                                         </h5>
                                                                         <div className="rating-box">
                                                                             <ul className="rating">
@@ -191,7 +191,7 @@ function Search(props) {
                                                                             </ul>
                                                                         </div>
                                                                     </div>
-                                                                    <h4><a className="product_name" href="product-details.html">{value.name_product}</a></h4>
+                                                                    <h4><Link className="product_name" to={`/detail/${value._id}`}>{value.name_product}</Link></h4>
                                                                     <div className="price-box">
                                                                         {sale ? (
                                                                             <div>
