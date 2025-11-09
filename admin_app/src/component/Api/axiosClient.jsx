@@ -14,6 +14,10 @@ const axiosClient = axios.create({
     paramsSerializer: params => queryString.stringify(params),
 });
 axiosClient.interceptors.request.use(async (config) => {
+    // Allow FormData to set its own Content-Type (multipart/form-data with boundary)
+    if (config.data instanceof FormData) {
+        delete config.headers['content-type'];
+    }
     // Handle token here ...
     return config;
 })
