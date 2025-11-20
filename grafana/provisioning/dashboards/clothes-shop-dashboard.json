@@ -1,0 +1,284 @@
+{
+  "dashboard": {
+    "title": "Clothes Shop - Business Metrics",
+    "tags": ["clothes-shop", "business", "ecommerce"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Revenue Today (VND)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(order_value_vnd_sum[24h]))",
+            "legendFormat": "Revenue"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyVND",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 1000000, "color": "yellow" },
+                { "value": 5000000, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Orders",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(orders_total)",
+            "legendFormat": "Orders"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Active Users (Socket.IO)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "socketio_active_connections",
+            "legendFormat": "Active"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
+      },
+      {
+        "id": 4,
+        "title": "MongoDB Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "mongodb_connection_status",
+            "legendFormat": "Status"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "value": 0, "text": "Disconnected", "color": "red" },
+              { "value": 1, "text": "Connected", "color": "green" }
+            ]
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Orders by Status",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (status) (orders_total)",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 4 }
+      },
+      {
+        "id": 6,
+        "title": "Revenue Trend (24h)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(order_value_vnd_sum[5m]))",
+            "legendFormat": "Revenue/sec"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 16, "x": 8, "y": 4 }
+      },
+      {
+        "id": 7,
+        "title": "Top 10 Products Viewed",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "topk(10, sum by (product_id) (products_viewed_total))",
+            "legendFormat": "{{product_id}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 }
+      },
+      {
+        "id": 8,
+        "title": "Request Rate (req/sec)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[1m]))",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 }
+      },
+      {
+        "id": 9,
+        "title": "Response Time (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 }
+      },
+      {
+        "id": 10,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_errors_total[5m]))",
+            "legendFormat": "Errors/sec"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 }
+      },
+      {
+        "id": 11,
+        "title": "User Registrations (by Gender)",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (gender) (user_registrations_total)",
+            "legendFormat": "{{gender}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 28 }
+      },
+      {
+        "id": 12,
+        "title": "Login Success Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "rate(user_logins_total{status=\"success\"}[5m]) / rate(user_logins_total[5m]) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 28 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 70, "color": "yellow" },
+                { "value": 90, "color": "green" }
+              ]
+            },
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Payment Success Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "rate(payment_transactions_total{status=\"success\"}[5m]) / rate(payment_transactions_total[5m]) * 100",
+            "legendFormat": "Success %"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 28 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 80, "color": "yellow" },
+                { "value": 95, "color": "green" }
+              ]
+            },
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Memory Usage (MB)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes / 1024 / 1024",
+            "legendFormat": "Memory (MB)"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 }
+      },
+      {
+        "id": 15,
+        "title": "CPU Usage (%)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total[5m]) * 100",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 }
+      },
+      {
+        "id": 16,
+        "title": "Cart Operations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (operation) (rate(cart_operations_total[5m]))",
+            "legendFormat": "{{operation}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 }
+      },
+      {
+        "id": 17,
+        "title": "File Upload Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(file_uploads_total{status=\"success\"}) / sum(file_uploads_total) * 100",
+            "legendFormat": "Success %"
+          }
+        ],
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 44 },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent"
+          }
+        }
+      },
+      {
+        "id": 18,
+        "title": "Socket.IO Events",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (event_type) (rate(socketio_events_total[5m]))",
+            "legendFormat": "{{event_type}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 }
+      }
+    ],
+    "refresh": "10s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    }
+  }
+}

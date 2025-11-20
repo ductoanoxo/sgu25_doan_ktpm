@@ -1,0 +1,35 @@
+# Prometheus Configuration
+global:
+  scrape_interval: 15s # Thu thập metrics mỗi 15 giây
+  evaluation_interval: 15s # Đánh giá rules mỗi 15 giây
+  external_labels:
+    monitor: 'clothes-shop-monitor'
+
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Rule files (optional)
+rule_files:
+  # - "alert_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus tự monitor chính nó
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node.js Server App
+  - job_name: 'server_app'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['server_app:8000']
+    metrics_path: '/metrics'
+    
+  # MongoDB Exporter (nếu cần monitor MongoDB)
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']

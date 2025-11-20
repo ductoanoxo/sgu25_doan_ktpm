@@ -21,17 +21,16 @@ console.log('\n=== TEST 1: Ping Cloudinary ===');
 cloudinary.api.ping()
     .then(result => {
         console.log('✅ Ping successful:', result);
-        
+
         // Test 2: Upload a test image
         console.log('\n=== TEST 2: Upload Test Image ===');
-        
+
         // Create a simple test buffer (1x1 pixel transparent PNG)
         const testImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
-        
+
         // Upload using upload_stream
         return new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
+            const uploadStream = cloudinary.uploader.upload_stream({
                     folder: 'fashion-shop/products',
                     resource_type: 'image',
                     public_id: 'test-upload-' + Date.now()
