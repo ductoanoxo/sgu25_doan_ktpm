@@ -63,7 +63,7 @@ module.exports.create = async(req, res) => {
         if (req.files && req.files.file) {
             try {
                 const fileImage = req.files.file;
-                
+
                 console.log('File info:', {
                     name: fileImage.name,
                     size: fileImage.size,
@@ -72,8 +72,7 @@ module.exports.create = async(req, res) => {
 
                 // Upload to Cloudinary using upload stream
                 const result = await new Promise((resolve, reject) => {
-                    const uploadStream = cloudinary.uploader.upload_stream(
-                        {
+                    const uploadStream = cloudinary.uploader.upload_stream({
                             folder: 'fashion-shop/products',
                             resource_type: 'image',
                             transformation: [
@@ -155,7 +154,7 @@ module.exports.update = async(req, res) => {
         if (req.files && req.files.file) {
             try {
                 const fileImage = req.files.file;
-                
+
                 // Get old product to delete old image from Cloudinary
                 const oldProduct = await Product.findById(req.body.id);
                 if (oldProduct && oldProduct.image) {
@@ -167,8 +166,7 @@ module.exports.update = async(req, res) => {
 
                 // Upload new image to Cloudinary
                 const result = await new Promise((resolve, reject) => {
-                    const uploadStream = cloudinary.uploader.upload_stream(
-                        {
+                    const uploadStream = cloudinary.uploader.upload_stream({
                             folder: 'fashion-shop/products',
                             resource_type: 'image',
                             transformation: [
