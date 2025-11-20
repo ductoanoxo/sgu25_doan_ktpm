@@ -11,7 +11,8 @@ function User(props) {
         page: '1',
         limit: '4',
         search: '',
-        status: true
+        status: true,
+        excludeCustomer: true  // Loại trừ customers, chỉ hiển thị admin/staff users
     })
 
     const [users, setUsers] = useState([])
@@ -67,7 +68,7 @@ function User(props) {
                     <div className="col-12">
                         <div className="card">
                             <div className="card-body">
-                                <h4 className="card-title">Users</h4>
+                                <h4 className="card-title">Admin Users</h4>
                                 <Search handlerSearch={handlerSearch} />
 
                                 <Link to="/user/create" className="btn btn-primary my-3">New create</Link>

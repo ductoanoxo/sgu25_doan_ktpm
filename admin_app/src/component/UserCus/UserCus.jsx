@@ -8,11 +8,11 @@ import Search from '../Shared/Search'
 
 function UserCus(props) {
     const [filter, setFilter] = useState({
-        permission: '6087dcb5f269113b3460fce4',
         page: '1',
         limit: '4',
         search: '',
-        status: true
+        status: true,
+        customerOnly: true  // Chỉ hiển thị customers
     })
 
     const [users, setUsers] = useState([])
@@ -68,7 +68,7 @@ function UserCus(props) {
                     <div className="col-12">
                         <div className="card">
                             <div className="card-body">
-                                <h4 className="card-title">Users</h4>
+                                <h4 className="card-title">Customers</h4>
                                 <Search handlerSearch={handlerSearch} />
 
                                 <Link to="/customer/create" className="btn btn-primary my-3">New create</Link>
@@ -95,7 +95,7 @@ function UserCus(props) {
                                                         <td>{value.id_permission && value.id_permission.permission ? value.id_permission.permission : 'Customer'}</td>
                                                         <td>
                                                             <div className="d-flex">
-                                                                <Link to={"user/update/" + value._id} className="btn btn-success mr-1">Update</Link>
+                                                                <Link to={"/customer/update/" + value._id} className="btn btn-success mr-1">Update</Link>
 
                                                                 <button type="button" style={{ cursor: 'pointer', color: 'white' }} onClick={() => handleDelete(value)} className="btn btn-danger" >Delete</button>
                                                             </div>
