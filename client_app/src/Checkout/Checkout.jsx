@@ -530,7 +530,7 @@ function Checkout(props) {
                             </div>
                             <div className="col-lg-6 col-12">
                                 <div className="your-order">
-                                    <h3>Your order</h3>
+                                    <h3>Your order </h3>
                                     <div className="your-order-table table-responsive">
                                         <table className="table">
                                             <thead>

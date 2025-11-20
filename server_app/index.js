@@ -6,13 +6,16 @@ const io = require('socket.io')(http);
 
 const cors = require('cors');
 
+// Import Prometheus metrics
+const { register, metrics } = require('./metrics');
+
 // Khởi tạo paypal
 var paypal = require('paypal-rest-sdk');
 
 // const io = require('socket.io')(http);
 
 var upload = require('express-fileupload');
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 const ProductAPI = require('./API/Router/product.router');
 const UserAPI = require('./API/Router/user.router');
@@ -21,6 +24,8 @@ const Detail_OrderAPI = require('./API/Router/detail_order.router');
 const CommentAPI = require('./API/Router/comment.router');
 const CategoryAPI = require('./API/Router/category.router');
 const NoteAPI = require('./API/Router/note.router');
+const FavoriteAPI = require('./API/Router/favorite.router');
+const UploadAPI = require('./API/Router/upload.router');
 
 const ProductAdmin = require('./API/Router/admin/product.router');
 const CategoryAdmin = require('./API/Router/admin/category.router');
@@ -42,8 +47,12 @@ const HOST = 'ktpm.dwb8wtz.mongodb.net';
 
 const uri = `mongodb+srv://${USER}:${PASS}@${HOST}/${DB}?retryWrites=true&w=majority`;
 
+console.log('🔌 Đang kết nối đến MongoDB Atlas...');
 
-mongoose.connect(uri)
+mongoose.connect(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
     .then(async() => {
         console.log('✅ Kết nối MongoDB Atlas');
 
@@ -289,6 +298,51 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
+// Middleware to track request metrics
+app.use((req, res, next) => {
+    const start = Date.now();
+    
+    res.on('finish', () => {
+        const duration = (Date.now() - start) / 1000;
+        const route = req.route ? req.route.path : req.path;
+        
+        // Track duration and total requests
+        metrics.httpRequestDuration.labels(req.method, route, res.statusCode).observe(duration);
+        metrics.httpRequestTotal.labels(req.method, route, res.statusCode).inc();
+        
+        // Track errors
+        if (res.statusCode >= 400) {
+            const errorType = res.statusCode >= 500 ? 'server_error' : 'client_error';
+            metrics.httpErrorsTotal.labels(req.method, route, res.statusCode, errorType).inc();
+        }
+    });
+    
+    next();
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType);
+    try {
+        // Update MongoDB connection status
+        metrics.mongodbConnectionStatus.set(mongoose.connection.readyState === 1 ? 1 : 0);
+        
+        const metricsData = await register.metrics();
+        res.send(metricsData);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
+});
+
 // Cài đặt config cho paypal
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
@@ -303,6 +357,13 @@ app.use('/api/Comment', CommentAPI);
 app.use('/api/Note', NoteAPI);
 app.use('/api/DetailOrder', Detail_OrderAPI);
 app.use('/api/Category', CategoryAPI);
+app.use('/api/favorite', FavoriteAPI);
+app.use('/api/upload', UploadAPI);
+
+// Root endpoint
+app.get('/', (req, res) => {
+    res.status(200).send('Server is running');
+});
 
 app.use('/api/admin/Product', ProductAdmin);
 app.use('/api/admin/Category', CategoryAdmin);
@@ -318,17 +379,49 @@ const StripeAPI = require('./API/Router/stripe.router');
 app.use('/api/stripe', StripeAPI);
 
 
+// Track socket connections with metrics
 io.on('connection', (socket) => {
+    metrics.activeConnections.inc();
+    metrics.socketioEventsTotal.labels('connection', 'inbound').inc();
     console.log(`Có người vừa kết nối, socketID: ${socket.id}`);
-
-
+    
+    socket.on('disconnect', () => {
+        metrics.activeConnections.dec();
+        metrics.socketioEventsTotal.labels('disconnect', 'outbound').inc();
+    });
+    
     socket.on('send_order', (data) => {
+        metrics.socketioEventsTotal.labels('send_order', 'inbound').inc();
         console.log(data);
-
         socket.broadcast.emit('receive_order', data);
     });
 });
 
-http.listen(port, () => {
+http.listen(port, '0.0.0.0', () => {
     console.log('listening on *: ' + port);
+    console.log('📊 Prometheus metrics available at http://localhost:' + port + '/metrics');
+    console.log('❤️  Health check available at http://localhost:' + port + '/health');
+});
+
+// Graceful shutdown handlers
+process.on('SIGTERM', () => {
+    console.log('👋 SIGTERM received, shutting down gracefully');
+    http.close(() => {
+        console.log('✅ HTTP server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
+    });
+});
+
+process.on('SIGINT', () => {
+    console.log('👋 SIGINT received, shutting down gracefully');
+    http.close(() => {
+        console.log('✅ HTTP server closed');
+        mongoose.connection.close(false, () => {
+            console.log('✅ MongoDB connection closed');
+            process.exit(0);
+        });
+    });
 });

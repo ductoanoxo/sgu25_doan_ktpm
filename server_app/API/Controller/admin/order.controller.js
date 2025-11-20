@@ -1,11 +1,15 @@
 const Order = require('../../../Models/order');
 const Detail_History = require('../../../Models/detail_order');
+const mongoose = require('mongoose');
+
+
 
 module.exports.index = async (req, res) => {
     let page = parseInt(req.query.page) || 1;
     let money = 0;
 
     const status = req.query.status;
+    const keyWordSearch = req.query.search;
 
     const perPage = parseInt(req.query.limit) || 8;
 
@@ -14,14 +18,34 @@ module.exports.index = async (req, res) => {
 
     let orders;
     if (status) {
-        orders = await (await Order.find({ status: status }).populate('id_user').populate('id_payment').populate('id_note')).reverse();
+        orders = await Order.find({ status: status }).populate('id_user').populate('id_payment').populate('id_note');
     } else {
-        orders = await (await Order.find().populate('id_user').populate('id_note').populate('id_payment')).reverse();
+        orders = await Order.find().populate('id_user').populate('id_note').populate('id_payment');
     }
+
+    // In-memory search
+    if (keyWordSearch) {
+        orders = orders.filter(value => {
+            const fullname = value.id_note ? value.id_note.fullname.toUpperCase() : '';
+            const email = value.id_user ? value.id_user.email.toUpperCase() : '';
+            const address = value.address ? value.address.toUpperCase() : '';
+            const id = value._id.toString().toUpperCase();
+            const search = keyWordSearch.toUpperCase();
+
+            return fullname.indexOf(search) !== -1 ||
+                   email.indexOf(search) !== -1 ||
+                   address.indexOf(search) !== -1 ||
+                   id.indexOf(search) !== -1;
+        });
+    }
+
+    // Reverse after filtering
+    orders.reverse();
 
     const totalPage = Math.ceil(orders.length / perPage);
 
-    orders.map((value) => {
+    // Calculate money on the filtered (but not paginated) results
+    orders.forEach((value) => {
         money += Number(value.total);
     });
 
@@ -30,8 +54,6 @@ module.exports.index = async (req, res) => {
         totalPage: totalPage,
         totalMoney: money
     });
-
-   
 };
 
 module.exports.detailOrder = async (req, res) => {

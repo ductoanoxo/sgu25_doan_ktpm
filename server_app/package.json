@@ -18,6 +18,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
@@ -26,18 +27,21 @@
     "jsonwebtoken": "^8.5.1",
     "jspdf": "^2.3.1",
     "mongoose": "^5.12.2",
+    "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^6.5.0",
     "paypal-rest-sdk": "^1.8.1",
+    "prom-client": "^15.1.0",
     "socket.io": "^3.1.0",
     "stripe": "^19.1.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7",
-    "jest": "^27.5.1",
-    "supertest": "^6.2.2",
-    "mongodb-memory-server": "^8.12.2",
-    "eslint": "^8.12.0",
     "@babel/core": "^7.17.9",
-    "@babel/preset-env": "^7.16.11"
+    "@babel/preset-env": "^7.16.11",
+    "eslint": "^8.12.0",
+    "jest": "^27.5.1",
+    "mongodb-memory-server": "^8.12.2",
+    "nodemon": "^2.0.7",
+    "supertest": "^6.2.2"
   }
 }

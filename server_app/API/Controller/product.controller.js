@@ -2,7 +2,7 @@ const Products = require('../../Models/product');
 const Category = require('../../Models/category');
 
 
-module.exports.index = async (req, res) => {
+module.exports.index = async(req, res) => {
 
     const products = await Products.find();
 
@@ -10,7 +10,7 @@ module.exports.index = async (req, res) => {
 };
 
 
-module.exports.gender = async (req, res) => {
+module.exports.gender = async(req, res) => {
 
     const gender = req.query.gender;
 
@@ -21,27 +21,27 @@ module.exports.gender = async (req, res) => {
 };
 
 //TH: Hàm này dùng để phân loại sản phẩm
-module.exports.category = async (req, res) => {
+module.exports.category = async(req, res) => {
 
     const id_category = req.query.id_category;
 
     let products_category;
 
-    if (id_category === 'all'){
+    if (id_category === 'all') {
         products_category = await Products.find();
-    }else{
+    } else {
         products_category = await Products.find({ id_category: id_category });
     }
-    
+
     res.json(products_category);
 };
 
 //TH: Chi Tiết Sản Phẩm
-module.exports.detail = async (req, res) => {
+module.exports.detail = async(req, res) => {
 
     const id = req.params.id;
 
-    const product = await Products.findOne({ _id: id });
+    const product = await Products.findOne({ _id: id }).populate('id_category');
 
     res.json(product);
 
@@ -49,7 +49,7 @@ module.exports.detail = async (req, res) => {
 
 
 // QT: Tìm kiếm phân loại và phân trang sản phẩm
-module.exports.pagination = async (req, res) => {
+module.exports.pagination = async(req, res) => {
 
     //Lấy page từ query
     const page = parseInt(req.query.page) || 1;
@@ -70,23 +70,23 @@ module.exports.pagination = async (req, res) => {
     var products;
 
     //Phân loại điều kiện category từ client gửi lên
-    if (category === 'all'){
+    if (category === 'all') {
         products = await Products.find();
-    }else{
+    } else {
         products = await Products.find({ id_category: category });
     }
 
     var paginationProducts = products.slice(start, end);
 
 
-    if (!keyWordSearch){
-        
+    if (!keyWordSearch) {
+
         res.json(paginationProducts);
 
-    }else{
+    } else {
         var newData = paginationProducts.filter(value => {
             return value.name_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
-            value.price_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
+                value.price_product.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
         });
 
         res.json(newData);
@@ -95,17 +95,17 @@ module.exports.pagination = async (req, res) => {
 };
 
 // Hàm này dùng để hiện những sản phẩm search theo scoll ở component tìm kiếm bên client
-module.exports.scoll = async (req, res) => {
+module.exports.scoll = async(req, res) => {
 
     const page = req.query.page;
-    
+
     const count = req.query.count;
 
     const search = req.query.search;
 
     //Lấy sản phẩm đầu và sẩn phẩm cuối
     const start = (page - 1) * count;
-    const end = page * count;   
+    const end = page * count;
 
     const products = await Products.find();
 

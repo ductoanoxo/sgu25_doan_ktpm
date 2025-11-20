@@ -31,6 +31,8 @@ function Detail_Product(props) {
     const count_change = useSelector(state => state.Count.isLoad)
 
     const [sale, setSale] = useState()
+    
+    const [relatedProducts, setRelatedProducts] = useState([]) // FR-011: Related products
 
     // Hàm này dùng để gọi API hiển thị sản phẩm
     useEffect(() => {
@@ -46,6 +48,22 @@ function Detail_Product(props) {
             if (resDetail.msg === "Thanh Cong"){
                 setSale(resDetail.sale)
             }
+            
+            // FR-011: Fetch related products (same category, exclude current product)
+            if (response.id_category && response.id_category._id) {
+                const categoryId = response.id_category._id
+                console.log('Fetching related products for category:', categoryId); // Debug
+                
+                const relatedRes = await Product.Get_Category_Product(`?id_category=${categoryId}`)
+                console.log('Related products response:', relatedRes); // Debug
+                
+                // Filter out current product and limit to 4 items
+                const filtered = relatedRes.filter(p => p._id !== id).slice(0, 4)
+                console.log('Filtered related products:', filtered); // Debug
+                setRelatedProducts(filtered)
+            } else {
+                console.log('No category found for product:', response); // Debug
+            }
 
         }
 
@@ -60,10 +78,55 @@ function Detail_Product(props) {
 
     const [size, set_size] = useState('S')
 
+    // Tính số lượng sản phẩm đã có trong giỏ hàng
+    const [quantityInCart, setQuantityInCart] = useState(0)
+
+    useEffect(() => {
+        const existingCarts = JSON.parse(localStorage.getItem('carts') || '[]')
+        const existingProduct = existingCarts.find(item => 
+            item.id_product === id && item.size === size
+        )
+        setQuantityInCart(existingProduct ? parseInt(existingProduct.count) : 0)
+    }, [id, size, count_change]) // Re-calculate when cart changes
+
     // Hàm này dùng để thêm vào giỏ hàng
     const handler_addcart = (e) => {
 
         e.preventDefault()
+
+        // Kiểm tra hết hàng
+        if (!product.number || product.number === 0) {
+            alert('Sản phẩm này hiện đã hết hàng!')
+            return
+        }
+
+        // Kiểm tra số lượng đặt không vượt quá tồn kho
+        if (count > product.number) {
+            alert(`Chỉ còn ${product.number} sản phẩm trong kho!`)
+            set_count(product.number)
+            return
+        }
+
+        // Kiểm tra số lượng đã có trong giỏ hàng
+        const existingCarts = JSON.parse(localStorage.getItem('carts') || '[]')
+        const existingProduct = existingCarts.find(item => 
+            item.id_product === id && item.size === size
+        )
+        
+        const currentQuantityInCart = existingProduct ? parseInt(existingProduct.count) : 0
+        const totalQuantity = currentQuantityInCart + parseInt(count)
+
+        // Kiểm tra tổng số lượng (đã có + mới thêm) không vượt quá tồn kho
+        if (totalQuantity > product.number) {
+            const availableToAdd = product.number - currentQuantityInCart
+            if (availableToAdd <= 0) {
+                alert(`Bạn đã có ${currentQuantityInCart} sản phẩm trong giỏ hàng. Không thể thêm nữa!`)
+                return
+            } else {
+                alert(`Bạn đã có ${currentQuantityInCart} sản phẩm trong giỏ. Chỉ có thể thêm tối đa ${availableToAdd} sản phẩm nữa!`)
+                return
+            }
+        }
 
         const data = {
             id_cart: Math.random().toString(),
@@ -100,6 +163,14 @@ function Detail_Product(props) {
     }
 
     const upCount = () => {
+        // Kiểm tra không cho tăng quá số lượng tồn kho trừ đi số lượng đã có trong giỏ
+        const maxCanAdd = product.number - quantityInCart
+        if (product.number && count >= maxCanAdd) {
+            if (maxCanAdd <= 0) {
+                alert(`Bạn đã có ${quantityInCart} sản phẩm trong giỏ. Không thể thêm nữa!`)
+            }
+            return
+        }
         set_count(count + 1)
     }
 
@@ -260,6 +331,24 @@ function Detail_Product(props) {
                                             )
                                         }
                                     </div>
+                                    <div className="stock-info pt-20 pb-20">
+                                        <div style={{ fontSize: '16px', fontWeight: '500' }}>
+                                            <span style={{ color: '#666' }}>Tình trạng: </span>
+                                            {product.number === 0 ? (
+                                                <span style={{ color: '#ff0000', fontWeight: 'bold' }}>Hết hàng</span>
+                                            ) : product.number < 5 ? (
+                                                <span style={{ color: '#ff9800', fontWeight: 'bold' }}>Chỉ còn {product.number || 0} sản phẩm</span>
+                                            ) : (
+                                                <span style={{ color: '#4caf50', fontWeight: 'bold' }}>Còn hàng ({product.number || 0} sản phẩm)</span>
+                                            )}
+                                        </div>
+                                        {quantityInCart > 0 && (
+                                            <div style={{ fontSize: '14px', marginTop: '8px', color: '#2196f3' }}>
+                                                <i className="fa fa-shopping-cart" style={{ marginRight: '5px' }}></i>
+                                                Bạn đã có <strong>{quantityInCart}</strong> sản phẩm (size {size}) trong giỏ hàng
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="product-desc">
                                         <p>
                                             <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel harum tenetur delectus nam quam assumenda? Soluta vitae tempora ratione excepturi doloremque, repudiandae ullam, eum corporis, itaque dolor aperiam enim aspernatur.
@@ -281,12 +370,48 @@ function Detail_Product(props) {
                                             <div className="quantity">
                                                 <label>Quantity</label>
                                                 <div className="cart-plus-minus">
-                                                    <input className="cart-plus-minus-box" value={count} type="text" onChange={(e) => set_count(e.target.value)} />
+                                                    <input 
+                                                        className="cart-plus-minus-box" 
+                                                        value={count} 
+                                                        type="text" 
+                                                        onChange={(e) => {
+                                                            const value = parseInt(e.target.value) || 1
+                                                            const maxCanAdd = product.number - quantityInCart
+                                                            
+                                                            if (value < 1) {
+                                                                set_count(1)
+                                                            } else if (product.number && value > maxCanAdd) {
+                                                                set_count(maxCanAdd > 0 ? maxCanAdd : 0)
+                                                                if (maxCanAdd <= 0) {
+                                                                    alert(`Bạn đã có ${quantityInCart} sản phẩm trong giỏ. Không thể thêm nữa!`)
+                                                                } else {
+                                                                    alert(`Chỉ có thể thêm tối đa ${maxCanAdd} sản phẩm nữa!`)
+                                                                }
+                                                            } else {
+                                                                set_count(value)
+                                                            }
+                                                        }} 
+                                                        disabled={!product.number || product.number === 0}
+                                                    />
                                                     <div className="dec qtybutton" onClick={downCount}><i className="fa fa-angle-down"></i></div>
                                                     <div className="inc qtybutton" onClick={upCount}><i className="fa fa-angle-up"></i></div>
                                                 </div>
                                             </div>
-                                            <a href="#" className="add-to-cart" type="submit" onClick={handler_addcart}>Add to cart</a>
+                                            {product.number === 0 ? (
+                                                <a 
+                                                    href="#" 
+                                                    className="add-to-cart" 
+                                                    style={{ 
+                                                        backgroundColor: '#ccc', 
+                                                        cursor: 'not-allowed',
+                                                        pointerEvents: 'none'
+                                                    }}
+                                                >
+                                                    Hết hàng
+                                                </a>
+                                            ) : (
+                                                <a href="#" className="add-to-cart" type="submit" onClick={handler_addcart}>Add to cart</a>
+                                            )}
                                         </form>
                                     </div>
                                 </div>
@@ -403,6 +528,72 @@ function Detail_Product(props) {
                     </div>
                 </div>
             </div>
+            
+            {/* FR-011: Related Products Section */}
+            {console.log('Rendering related products, count:', relatedProducts.length)}
+            {relatedProducts.length > 0 ? (
+                <div className="related-products-area pt-60 pb-50" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-lg-12">
+                                <div className="section-title text-center mb-40">
+                                    <h2 style={{ fontSize: '28px', fontWeight: 'bold' }}>Sản phẩm liên quan</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            {relatedProducts.map((relatedProduct) => (
+                                <div className="col-lg-3 col-md-4 col-sm-6 mt-40" key={relatedProduct._id}>
+                                    <div className="single-product-wrap">
+                                        <div className="product-image" style={{ position: 'relative' }}>
+                                            <Link to={`/detail/${relatedProduct._id}`}>
+                                                <img 
+                                                    src={relatedProduct.image} 
+                                                    alt={relatedProduct.name_product}
+                                                    style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+                                                />
+                                            </Link>
+                                            {relatedProduct.id_sale && relatedProduct.id_sale.sale > 0 && (
+                                                <span className="sticker">-{relatedProduct.id_sale.sale}%</span>
+                                            )}
+                                        </div>
+                                        <div className="product_desc">
+                                            <div className="product_desc_info">
+                                                <div className="product-review">
+                                                    <h5 className="manufacturer">
+                                                        <Link to={`/detail/${relatedProduct._id}`}>
+                                                            {relatedProduct.name_product}
+                                                        </Link>
+                                                    </h5>
+                                                </div>
+                                                <div className="price-box">
+                                                    {relatedProduct.id_sale && relatedProduct.id_sale.sale > 0 ? (
+                                                        <>
+                                                            <span className="new-price" style={{ color: 'red', fontWeight: 'bold' }}>
+                                                                {new Intl.NumberFormat('vi-VN', {style: 'decimal', decimal: 'VND'}).format(
+                                                                    relatedProduct.price_product - (relatedProduct.price_product * relatedProduct.id_sale.sale / 100)
+                                                                ) + ' VNĐ'}
+                                                            </span>
+                                                            <br />
+                                                            <del style={{ color: '#999', fontSize: '14px' }}>
+                                                                {new Intl.NumberFormat('vi-VN', {style: 'decimal', decimal: 'VND'}).format(relatedProduct.price_product) + ' VNĐ'}
+                                                            </del>
+                                                        </>
+                                                    ) : (
+                                                        <span className="new-price">
+                                                            {new Intl.NumberFormat('vi-VN', {style: 'decimal', decimal: 'VND'}).format(relatedProduct.price_product) + ' VNĐ'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }

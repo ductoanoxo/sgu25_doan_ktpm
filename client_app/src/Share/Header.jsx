@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Redirect } from 'react-router-dom';
 import Cart from '../API/CartAPI';
@@ -47,6 +47,22 @@ function Header(props) {
     })
 
     const dispatch = useDispatch()
+
+    // control mini cart open/close using React state instead of data-toggle (avoids requiring Bootstrap JS)
+    const [miniOpen, setMiniOpen] = useState(false)
+    const miniRef = useRef(null)
+
+    // Close mini cart when clicking outside of it
+    useEffect(() => {
+        const handleDocClick = (e) => {
+            if (miniRef.current && !miniRef.current.contains(e.target)) {
+                setMiniOpen(false)
+            }
+        }
+
+        document.addEventListener('click', handleDocClick)
+        return () => document.removeEventListener('click', handleDocClick)
+    }, [])
 
     //Sau khi F5 nó sẽ kiểm tra nếu phiên làm việc của Session vẫn còn thì nó sẽ tiếp tục
     // đưa dữ liệu vào Redux
@@ -314,20 +330,28 @@ function Header(props) {
                             </form>
                             <div className="header-middle-right">
                                 <ul className="hm-menu">
-                                    <li className="hm-wishlist d-flex">
-                                        <li className="hm-minicart">
-                                            <div className="hm-minicart-trigger"
-                                                data-toggle="collapse"
-                                                data-target="#collapse_carts"
-                                                aria-expanded="false"
-                                                aria-controls="collapse_carts">
-                                                <span className="item-icon"></span>
-                                                <span className="item-text">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(total_price)+ ' VNĐ'}
-                                                    <span className="cart-item-count">{count_cart}</span>
-                                                </span>
-                                            </div>
-                                            <span></span>
-                                            <div className="minicart collapse" id="collapse_carts">
+                                    {/* Wishlist/Favorite Link */}
+                                    <li className="hm-wishlist">
+                                        <Link to="/favorite">
+                                            <span className="cart-item-icon">
+                                                <i className="fa fa-heart-o"></i>
+                                            </span>
+                                        </Link>
+                                    </li>
+                                    <li className="hm-minicart" ref={miniRef}>
+                                        <div className="hm-minicart-trigger"
+                                            onClick={() => setMiniOpen(prev => !prev)}
+                                            aria-expanded={miniOpen}
+                                            aria-controls="collapse_carts"
+                                            role="button"
+                                        >
+                                            <span className="item-icon"></span>
+                                            <span className="item-text">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(total_price)+ ' VNĐ'}
+                                                <span className="cart-item-count">{count_cart}</span>
+                                            </span>
+                                        </div>
+                                        <span></span>
+                                        <div className={`minicart ${miniOpen ? 'show' : 'collapse'}`} id="collapse_carts">
                                                 <ul className="minicart-product-list">
                                                     {
                                                         carts_mini && carts_mini.map((value, index) => (
@@ -353,7 +377,6 @@ function Header(props) {
                                                     </Link>
                                                 </div>
                                             </div>
-                                        </li>
                                     </li>
                                 </ul>
                             </div>
@@ -370,7 +393,7 @@ function Header(props) {
 
                                             <li className="dropdown-holder"><Link to="/">Home</Link></li>
                                             <li className="megamenu-holder"><Link to="/shop/all">Menu</Link>
-                                                <ul class="megamenu hb-megamenu">
+                                                <ul className="megamenu hb-megamenu">
                                                     <li><Link to="/shop/all">Male</Link>
                                                         <ul>
                                                             {

@@ -16,57 +16,65 @@ services:
         - path: ./server_app
           action: sync
           target: /usr/src/app
+          ignore:
+            - node_modules/
         - path: ./server_app/package.json
           action: rebuild
 
   client_app:
-    build: ./client_app
+    build:
+      context: ./client_app
+      dockerfile: Dockerfile.dev
     container_name: client_app
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Dev server runs on 3000
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - HOST=0.0.0.0
-      - REACT_APP_API_URL=http://localhost:8000/
-    volumes:
-      - ./client_app:/usr/src/app
-      - ./client_app/node_modules:/usr/src/app/node_modules
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_test_51SCj0G2OdrtKbthC9DWQntFsFgwYnXBMtJOEVnPR0K3YT2F4EuIXIVGd6cK642YgGKEyd3yJEKSZB1yZ54vEQqiT00FFhUeJCb
+      - REACT_APP_SOCKET_URL=http://localhost:8000
     stdin_open: true
     tty: true
     depends_on:
       - server_app
     develop:
       watch:
-        - path: ./client_app
+        - path: ./client_app/src
           action: sync
-          target: /usr/src/app
+          target: /usr/src/app/src
+        - path: ./client_app/public
+          action: sync+restart
+          target: /usr/src/app/public
         - path: ./client_app/package.json
           action: rebuild
 
   admin_app:
-    build: ./admin_app
+    build:
+      context: ./admin_app
+      dockerfile: Dockerfile.dev
     container_name: admin_app
     ports:
-      - "3001:3001"
+      - "3001:3001"  # Dev server runs on 3001
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - HOST=0.0.0.0
       - PORT=3001
-      - REACT_APP_API_URL=http://localhost:8000/
-    volumes:
-      - ./admin_app:/usr/src/app
-      - ./admin_app/node_modules:/usr/src/app/node_modules
+      - REACT_APP_API_URL=http://localhost:8000
     stdin_open: true
     tty: true
     depends_on:
       - server_app
     develop:
       watch:
-        - path: ./admin_app
+        - path: ./admin_app/src
           action: sync
-          target: /usr/src/app
+          target: /usr/src/app/src
+        - path: ./admin_app/public
+          action: sync+restart
+          target: /usr/src/app/public
         - path: ./admin_app/package.json
           action: rebuild
 
@@ -78,5 +86,52 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - server_app
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.40
+    container_name: mongodb-exporter
+    ports:
+      - "9216:9216"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017
+    command:
+      - '--mongodb.uri=mongodb://mongo:27017'
+      - '--collect-all'
+    depends_on:
+      - mongo
+
 volumes:
   mongo-data:
+  prometheus-data:
+  grafana-data:
