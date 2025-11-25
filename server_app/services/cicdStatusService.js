@@ -262,10 +262,9 @@ class CICDStatusService {
                     branch: latestRun.head_branch,
                     created_at: latestRun.created_at,
                     updated_at: latestRun.updated_at,
-                    actor: latestRun.actor ? .login || 'unknown',
+                    actor: (latestRun.actor && latestRun.actor.login) || 'unknown',
                     html_url: latestRun.html_url
                 },
-
                 recent_runs: runs.slice(0, 5).map(run => ({
                     id: run.id,
                     run_number: run.run_number,
