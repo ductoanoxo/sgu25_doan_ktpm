@@ -24,10 +24,12 @@ app.use('/api/user', userRouter);
 
 describe('User API Integration Tests', () => {
   let adminPermission;
+  let customerPermission;
   let testUser;
 
   beforeEach(async () => {
     adminPermission = await Permission.create({ permission: 'Admin' });
+    customerPermission = await Permission.create({ permission: 'Customer', isCustomer: true });
   });
 
   beforeEach(async () => {

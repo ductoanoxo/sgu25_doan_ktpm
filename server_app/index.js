@@ -55,20 +55,105 @@ mongoose.connect(uri, {
     })
     .then(async() => {
         console.log('✅ Kết nối MongoDB Atlas');
+        
+        try {
 
         // ===== Permission =====
         let adminPerm = await Permission.findOne({ permission: 'Admin' });
         if (!adminPerm) {
-            adminPerm = new Permission({ permission: 'Admin' });
+            adminPerm = new Permission({ 
+                permission: 'Admin',
+                description: 'Quản trị viên cao nhất có toàn quyền truy cập hệ thống',
+                level: 100,
+                isAdmin: true,
+                isStaff: false,
+                isCustomer: false,
+                isSystem: true,
+                permissions: {
+                    products: { view: true, create: true, edit: true, delete: true },
+                    categories: { view: true, create: true, edit: true, delete: true },
+                    users: { view: true, create: true, edit: true, delete: true },
+                    orders: { view: true, create: true, edit: true, delete: true },
+                    coupons: { view: true, create: true, edit: true, delete: true },
+                    sales: { view: true, create: true, edit: true, delete: true },
+                    permissions: { view: true, create: true, edit: true, delete: true }
+                }
+            });
             await adminPerm.save();
-            console.log('🌱 Permission \'Admin\' đã được tạo');
+            console.log('🌱 Permission \'Admin\' đã được tạo với đầy đủ quyền');
+        } else if (!adminPerm.isSystem) {
+            // Update existing admin permission to system
+            adminPerm.isSystem = true;
+            adminPerm.level = 100;
+            adminPerm.isAdmin = true;
+            adminPerm.description = adminPerm.description || 'Quản trị viên cao nhất có toàn quyền truy cập hệ thống';
+            await adminPerm.save();
+            console.log('✅ Cập nhật permission Admin thành system permission');
         }
 
         let staffPerm = await Permission.findOne({ permission: 'Nhân Viên' });
         if (!staffPerm) {
-            staffPerm = new Permission({ permission: 'Nhân Viên' });
+            staffPerm = new Permission({ 
+                permission: 'Nhân Viên',
+                description: 'Nhân viên quản lý có quyền hạn trung cấp',
+                level: 50,
+                isAdmin: false,
+                isStaff: true,
+                isCustomer: false,
+                isSystem: true,
+                permissions: {
+                    products: { view: true, create: true, edit: true, delete: false },
+                    categories: { view: true, create: false, edit: false, delete: false },
+                    users: { view: true, create: false, edit: false, delete: false },
+                    orders: { view: true, create: false, edit: true, delete: false },
+                    coupons: { view: true, create: true, edit: true, delete: false },
+                    sales: { view: true, create: false, edit: false, delete: false },
+                    permissions: { view: true, create: false, edit: false, delete: false }
+                }
+            });
             await staffPerm.save();
             console.log('🌱 Permission \'Nhân Viên\' đã được tạo');
+        } else if (!staffPerm.isSystem) {
+            // Update existing staff permission to system
+            staffPerm.isSystem = true;
+            staffPerm.level = 50;
+            staffPerm.isStaff = true;
+            staffPerm.description = staffPerm.description || 'Nhân viên quản lý có quyền hạn trung cấp';
+            await staffPerm.save();
+            console.log('✅ Cập nhật permission Nhân Viên thành system permission');
+        }
+
+        // Create Customer permission if not exists
+        let customerPerm = await Permission.findOne({ permission: 'Customer' });
+        if (!customerPerm) {
+            customerPerm = new Permission({ 
+                permission: 'Customer',
+                description: 'Khách hàng - người dùng thông thường của hệ thống',
+                level: 10,
+                isAdmin: false,
+                isStaff: false,
+                isCustomer: true,
+                isSystem: true,
+                permissions: {
+                    products: { view: true, create: false, edit: false, delete: false },
+                    categories: { view: true, create: false, edit: false, delete: false },
+                    users: { view: false, create: false, edit: false, delete: false },
+                    orders: { view: true, create: true, edit: false, delete: false },
+                    coupons: { view: true, create: false, edit: false, delete: false },
+                    sales: { view: true, create: false, edit: false, delete: false },
+                    permissions: { view: false, create: false, edit: false, delete: false }
+                }
+            });
+            await customerPerm.save();
+            console.log('🌱 Permission \'Customer\' đã được tạo');
+        } else if (!customerPerm.isSystem) {
+            // Update existing customer permission to system
+            customerPerm.isSystem = true;
+            customerPerm.level = 10;
+            customerPerm.isCustomer = true;
+            customerPerm.description = customerPerm.description || 'Khách hàng - người dùng thông thường của hệ thống';
+            await customerPerm.save();
+            console.log('✅ Cập nhật permission Customer thành system permission');
         }
 
         // ===== User (admin) =====
@@ -268,23 +353,51 @@ mongoose.connect(uri, {
             console.log('🌱 Sale mẫu đã được tạo');
         }
 
-        // 🌱 Đồng bộ user chưa có permission
+        // 🌱 Đồng bộ user chưa có permission - gán Customer cho user thường
         const allUsers = await Users.find();
+        let updatedCount = 0;
         for (let user of allUsers) {
             if (!user.id_permission) {
                 if (user.username === 'admin') {
                     user.id_permission = adminPerm._id;
                 } else {
-                    user.id_permission = staffPerm._id;
+                    // Gán Customer cho tất cả user thường
+                    user.id_permission = customerPerm._id;
                 }
                 await user.save();
-                console.log(`✅ Đã cập nhật permission cho user: ${user.username}`);
+                updatedCount++;
+                console.log(`✅ Đã cập nhật permission cho user: ${user.username} → ${user.username === 'admin' ? 'Admin' : 'Customer'}`);
             }
+        }
+        
+        if (updatedCount > 0) {
+            console.log(`✅ Đã cập nhật permission cho ${updatedCount} users`);
         }
 
         console.log('✅ Hoàn tất seed toàn bộ dữ liệu mẫu');
+        
+        } catch (seedError) {
+            console.error('❌ Lỗi khi seed dữ liệu:', seedError);
+            // Server vẫn chạy nhưng log lỗi
+        }
     })
-    .catch(err => console.error('❌ Lỗi:', err));
+    .catch(err => {
+        console.error('❌ Lỗi kết nối MongoDB:', err);
+        process.exit(1); // Thoát nếu không kết nối được DB
+    });
+
+// MongoDB connection event handlers
+mongoose.connection.on('disconnected', () => {
+    console.warn('⚠️  MongoDB disconnected! Attempting to reconnect...');
+});
+
+mongoose.connection.on('reconnected', () => {
+    console.log('✅ MongoDB reconnected successfully');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB connection error:', err);
+});
 
 
 
@@ -345,9 +458,9 @@ app.get('/health', (req, res) => {
 
 // Cài đặt config cho paypal
 paypal.configure({
-    'mode': 'sandbox', //sandbox or live
-    'client_id': 'AZs1BwWM6IlHg7FFjBOURgGUuObrQmEKguSVbowu4ZqOuH7n2em2NBDmzBoQOqrUsgV-CVAsylOOB5ve', // Thông số này copy bên my account paypal
-    'client_secret': 'ELcS0dYevQhG7LZrBQ-fdOpPXINVQXfKQCzh8f7uFpM2vpO_g0hz5K4rk2tg1dO5p2Hzxvsx-m2fn0QU' // Thông số này cùng vậy
+    'mode': process.env.PAYPAL_MODE || 'sandbox', //sandbox or live
+    'client_id': process.env.PAYPAL_CLIENT_ID || 'AZs1BwWM6IlHg7FFjBOURgGUuObrQmEKguSVbowu4ZqOuH7n2em2NBDmzBoQOqrUsgV-CVAsylOOB5ve',
+    'client_secret': process.env.PAYPAL_CLIENT_SECRET || 'ELcS0dYevQhG7LZrBQ-fdOpPXINVQXfKQCzh8f7uFpM2vpO_g0hz5K4rk2tg1dO5p2Hzxvsx-m2fn0QU'
 });
 
 app.use('/api/Product', ProductAPI);
@@ -377,6 +490,33 @@ app.use('/api/admin/Sale', Sale);
 // Stripe API routes
 const StripeAPI = require('./API/Router/stripe.router');
 app.use('/api/stripe', StripeAPI);
+
+// Global error handler - must be after all routes
+app.use((err, req, res, next) => {
+    console.error('❌ Global error handler caught:', err);
+    
+    // Handle Mongoose CastError (invalid ObjectId)
+    if (err.name === 'CastError' && err.kind === 'ObjectId') {
+        return res.status(400).json({ 
+            msg: 'ID không hợp lệ',
+            error: 'Invalid ObjectId format'
+        });
+    }
+    
+    // Handle other Mongoose validation errors
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({ 
+            msg: 'Dữ liệu không hợp lệ',
+            error: err.message
+        });
+    }
+    
+    // Default error
+    res.status(500).json({ 
+        msg: 'Lỗi server',
+        error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
+    });
+});
 
 
 // Track socket connections with metrics

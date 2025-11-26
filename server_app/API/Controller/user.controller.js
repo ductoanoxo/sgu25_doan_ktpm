@@ -1,4 +1,5 @@
 const Users = require('../../Models/user');
+const Permission = require('../../Models/permission');
 const bcrypt = require('bcryptjs');  // Thêm bcrypt
 
 
@@ -13,6 +14,11 @@ module.exports.index = async(req, res) => {
 module.exports.user = async(req, res) => {
 
     const id = req.params.id;
+
+    // Validate ObjectId format to prevent crashes
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ msg: 'ID không hợp lệ' });
+    }
 
     const user = await Users.findOne({ _id: id });
 
@@ -82,11 +88,29 @@ module.exports.post_user = async(req, res) => {
         // Hash mật khẩu trước khi lưu
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
-        
+
+        let assignedPermission = null;
+
+        if (req.body.id_permission) {
+            const requestedPermission = await Permission.findById(req.body.id_permission);
+            if (requestedPermission) {
+                assignedPermission = requestedPermission._id;
+            }
+        }
+
+        if (!assignedPermission) {
+            const customerPerm = await Permission.findOne({ isCustomer: true });
+            if (!customerPerm) {
+                return res.status(500).send('Missing customer permission');
+            }
+            assignedPermission = customerPerm._id;
+        }
+
         // Tạo object user mới với mật khẩu đã được hash
         const newUserData = {
             ...req.body,
-            password: hashedPassword
+            password: hashedPassword,
+            id_permission: assignedPermission
         };
         
         await Users.create(newUserData);
@@ -97,7 +121,16 @@ module.exports.post_user = async(req, res) => {
 
 module.exports.update_user = async(req, res) => {
 
+    // Validate ObjectId format
+    if (req.body._id && !req.body._id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ msg: 'ID không hợp lệ' });
+    }
+
     const user = await Users.findOne({ _id: req.body._id });
+
+    if (!user) {
+        return res.status(404).json({ msg: 'Không tìm thấy user' });
+    }
 
     user.fullname = req.body.fullname;
     user.username = req.body.username;
@@ -108,7 +141,7 @@ module.exports.update_user = async(req, res) => {
         user.password = await bcrypt.hash(req.body.password, salt);
     }
 
-    user.save();
+    await user.save();
 
     res.json('Thanh Cong');
 
@@ -161,10 +194,8 @@ module.exports.change_password = async(req, res) => {
         console.log('New hashed password:', hashedNewPassword);
 
         // Cập nhật mật khẩu mới
-        await Users.updateOne(
-            { _id: userId }, 
-            { password: hashedNewPassword }
-        );
+        user.password = hashedNewPassword;
+        await user.save();
 
         console.log('Password updated successfully');
 

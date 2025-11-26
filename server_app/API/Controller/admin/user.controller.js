@@ -1,84 +1,126 @@
 const User = require('../../../Models/user');
+const Permission = require('../../../Models/permission');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports.index = async(req, res) => {
-    let page = parseInt(req.query.page) || 1;
-    const keyWordSearch = req.query.search;
+    try {
+        console.log('\n========== USER INDEX REQUEST ==========');
+        console.log('📥 Query params:', req.query);
+        
+        let page = parseInt(req.query.page) || 1;
+        const keyWordSearch = req.query.search;
 
-    const perPage = parseInt(req.query.limit) || 8;
+        const perPage = parseInt(req.query.limit) || 8;
+        
+        let users;
+        let query = {};
+        
+        // Nếu có filter permission cụ thể
+        if (req.query.permission) {
+            query.id_permission = req.query.permission;
+        }
+        
+        // Nếu chỉ muốn lấy customers - tìm customer permission động
+        if (req.query.customerOnly === 'true') {
+            console.log('🔍 Tìm kiếm customer permission...');
+            const customerPerm = await Permission.findOne({ isCustomer: true });
+            console.log('✅ Customer permission tìm thấy:', customerPerm);
+            if (customerPerm) {
+                query.id_permission = customerPerm._id;
+                console.log('📝 Query filter cho customers:', query);
+            } else {
+                console.log('⚠️ KHÔNG tìm thấy permission có isCustomer: true');
+            }
+        }
+        
+        // Nếu muốn loại trừ customers (chỉ lấy admin/staff)
+        if (req.query.excludeCustomer === 'true') {
+            // Tìm tất cả permissions là Admin hoặc Staff
+            const adminStaffPerms = await Permission.find({ 
+                $or: [
+                    { isAdmin: true },
+                    { isStaff: true }
+                ]
+            });
+            
+            // Lấy danh sách IDs
+            const permIds = adminStaffPerms.map(p => p._id);
+            
+            // Chỉ lấy users có permission trong danh sách Admin/Staff (loại bỏ null và Customer)
+            if (permIds.length > 0) {
+                query.id_permission = { $in: permIds };
+            }
+        }
+        
+        // Lọc theo search nếu có
+        if (keyWordSearch) {
+            users = await User.find(query).populate('id_permission');
+            console.log(`🔎 Tìm thấy ${users.length} users với query:`, query);
+            users = users.filter(value => {
+                return value.fullname.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
+                    value.username.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
+            });
+        } else {
+            users = await User.find(query).populate('id_permission');
+            console.log(`🔎 Tìm thấy ${users.length} users với query:`, query);
+        }
     
-    let users;
-    let query = {};
-    
-    // Nếu có filter permission cụ thể
-    if (req.query.permission) {
-        query.id_permission = req.query.permission;
-    }
-    
-    // Nếu chỉ muốn lấy customers
-    if (req.query.customerOnly === 'true') {
-        query.id_permission = '6087dcb5f269113b3460fce4';
-    }
-    
-    // Nếu muốn loại trừ customers (chỉ lấy admin/staff)
-    if (req.query.excludeCustomer === 'true') {
-        query.id_permission = { $ne: '6087dcb5f269113b3460fce4' };
-    }
-    
-    users = await User.find(query).populate('id_permission');
-    
-    const totalPage = Math.ceil(users.length / perPage);
-    let start = (page - 1) * perPage;
-    let end = page * perPage;
+        const totalPage = Math.ceil(users.length / perPage);
+        let start = (page - 1) * perPage;
+        let end = page * perPage;
 
-    if (!keyWordSearch) {
+        console.log(`📤 Trả về ${users.slice(start, end).length} users (từ ${users.length} users tổng)`);
+        console.log('========================================\n');
+
         res.json({
             users: users.slice(start, end),
-            totalPage: totalPage
+            totalPage: totalPage,
+            total: users.length
         });
-
-    } else {
-        var newData = users.filter(value => {
-            return value.fullname.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1 ||
-                value.id.toUpperCase().indexOf(keyWordSearch.toUpperCase()) !== -1;
-        });
-
-        res.json({
-            users: newData.slice(start, end),
-            totalPage: totalPage
-        });
+    
+    } catch (error) {
+        console.error('Error in user.index:', error);
+        res.status(500).json({ msg: 'Lỗi server', error: error.message });
     }
 };
 
 module.exports.create = async(req, res) => {
-    const user = await User.find();
+    try {
+        const user = await User.find();
 
-    const userFilter = user.filter((c) => {
-        return c.email === req.query.email.trim() || c.username === req.query.username.trim();
-    });
+        const userFilter = user.filter((c) => {
+            return c.email === req.query.email.trim() || c.username === req.query.username.trim();
+        });
 
-    if (userFilter.length > 0) {
-        res.json({ msg: 'Email hoặc username đã tồn tại' });
-    } else {
-        var newUser = new User();
-        const salt = await bcrypt.genSalt();
-        req.query.password = await bcrypt.hash(req.query.password, salt);
-        req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, a => { return a.toUpperCase(); });
-        newUser.fullname = req.query.name;
-        newUser.username = req.query.username;
-        newUser.password = req.query.password;
-        newUser.email = req.query.email;
-        
-        // Fix logic permission
-        if (req.query.permission) {
-            newUser.id_permission = req.query.permission;
+        if (userFilter.length > 0) {
+            res.json({ msg: 'Email hoặc username đã tồn tại' });
         } else {
-            newUser.id_permission = '6087dcb5f269113b3460fce4';  // Default customer permission
-        }
+            var newUser = new User();
+            const salt = await bcrypt.genSalt();
+            req.query.password = await bcrypt.hash(req.query.password, salt);
+            req.query.name = req.query.name.toLowerCase().replace(/^.|\s\S/g, a => { return a.toUpperCase(); });
+            newUser.fullname = req.query.name;
+            newUser.username = req.query.username;
+            newUser.password = req.query.password;
+            newUser.email = req.query.email;
+            
+            // Fix logic permission - tìm customer permission động
+            if (req.query.permission) {
+                newUser.id_permission = req.query.permission;
+            } else {
+                const customerPerm = await Permission.findOne({ isCustomer: true });
+                if (customerPerm) {
+                    newUser.id_permission = customerPerm._id;
+                }
+            }
 
-        newUser.save();
-        res.json({ msg: 'Bạn đã thêm thành công' });
+            newUser.save();
+            res.json({ msg: 'Bạn đã thêm thành công' });
+        }
+    } catch (error) {
+        console.error('Error in user.create:', error);
+        res.status(500).json({ msg: 'Lỗi server', error: error.message });
     }
 };
 

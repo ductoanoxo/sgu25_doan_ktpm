@@ -215,7 +215,7 @@ function Checkout(props) {
             total: total_price,
             status: "1",
             pay: false,
-            id_payment: '6086709cdc52ab1ae999e882',
+            id_payment: '68d5faa208f61e0fd6fd946b', // COD payment ID
             id_note: response_delivery._id,
             feeship: price,
             id_coupon: localStorage.getItem('id_coupon') ? localStorage.getItem('id_coupon') : '',
