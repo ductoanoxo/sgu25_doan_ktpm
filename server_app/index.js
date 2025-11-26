@@ -9,6 +9,9 @@ const cors = require('cors');
 // Import Prometheus metrics
 const { register, metrics } = require('./metrics');
 
+// Import CI/CD Status Service
+const cicdStatusService = require('./services/cicdStatusService');
+
 // Khởi tạo paypal
 var paypal = require('paypal-rest-sdk');
 
@@ -414,36 +417,54 @@ app.use(cors());
 // Middleware to track request metrics
 app.use((req, res, next) => {
     const start = Date.now();
-    
+
     res.on('finish', () => {
         const duration = (Date.now() - start) / 1000;
         const route = req.route ? req.route.path : req.path;
-        
+
         // Track duration and total requests
         metrics.httpRequestDuration.labels(req.method, route, res.statusCode).observe(duration);
         metrics.httpRequestTotal.labels(req.method, route, res.statusCode).inc();
-        
+
         // Track errors
         if (res.statusCode >= 400) {
             const errorType = res.statusCode >= 500 ? 'server_error' : 'client_error';
             metrics.httpErrorsTotal.labels(req.method, route, res.statusCode, errorType).inc();
         }
     });
-    
+
     next();
 });
 
 // Metrics endpoint for Prometheus
-app.get('/metrics', async (req, res) => {
+app.get('/metrics', async(req, res) => {
     res.set('Content-Type', register.contentType);
     try {
         // Update MongoDB connection status
         metrics.mongodbConnectionStatus.set(mongoose.connection.readyState === 1 ? 1 : 0);
-        
+
+        // Update CI/CD metrics (non-blocking)
+        cicdStatusService.updateMetrics().catch(err => {
+            console.error('⚠️  Failed to update CI/CD metrics:', err.message);
+        });
+
         const metricsData = await register.metrics();
         res.send(metricsData);
     } catch (err) {
         res.status(500).send(err);
+    }
+});
+
+// CI/CD Status endpoint (JSON)
+app.get('/cicd/status', async(req, res) => {
+    try {
+        const status = await cicdStatusService.getStatus();
+        res.json(status);
+    } catch (err) {
+        res.status(500).json({
+            status: 'error',
+            message: err.message
+        });
     }
 });
 
@@ -524,12 +545,12 @@ io.on('connection', (socket) => {
     metrics.activeConnections.inc();
     metrics.socketioEventsTotal.labels('connection', 'inbound').inc();
     console.log(`Có người vừa kết nối, socketID: ${socket.id}`);
-    
+
     socket.on('disconnect', () => {
         metrics.activeConnections.dec();
         metrics.socketioEventsTotal.labels('disconnect', 'outbound').inc();
     });
-    
+
     socket.on('send_order', (data) => {
         metrics.socketioEventsTotal.labels('send_order', 'inbound').inc();
         console.log(data);
@@ -540,12 +561,17 @@ io.on('connection', (socket) => {
 http.listen(port, '0.0.0.0', () => {
     console.log('listening on *: ' + port);
     console.log('📊 Prometheus metrics available at http://localhost:' + port + '/metrics');
+    console.log('📊 CI/CD status available at http://localhost:' + port + '/cicd/status');
     console.log('❤️  Health check available at http://localhost:' + port + '/health');
+
+    // Start CI/CD metrics collection
+    cicdStatusService.start();
 });
 
 // Graceful shutdown handlers
 process.on('SIGTERM', () => {
     console.log('👋 SIGTERM received, shutting down gracefully');
+    cicdStatusService.stop();
     http.close(() => {
         console.log('✅ HTTP server closed');
         mongoose.connection.close(false, () => {
@@ -557,6 +583,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
     console.log('👋 SIGINT received, shutting down gracefully');
+    cicdStatusService.stop();
     http.close(() => {
         console.log('✅ HTTP server closed');
         mongoose.connection.close(false, () => {

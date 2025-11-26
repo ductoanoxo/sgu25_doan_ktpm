@@ -5,7 +5,7 @@ const promClient = require('prom-client');
 const register = new promClient.Registry();
 
 // Collect default metrics (CPU, Memory, Event Loop, etc.)
-promClient.collectDefaultMetrics({ 
+promClient.collectDefaultMetrics({
     register,
     prefix: 'nodejs_',
     gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5]
@@ -180,6 +180,65 @@ const cacheOperations = new promClient.Counter({
     registers: [register]
 });
 
+// ============= CI/CD METRICS =============
+
+// CI/CD Build Status
+const cicdBuildStatus = new promClient.Gauge({
+    name: 'cicd_build_status',
+    help: 'CI/CD build status (1 = success, 0 = failure, -1 = in progress)',
+    labelNames: ['workflow', 'branch', 'job'],
+    registers: [register]
+});
+
+// CI/CD Builds Total Counter
+const cicdBuildsTotal = new promClient.Counter({
+    name: 'cicd_builds_total',
+    help: 'Total number of CI/CD builds',
+    labelNames: ['workflow', 'branch', 'conclusion'],
+    registers: [register]
+});
+
+// CI/CD Build Duration
+const cicdBuildDuration = new promClient.Histogram({
+    name: 'cicd_build_duration_seconds',
+    help: 'Duration of CI/CD builds in seconds',
+    labelNames: ['workflow', 'branch', 'job'],
+    buckets: [30, 60, 120, 300, 600, 900, 1800],
+    registers: [register]
+});
+
+// CI/CD Deployment Status
+const cicdDeploymentStatus = new promClient.Gauge({
+    name: 'cicd_deployment_status',
+    help: 'CI/CD deployment status (1 = success, 0 = failure)',
+    labelNames: ['environment', 'job'],
+    registers: [register]
+});
+
+// CI/CD Test Results
+const cicdTestResults = new promClient.Gauge({
+    name: 'cicd_test_results',
+    help: 'CI/CD test results status',
+    labelNames: ['workflow', 'job', 'status'],
+    registers: [register]
+});
+
+// CI/CD Last Build Timestamp
+const cicdLastBuildTime = new promClient.Gauge({
+    name: 'cicd_last_build_timestamp',
+    help: 'Timestamp of the last CI/CD build',
+    labelNames: ['workflow', 'branch'],
+    registers: [register]
+});
+
+// GitHub Workflow Info
+const githubWorkflowInfo = new promClient.Gauge({
+    name: 'github_workflow_info',
+    help: 'GitHub workflow information',
+    labelNames: ['workflow', 'run_id', 'run_number', 'event', 'actor'],
+    registers: [register]
+});
+
 // ============= EXPORT =============
 
 module.exports = {
@@ -189,16 +248,16 @@ module.exports = {
         httpRequestDuration,
         httpRequestTotal,
         httpErrorsTotal,
-        
+
         // Database
         mongodbConnectionStatus,
         mongodbQueryDuration,
         mongodbOperationsTotal,
-        
+
         // WebSocket
         activeConnections,
         socketioEventsTotal,
-        
+
         // Business
         ordersTotal,
         orderValue,
@@ -206,16 +265,25 @@ module.exports = {
         userRegistrations,
         userLogins,
         cartOperations,
-        
+
         // Payment
         paymentTransactions,
         paymentAmount,
-        
+
         // Upload
         fileUploads,
         uploadSize,
-        
+
         // Cache
-        cacheOperations
+        cacheOperations,
+
+        // CI/CD
+        cicdBuildStatus,
+        cicdBuildsTotal,
+        cicdBuildDuration,
+        cicdDeploymentStatus,
+        cicdTestResults,
+        cicdLastBuildTime,
+        githubWorkflowInfo
     }
 };
