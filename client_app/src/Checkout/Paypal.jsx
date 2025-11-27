@@ -93,7 +93,7 @@ function Paypal(props) {
                     total: total,
                     status: '1',
                     pay: true,
-                    id_payment: '60635313a1ba573dc01656b5',
+                    id_payment: '68d7d04fea4d621044e4e675', // PayPal payment ID (using "Thanh toán khi nhận hàng" as placeholder)
                     id_note: response_Note._id,
                     feeship: price,
                     id_coupon: localStorage.getItem('id_coupon') ? localStorage.getItem('id_coupon') : '',

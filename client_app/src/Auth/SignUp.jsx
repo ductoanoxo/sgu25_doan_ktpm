@@ -106,8 +106,7 @@ function SignUp(props) {
                                     email: email,
                                     username: username,
                                     password: password,
-                                    fullname: fullname,
-                                    id_permission: '6087dcb5f269113b3460fce4'
+                                    fullname: fullname
                                 }
 
                                 const response = await User.Post_User(data)

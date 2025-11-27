@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import CouponAPI from '../Api/CouponAPI';
 import Pagination from '../Shared/Pagination';
 import Search from '../Shared/Search';
 import queryString from 'query-string'
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/Auth'
+import { canDelete } from '../../utils/permissionHelper'
 
 function Coupon(props) {
+    const { user } = useContext(AuthContext);
 
     const [filter, setFilter] = useState({
         page: '1',
@@ -94,7 +97,10 @@ function Coupon(props) {
                                                             <div className="d-flex">
                                                                 <Link to={"/coupon/" + value._id} className="btn btn-success mr-1">Update</Link>
 
-                                                                <button type="button" style={{ cursor: 'pointer', color: 'white' }} onClick={() => handleDelete(value._id)} className="btn btn-danger" >Delete</button>
+                                                                {/* Chỉ Admin mới có nút Delete */}
+                                                                {canDelete(user, 'coupons') && (
+                                                                    <button type="button" style={{ cursor: 'pointer', color: 'white' }} onClick={() => handleDelete(value._id)} className="btn btn-danger" >Delete</button>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>
