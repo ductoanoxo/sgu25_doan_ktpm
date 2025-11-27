@@ -43,25 +43,32 @@ function Login(props) {
         console.log(response);
 
         if (response.msg === "Đăng nhập thành công") {
-            if (response.user.id_permission.permission === "Nhân Viên") {
+            const userPermission = response.user.id_permission;
+            const isAdmin = userPermission?.isAdmin === true || userPermission?.permission === "Admin";
+            const isStaff = userPermission?.isStaff === true || userPermission?.permission === "Nhân Viên";
+            
+            // Cho phép cả Admin và Staff truy cập
+            if (isAdmin || isStaff) {
                 addLocal(response.jwt, response.user)
-                history.push('/customer')
-            }
-            else if (response.user.id_permission.permission === "Admin") {
-                addLocal(response.jwt, response.user)
-                history.push('/user')
+                // Redirect tới dashboard hoặc product để có nhiều tùy chọn hơn
+                history.push('/product')
             } else {
-                setValidationMsg({ api: "Bạn không có quyền truy cập" })
+                setValidationMsg({ api: "Bạn không có quyền truy cập. Chỉ Admin và Nhân Viên mới có thể đăng nhập." })
             }
 
         } else
             setValidationMsg({ api: response.msg })
     }
 
-    if (jwt && user && user.id_permission.permission === "Nhân Viên") {
-        return <Redirect to="/customer" />
-    } else if (jwt && user && user.id_permission.permission === "Admin") {
-        return <Redirect to="/user" />
+    // Kiểm tra quyền để redirect
+    if (jwt && user) {
+        const userPermission = user.id_permission;
+        const isAdmin = userPermission?.isAdmin === true || userPermission?.permission === "Admin";
+        const isStaff = userPermission?.isStaff === true || userPermission?.permission === "Nhân Viên";
+        
+        if (isAdmin || isStaff) {
+            return <Redirect to="/product" />
+        }
     }
 
     return (

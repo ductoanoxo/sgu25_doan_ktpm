@@ -102,11 +102,17 @@ function DetailOrder(props) {
                                             {
                                                 details && details.map((value, index) => (
                                                     <tr key={index}>
-                                                        <td><img src={value.id_product.image} alt="" style={{ width: '70px' }} /></td>
-                                                        <td className="name">{value.name_product}</td>
+                                                        <td>
+                                                            {value.id_product && value.id_product.image ? (
+                                                                <img src={value.id_product.image} alt="" style={{ width: '70px' }} />
+                                                            ) : (
+                                                                <span className="text-muted">No image</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="name">{value.name_product || 'N/A'}</td>
                                                         <td className="name">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.price_product)+ ' VNĐ'}</td>
-                                                        <td className="name">{value.size}</td>
-                                                        <td className="name">{value.count}</td>
+                                                        <td className="name">{value.size || 'N/A'}</td>
+                                                        <td className="name">{value.count || 0}</td>
                                                         <td className="name">{new Intl.NumberFormat('vi-VN',{style: 'decimal',decimal: 'VND'}).format(value.count * Number(value.price_product))+ ' VNĐ'}</td>
                                                     </tr>
                                                 ))

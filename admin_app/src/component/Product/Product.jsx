@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import queryString from 'query-string'
 
 import productAPI from '../Api/productAPI';
 import Pagination from '../Shared/Pagination'
 import Search from '../Shared/Search'
+import { AuthContext } from '../context/Auth'
+import { canDelete } from '../../utils/permissionHelper'
 
 
 function Product() {
+    const { user } = useContext(AuthContext);
 
     const [filter, setFilter] = useState({
         page: '1',
@@ -111,7 +114,10 @@ function Product() {
                                                             <div className="d-flex">
                                                                 <Link to={"/product/update/" + value._id} className="btn btn-success mr-1">Update</Link>
 
-                                                                <button type="button" style={{ cursor: 'pointer', color: 'white' }} onClick={() => handleDelete(value._id)} className="btn btn-danger" >Delete</button>
+                                                                {/* Chỉ Admin mới có nút Delete */}
+                                                                {canDelete(user, 'products') && (
+                                                                    <button type="button" style={{ cursor: 'pointer', color: 'white' }} onClick={() => handleDelete(value._id)} className="btn btn-danger" >Delete</button>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>

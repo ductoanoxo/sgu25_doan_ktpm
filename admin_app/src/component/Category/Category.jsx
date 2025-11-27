@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import queryString from 'query-string'
 
 import categoryAPI from '../Api/categoryAPI';
 import Pagination from '../Shared/Pagination'
 import Search from '../Shared/Search'
+import { AuthContext } from '../context/Auth'
+import { canCreate, canEdit, canDelete } from '../../utils/permissionHelper'
 
 function Category(props) {
+    const { user } = useContext(AuthContext);
+
     const [filter, setFilter] = useState({
         page: '1',
         limit: '4',
@@ -70,7 +74,10 @@ function Category(props) {
                                 {/* <h4 className="card-title">Producer</h4> */}
                                 <Search handlerSearch={handlerSearch} />
 
-                                <Link to="/category/create" className="btn btn-primary my-3">New create</Link>
+                                {/* Chỉ Admin mới có nút Create */}
+                                {canCreate(user, 'categories') && (
+                                    <Link to="/category/create" className="btn btn-primary my-3">New create</Link>
+                                )}
                                 {/* <Link to="/producer/create" className="btn btn-primary my-3">New create</Link> */}
 
 
@@ -93,11 +100,17 @@ function Category(props) {
                                                         <td>
                                                             <div className="d-flex">
                                                                 <Link to={"/category/" + value.category} className="btn btn-info mr-1">Detail</Link>
-                                                                <Link to={"/category/update/" + value._id} className="btn btn-success mr-1">Update</Link>
+                                                                
+                                                                {/* Chỉ Admin mới có nút Update và Delete */}
+                                                                {canEdit(user, 'categories') && (
+                                                                    <Link to={"/category/update/" + value._id} className="btn btn-success mr-1">Update</Link>
+                                                                )}
                                                                 {/* <Link to={"/producer/" + value.category} className="btn btn-info mr-1">Detail</Link>
                                                                 <Link to={"/producer/update/" + value._id} className="btn btn-success mr-1">Update</Link> */}
 
-                                                                <button type="button" onClick={() => handleDelete(value)} style={{ cursor: 'pointer', color: 'white' }} className="btn btn-danger" >Delete</button>
+                                                                {canDelete(user, 'categories') && (
+                                                                    <button type="button" onClick={() => handleDelete(value)} style={{ cursor: 'pointer', color: 'white' }} className="btn btn-danger" >Delete</button>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>

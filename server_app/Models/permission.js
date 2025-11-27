@@ -38,6 +38,8 @@ const permissionSchema = new mongoose.Schema({
     permissions: {
         type: Object,
         default: {
+            // Default permissions cho tất cả roles
+            // Staff sẽ được override khi tạo
             products: { view: true, create: false, edit: false, delete: false },
             categories: { view: true, create: false, edit: false, delete: false },
             users: { view: false, create: false, edit: false, delete: false },

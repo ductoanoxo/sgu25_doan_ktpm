@@ -115,43 +115,80 @@
   top: 70px !important;
   height: calc(100vh - 70px) !important;
   z-index: 1020 !important;
+  overflow: hidden !important;
 }
 
-/* Thêm scrollbar cho menu quản lý */
+/* Scroll sidebar container - ẨN thanh cuộn mặc định */
+.scroll-sidebar {
+  height: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Sidebar nav - scroll chỉ khi cần */
 .sidebar-nav {
   height: 100% !important;
   overflow-y: auto !important;
-}
-
-.sidebar-nav #sidebarnav .sidebar-item .first-level {
-  max-height: 600px !important;
-  overflow-y: auto !important;
   overflow-x: hidden !important;
+  padding-bottom: 20px !important;
 }
 
-/* Custom scrollbar styling */
-.sidebar-nav::-webkit-scrollbar,
-.first-level::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-nav::-webkit-scrollbar-track,
-.first-level::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb,
-.first-level::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover,
-.first-level::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
+/* Menu Quản Lý dropdown - ẨN thanh cuộn */
 .sidebar-nav #sidebarnav .sidebar-item .first-level {
-  display: block;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-left: 0 !important;
+}
+
+/* Custom scrollbar styling cho sidebar-nav */
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.3);
+}
+
+/* Ensure menu items are properly displayed */
+.sidebar-nav #sidebarnav .sidebar-item .first-level {
+  list-style: none !important;
+}
+
+/* Menu collapse/show states */
+.sidebar-nav #sidebarnav .sidebar-item .first-level.collapse {
+  display: none;
+}
+
+.sidebar-nav #sidebarnav .sidebar-item .first-level.collapse.show {
+  display: block !important;
+}
+
+/* Menu item styling */
+.sidebar-nav #sidebarnav .sidebar-item {
+  list-style: none !important;
+}
+
+.sidebar-nav #sidebarnav .sidebar-item .sidebar-link {
+  display: flex !important;
+  align-items: center !important;
+  padding: 10px 15px !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar-nav #sidebarnav .sidebar-item .sidebar-link:hover {
+  background-color: rgba(0,0,0,0.05) !important;
+}
+
+.sidebar-nav #sidebarnav .sidebar-item .sidebar-link.active {
+  background-color: rgba(0,0,0,0.1) !important;
+  font-weight: 600 !important;
 }

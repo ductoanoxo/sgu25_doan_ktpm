@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import queryString from 'query-string'
 
@@ -6,8 +6,12 @@ import permissionAPI from '../Api/permissionAPI';
 import Pagination from '../Shared/Pagination'
 import Search from '../Shared/Search'
 import SaleAPI from '../Api/SaleAPI';
+import { AuthContext } from '../context/Auth'
+import { canCreate, canEdit } from '../../utils/permissionHelper'
 
 function Sale(props) {
+    const { user } = useContext(AuthContext);
+
     const [filter, setFilter] = useState({
         page: '1',
         limit: '4',
@@ -56,7 +60,10 @@ function Sale(props) {
                                 <h4 className="card-title">Sale</h4>
                                 <Search handlerSearch={handlerSearch} />
 
-                                <Link to="/sale/create" className="btn btn-primary my-3">New create</Link>
+                                {/* Chỉ Admin mới có nút Create */}
+                                {canCreate(user, 'sales') && (
+                                    <Link to="/sale/create" className="btn btn-primary my-3">New create</Link>
+                                )}
 
 
                                 <div className="table-responsive">
@@ -85,7 +92,10 @@ function Sale(props) {
                                                         <td className="name">{value.status ? "Active" : "Disable"}</td>
                                                         <td>
                                                             <div className="d-flex">
-                                                                <Link to={"/sale/" + value._id} className="btn btn-success mr-1">Update</Link>
+                                                                {/* Chỉ Admin mới có nút Update */}
+                                                                {canEdit(user, 'sales') && (
+                                                                    <Link to={"/sale/" + value._id} className="btn btn-success mr-1">Update</Link>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>
