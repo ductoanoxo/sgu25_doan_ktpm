@@ -24,7 +24,7 @@
 - **Tên đề tài:** Xây dựng Website bán quần áo sử dụng công nghệ ReactJS & NodeJS (API, Socket)
 - **Môn học:** Kiểm thử phần mềm
 - **Lớp:** DCT122C3
-- **Năm học:** 2025
+- **Năm học:** 2025 - 2026
 
 ### 👥 Thành viên nhóm
 | STT | Họ và Tên |
