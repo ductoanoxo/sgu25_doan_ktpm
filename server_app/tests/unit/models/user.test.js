@@ -4,13 +4,12 @@ describe('User Model Unit Tests', () => {
   afterAll(async () => {
     await User.deleteMany({});
   });
-  
-  // ⚠️ TEMPORARY FAILING TEST - TO TEST GITHUB ISSUE CREATION
-  describe('Test GitHub Issue Creation', () => {
-    test('INTENTIONAL FAIL - Testing CI/CD issue creation', () => {
-      expect(true).toBe(false); // This will fail on purpose
-    });
-  });
+  //   // ⚠️ TEMPORARY FAILING TEST - TO TEST GITHUB ISSUE CREATION
+  // describe('Test GitHub Issue Creation', () => {
+  //   test('INTENTIONAL FAIL - Testing CI/CD issue creation', () => {
+  //     expect(true).toBe(false); // This will fail on purpose
+  //   });
+  // });
 
   describe('User Creation', () => {
     test('should create a valid user', async () => {
