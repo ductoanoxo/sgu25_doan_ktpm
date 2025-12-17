@@ -3,7 +3,7 @@
 
 <div align="center">
 
-![Demo Application](https://s1.ezgif.com/tmp/ezgif-10007c9ac27af2a0.gif)
+![Demo Application](./image/output.gif)
 
 *🎥 Demo ứng dụng hoạt động thực tế*
 
